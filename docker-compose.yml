@@ -12,14 +12,16 @@ services:
       - postgres-data:/var/lib/postgresql/data  # 데이터 영속성 보장 (컨테이너 삭제해도 데이터 유지)
 
   backend:
-    build: ./backend            # ./backend 폴더의 Dockerfile로 이미지 빌드
+    image: tomcat:9-jdk11  # Tomcat 9 + JDK 11 공식 이미지
     container_name: retrack-backend
     ports:
       - "8080:8080"
     depends_on:
-      - db                      # db 컨테이너가 먼저 실행된 후 시작
+      - db
+    volumes:
+      - ./backend/target/retrack-backend-1.0-SNAPSHOT.war:/usr/local/tomcat/webapps/ROOT.war  # 빌드된 WAR 파일 마운트
     environment:
-      DB_HOST: db               # 컨테이너 내부에서 db 서비스 이름으로 접근
+      DB_HOST: db
       DB_PORT: 5432
       DB_NAME: retrack
       DB_USER: retrack
