@@ -242,3 +242,37 @@ DRAFT → SUBMITTED → REVIEWING → APPROVED → IN_PROGRESS → COMPLETED
 - WAR 패키징 방식으로 빌드
 - mapperLocations 설정은 mapper XML 파일이 없으면 주석 처리 필요
 - Windows 환경에서 로컬 PostgreSQL 서비스(postgresql-x64-17)가 실행 중이면 포트 충돌 발생 → 작업 전 중지 필요
+
+---
+
+## 개발 현황
+
+### 완료된 작업
+
+#### 1단계 — 기반 설정
+- [x] DB 스키마 확인 (7개 테이블 모두 정상)
+- [x] pom.xml — JWT(jjwt 0.11.5), BCrypt(spring-security-crypto 5.8.13) 의존성 추가
+- [x] spring-db.xml — DB host `localhost` → `db` 수정, mapperLocations 활성화
+- [x] spring-mvc.xml — CORS 설정 (localhost:3000 허용), mvc:annotation-driven + UTF-8 인코딩 설정
+- [x] ApiResponse — 공통 API 응답 포맷 (`success`, `message`, `data`)
+
+#### 2단계 — 인증 API
+- [x] UserVO, LoginRequestVO, RegisterRequestVO
+- [x] JwtUtil — 토큰 생성/검증, 만료 30분, HMAC-SHA256
+- [x] AuthMapper + AuthMapper.xml — insertUser, findByEmail, existsByEmail
+- [x] AuthService — 회원가입(BCrypt 암호화), 로그인(JWT 발급)
+- [x] AuthController — POST /api/auth/register, /login, /logout
+- [x] 인증 방식: JWT (React/Spring 분리 구조)
+
+### 다음 작업
+
+#### 3단계 — JWT 인터셉터
+- [ ] `JwtInterceptor` 구현
+  - `Authorization: Bearer {token}` 헤더에서 토큰 추출
+  - 토큰 없음 → 401 반환
+  - 토큰 유효하지 않음 → 401 반환
+  - 권한 부족 → 403 반환
+  - 토큰 유효 시 userId, role을 request attribute에 저장 (컨트롤러에서 꺼내 쓸 수 있도록)
+- [ ] `spring-mvc.xml`에 인터셉터 등록
+  - `/api/auth/**` 제외하고 나머지 `/api/**`에 적용
+- [ ] 인터셉터에서 권한 체크 방법 결정 (어노테이션 방식 or 인터셉터 내부 URL 매핑)
