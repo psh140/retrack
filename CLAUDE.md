@@ -249,14 +249,14 @@ DRAFT → SUBMITTED → REVIEWING → APPROVED → IN_PROGRESS → COMPLETED
 
 ### 완료된 작업
 
-#### 1단계 — 기반 설정
+#### 1단계 — 기반 설정 (2026-04-16)
 - [x] DB 스키마 확인 (7개 테이블 모두 정상)
 - [x] pom.xml — JWT(jjwt 0.11.5), BCrypt(spring-security-crypto 5.8.13) 의존성 추가
 - [x] spring-db.xml — DB host `localhost` → `db` 수정, mapperLocations 활성화
 - [x] spring-mvc.xml — CORS 설정 (localhost:3000 허용), mvc:annotation-driven + UTF-8 인코딩 설정
 - [x] ApiResponse — 공통 API 응답 포맷 (`success`, `message`, `data`)
 
-#### 2단계 — 인증 API
+#### 2단계 — 인증 API (2026-04-16)
 - [x] UserVO, LoginRequestVO, RegisterRequestVO
 - [x] JwtUtil — 토큰 생성/검증, 만료 30분, HMAC-SHA256
 - [x] AuthMapper + AuthMapper.xml — insertUser, findByEmail, existsByEmail
