@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.retrack.mapper.AuthMapper">
+
+    <resultMap id="userResultMap" type="com.retrack.vo.UserVO">
+        <id property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="role" column="role"/>
+        <result property="isVerified" column="is_verified"/>
+        <result property="verifiedAt" column="verified_at"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <insert id="insertUser" parameterType="com.retrack.vo.UserVO">
+        INSERT INTO users (username, password, email, phone)
+        VALUES (#{username}, #{password}, #{email}, #{phone})
+    </insert>
+
+    <select id="findByEmail" parameterType="String" resultMap="userResultMap">
+        SELECT * FROM users WHERE email = #{email}
+    </select>
+
+    <select id="existsByEmail" parameterType="String" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM users WHERE email = #{email})
+    </select>
+
+</mapper>

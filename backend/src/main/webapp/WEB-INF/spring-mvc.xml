@@ -14,19 +14,25 @@
     <!-- 컴포넌트 스캔 - com.retrack 패키지 자동 인식 -->
     <context:component-scan base-package="com.retrack"/>
 
-    <!-- Spring MVC 어노테이션 활성화 -->
-<!--    <mvc:annotation-driven/>-->
+    <!-- CORS 설정 -->
+    <mvc:cors>
+        <mvc:mapping path="/api/**"
+                     allowed-origins="http://localhost:3000"
+                     allowed-methods="GET,POST,PUT,PATCH,DELETE,OPTIONS"
+                     allowed-headers="*"
+                     allow-credentials="true"/>
+    </mvc:cors>
 
-    <!-- JSON 응답 인코딩 설정 -->
-    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
-        <property name="messageConverters">
-            <list>
-                <bean class="org.springframework.http.converter.StringHttpMessageConverter">
-                    <property name="defaultCharset" value="UTF-8"/>
-                </bean>
-                <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"/>
-            </list>
-        </property>
-    </bean>
+    <!-- Spring MVC 어노테이션 활성화 + Jackson JSON UTF-8 인코딩 설정 -->
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <property name="defaultCharset" value="UTF-8"/>
+            </bean>
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="defaultCharset" value="UTF-8"/>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
 
 </beans>
