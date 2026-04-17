@@ -23,13 +23,18 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    // HMAC-SHA256 서명에 사용할 시크릿 키 (32바이트 이상 필요)
-    private static final String SECRET = "retrack-secret-key-must-be-at-least-32-bytes!!";
-
     // 토큰 만료 시간: 30분
     private static final long EXPIRATION_MS = 1000L * 60 * 30;
 
-    private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
+    private final Key key;
+
+    public JwtUtil() {
+        String secret = System.getenv("JWT_SECRET");
+        if (secret == null || secret.length() < 32) {
+            throw new IllegalStateException("환경변수 JWT_SECRET이 설정되지 않았거나 32자 미만입니다.");
+        }
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
     /**
      * JWT 토큰 생성
