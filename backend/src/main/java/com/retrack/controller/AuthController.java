@@ -35,6 +35,8 @@ public class AuthController {
             return ResponseEntity.ok(ApiResponse.ok("회원가입이 완료되었습니다."));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(ApiResponse.fail("서버 오류가 발생했습니다."));
         }
     }
 
@@ -48,6 +50,8 @@ public class AuthController {
             return ResponseEntity.ok(ApiResponse.ok("로그인 성공", authService.login(request)));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(ApiResponse.fail("서버 오류가 발생했습니다."));
         }
     }
 
