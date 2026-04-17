@@ -245,6 +245,35 @@ DRAFT → SUBMITTED → REVIEWING → APPROVED → IN_PROGRESS → COMPLETED
 
 ---
 
+## 트랜잭션 처리
+
+### 과제 상태 변경 트랜잭션
+과제 상태 변경 시 아래 3가지 작업이 하나의 트랜잭션으로 처리되어야 합니다.
+중간에 하나라도 실패하면 전체 롤백됩니다.
+
+1. PROJECTS 테이블 status 업데이트
+2. PROJECT_HISTORY 테이블 이력 INSERT
+3. K_NOTIFICATIONS 테이블 알림 기록 INSERT
+
+구현 위치: ProjectService.changeStatus() 메서드
+어노테이션: @Transactional (org.springframework.transaction.annotation.Transactional)
+
+예시:
+```java
+@Transactional
+public void changeStatus(Long projectId, String newStatus, Long changedBy, String comment) {
+    // 1. 과제 상태 변경
+    // 2. 이력 저장
+    // 3. 알림 기록 저장
+    // 4. 카카오 알림톡 API 호출 (트랜잭션 외부에서 처리 권장)
+}
+```
+
+주의: 카카오 알림톡 API 호출은 외부 API라 트랜잭션 안에 포함하지 않습니다.
+DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
+
+---
+
 ## 개발 현황
 
 ### 완료된 작업
@@ -264,18 +293,19 @@ DRAFT → SUBMITTED → REVIEWING → APPROVED → IN_PROGRESS → COMPLETED
 - [x] AuthController — POST /api/auth/register, /login, /logout
 - [x] 인증 방식: JWT (React/Spring 분리 구조)
 
+#### 3단계 — JWT 인터셉터 (2026-04-17)
+- [x] `@RequiredRole` 커스텀 어노테이션 — 메서드 단위 최소 권한 지정
+- [x] `JwtInterceptor` — Authorization 헤더 추출, 토큰 검증, 권한 계층 체크, request attribute 저장
+- [x] `spring-mvc.xml` 인터셉터 등록 — `/api/auth/**` 제외, `/api/**` 적용
+- [x] 권한 체크 방식: 어노테이션 방식 (`@RequiredRole`) 채택, 계층 구조 VIEWER < RESEARCHER < MANAGER < ADMIN
+
 ### 다음 작업
 
-#### 3단계 — JWT 인터셉터
-- [ ] `JwtInterceptor` 구현
-  - `Authorization: Bearer {token}` 헤더에서 토큰 추출
-  - 토큰 없음 → 401 반환
-  - 토큰 유효하지 않음 → 401 반환
-  - 권한 부족 → 403 반환
-  - 토큰 유효 시 userId, role을 request attribute에 저장 (컨트롤러에서 꺼내 쓸 수 있도록)
-- [ ] `spring-mvc.xml`에 인터셉터 등록
-  - `/api/auth/**` 제외하고 나머지 `/api/**`에 적용
-- [ ] 인터셉터에서 권한 체크 방법 결정 (어노테이션 방식 or 인터셉터 내부 URL 매핑)
+#### 4단계 — 사용자 관리 API
+- [ ] UserMapper + UserMapper.xml — findAll, findById, updateRole, updateVerify, deleteUser
+- [ ] UserService — 사용자 목록/상세/권한변경/인증승인/삭제
+- [ ] UserController — GET /api/users, /api/users/{id}, PATCH /api/users/{id}/role, PATCH /api/users/{id}/verify, DELETE /api/users/{id}
+- [ ] 각 메서드에 `@RequiredRole("ADMIN")` 적용
 
 ---
 

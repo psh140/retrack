@@ -23,6 +23,15 @@
                      allow-credentials="true"/>
     </mvc:cors>
 
+    <!-- JWT 인터셉터 등록 (/api/auth/** 제외, 나머지 /api/** 적용) -->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/api/**"/>
+            <mvc:exclude-mapping path="/api/auth/**"/>
+            <ref bean="jwtInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
     <!-- Spring MVC 어노테이션 활성화 + Jackson JSON UTF-8 인코딩 설정 -->
     <mvc:annotation-driven>
         <mvc:message-converters>
