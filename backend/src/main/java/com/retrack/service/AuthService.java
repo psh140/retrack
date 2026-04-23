@@ -1,5 +1,7 @@
 package com.retrack.service;
 
+import com.retrack.exception.BadRequestException;
+import com.retrack.exception.UnauthorizedException;
 import com.retrack.mapper.AuthMapper;
 import com.retrack.util.JwtUtil;
 import com.retrack.vo.LoginRequestVO;
@@ -33,12 +35,11 @@ public class AuthService {
     /**
      * 회원가입
      * 기본 권한은 VIEWER로 설정됨 (DB 컬럼 기본값)
-     * @throws IllegalArgumentException 이메일 중복 시
      */
     public void register(RegisterRequestVO request) {
         // 이메일 중복 확인
         if (authMapper.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+            throw new BadRequestException("이미 사용 중인 이메일입니다.");
         }
 
         UserVO user = new UserVO();
@@ -53,14 +54,13 @@ public class AuthService {
     /**
      * 로그인
      * @return token, userId, username, role 포함한 Map
-     * @throws IllegalArgumentException 이메일 없거나 비밀번호 불일치 시
      */
     public Map<String, Object> login(LoginRequestVO request) {
         UserVO user = authMapper.findByEmail(request.getEmail());
 
         // 이메일 미존재 or 비밀번호 불일치 → 동일한 메시지로 처리 (보안상 구분 X)
         if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+            throw new UnauthorizedException("이메일 또는 비밀번호가 올바르지 않습니다.");
         }
 
         // JWT 발급

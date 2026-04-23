@@ -220,10 +220,11 @@ DRAFT → SUBMITTED → REVIEWING → APPROVED → IN_PROGRESS → COMPLETED
 ## 개발 규칙
 
 ### 패키지 구조
-- `com.retrack.controller`: @RestController, @RequestMapping("/api/...")
+- `com.retrack.controller`: @RestController, @RequestMapping("/api/..."), GlobalExceptionHandler
 - `com.retrack.service`: 비즈니스 로직, @Service
 - `com.retrack.mapper`: MyBatis Mapper 인터페이스, @Mapper
 - `com.retrack.vo`: VO/DTO 클래스
+- `com.retrack.exception`: 커스텀 예외 클래스 (BadRequestException, UnauthorizedException, NotFoundException)
 
 ### 네이밍 규칙
 - 클래스명: PascalCase (예: ProjectController)
@@ -298,6 +299,13 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 - [x] `JwtInterceptor` — Authorization 헤더 추출, 토큰 검증, 권한 계층 체크, request attribute 저장
 - [x] `spring-mvc.xml` 인터셉터 등록 — `/api/auth/**` 제외, `/api/**` 적용
 - [x] 권한 체크 방식: 어노테이션 방식 (`@RequiredRole`) 채택, 계층 구조 VIEWER < RESEARCHER < MANAGER < ADMIN
+
+#### 3.5단계 — 예외 처리 (2026-04-23)
+- [x] `BadRequestException` / `UnauthorizedException` / `NotFoundException` — 커스텀 예외 계층 추가
+- [x] `GlobalExceptionHandler` (`@RestControllerAdvice`) — 예외 타입별 HTTP 상태 코드 매핑 (400 / 401 / 404 / 500)
+- [x] `AuthService` — `IllegalArgumentException` → 커스텀 예외로 교체 (이메일 중복 → 400, 로그인 실패 → 401)
+- [x] `AuthController` — try-catch 제거, 핵심 로직만 유지
+- [x] 이후 모든 컨트롤러는 try-catch 없이 작성, 서비스에서 커스텀 예외를 던지면 GlobalExceptionHandler가 처리
 
 ### 다음 작업
 
