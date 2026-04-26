@@ -5,12 +5,17 @@
            http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <!-- DataSource - PostgreSQL 연결 설정 -->
-    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <!-- DataSource - HikariCP 커넥션 풀 -->
+    <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
         <property name="driverClassName" value="org.postgresql.Driver"/>
-        <property name="url" value="jdbc:postgresql://db:5432/retrack"/>
+        <property name="jdbcUrl" value="jdbc:postgresql://db:5432/retrack"/>
         <property name="username" value="retrack"/>
         <property name="password" value="retrack1234"/>
+        <property name="maximumPoolSize" value="10"/>
+        <property name="minimumIdle" value="2"/>
+        <property name="connectionTimeout" value="30000"/>
+        <property name="idleTimeout" value="600000"/>
+        <property name="maxLifetime" value="1800000"/>
     </bean>
 
     <!-- MyBatis SqlSessionFactory -->

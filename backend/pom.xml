@@ -102,6 +102,13 @@
       <version>5.8.13</version>
     </dependency>
 
+    <!-- HikariCP (커넥션 풀) -->
+    <dependency>
+      <groupId>com.zaxxer</groupId>
+      <artifactId>HikariCP</artifactId>
+      <version>4.0.3</version>
+    </dependency>
+
   </dependencies>
 
   <build>

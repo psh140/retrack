@@ -307,6 +307,12 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 - [x] `AuthController` — try-catch 제거, 핵심 로직만 유지
 - [x] 이후 모든 컨트롤러는 try-catch 없이 작성, 서비스에서 커스텀 예외를 던지면 GlobalExceptionHandler가 처리
 
+#### 3.7단계 — HikariCP 커넥션 풀 (2026-04-26)
+- [x] `pom.xml` — HikariCP 4.0.3 의존성 추가 (Java 11 호환 버전)
+- [x] `spring-db.xml` — `DriverManagerDataSource` → `HikariDataSource` 교체
+- [x] 풀 설정: maximumPoolSize=10, minimumIdle=2, connectionTimeout=30s, idleTimeout=10분, maxLifetime=30분
+- [x] `destroy-method="close"` 등록 — Tomcat 종료 시 커넥션 정상 반납
+
 ### 다음 작업
 
 #### 4단계 — 사용자 관리 API
