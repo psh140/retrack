@@ -1,5 +1,6 @@
 package com.retrack.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,7 +21,12 @@ public class UserVO {
     private String phone;           // 연락처 (카카오 알림톡 발송용)
     private String role;            // 권한 (기본값: VIEWER)
     private boolean isVerified;     // 연구자 인증 여부
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime verifiedAt;   // 연구자 인증 승인 일시
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;    // 계정 생성 일시
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;    // 계정 수정 일시
 }

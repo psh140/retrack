@@ -32,6 +32,18 @@
         </mvc:interceptor>
     </mvc:interceptors>
 
+    <!--
+        Jackson2ObjectMapperFactoryBean — JavaTimeModule 등록으로 LocalDateTime 직렬화 지원
+        @JsonFormat 어노테이션이 적용되려면 JavaTimeModule이 반드시 등록되어야 함
+    -->
+    <bean id="objectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
+        <property name="modulesToInstall">
+            <array>
+                <value>com.fasterxml.jackson.datatype.jsr310.JavaTimeModule</value>
+            </array>
+        </property>
+    </bean>
+
     <!-- Spring MVC 어노테이션 활성화 + Jackson JSON UTF-8 인코딩 설정 -->
     <mvc:annotation-driven>
         <mvc:message-converters>
@@ -40,6 +52,7 @@
             </bean>
             <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
                 <property name="defaultCharset" value="UTF-8"/>
+                <property name="objectMapper" ref="objectMapper"/>
             </bean>
         </mvc:message-converters>
     </mvc:annotation-driven>

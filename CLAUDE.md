@@ -236,6 +236,18 @@ DRAFT → SUBMITTED → REVIEWING → APPROVED → IN_PROGRESS → COMPLETED
 - 모든 API 응답은 JSON
 - Content-Type: application/json; charset=UTF-8
 
+### 주석 규칙
+모든 Java 파일과 MyBatis XML 파일에 반드시 주석을 작성한다.
+
+**Java 클래스/인터페이스**
+- 클래스/인터페이스 상단에 Javadoc(`/** */`)으로 역할 설명
+- 각 메서드에 한 줄 Javadoc(`/** */`) 또는 여러 줄 Javadoc 작성
+- 비즈니스 규칙, 예외 발생 조건, 주의사항은 메서드 주석에 명시
+
+**MyBatis XML (mapper)**
+- 각 `<select>`, `<insert>`, `<update>`, `<delete>` 쿼리 위에 `<!-- -->` 주석으로 목적 설명
+- `<resultMap>` 상단에 컬럼 매핑 전략 등 특이사항 설명
+
 ### 주의사항
 - Spring Framework 5.3.x 사용 (Spring Boot 아님)
 - web.xml, spring-mvc.xml, spring-db.xml XML 설정 방식
@@ -313,13 +325,16 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 - [x] 풀 설정: maximumPoolSize=10, minimumIdle=2, connectionTimeout=30s, idleTimeout=10분, maxLifetime=30분
 - [x] `destroy-method="close"` 등록 — Tomcat 종료 시 커넥션 정상 반납
 
-### 다음 작업
+#### 4단계 — 사용자 관리 API (2026-04-28)
+- [x] `UserMapper` + `UserMapper.xml` — findAll, findById, updateRole, updateVerify, deleteUser
+- [x] `UserService` — 사용자 목록/상세/권한변경/인증승인/삭제, 유효 role 검증, 중복 인증 방지
+- [x] `UserController` — GET /api/users, /api/users/{id}, PATCH /api/users/{id}/role, PATCH /api/users/{id}/verify, DELETE /api/users/{id}
+- [x] 모든 엔드포인트 `@RequiredRole("ADMIN")` 적용
+- [x] `pom.xml` — `jackson-datatype-jsr310` 추가 (LocalDateTime 직렬화 지원)
+- [x] `UserVO` — LocalDateTime 필드에 `@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")` 추가
+- [x] `spring-mvc.xml` — `Jackson2ObjectMapperFactoryBean`으로 JavaTimeModule 등록
 
-#### 4단계 — 사용자 관리 API
-- [ ] UserMapper + UserMapper.xml — findAll, findById, updateRole, updateVerify, deleteUser
-- [ ] UserService — 사용자 목록/상세/권한변경/인증승인/삭제
-- [ ] UserController — GET /api/users, /api/users/{id}, PATCH /api/users/{id}/role, PATCH /api/users/{id}/verify, DELETE /api/users/{id}
-- [ ] 각 메서드에 `@RequiredRole("ADMIN")` 적용
+### 다음 작업
 
 ---
 
@@ -347,3 +362,15 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 - **증상**: 한글이 포함된 JSON 요청 시 `HttpMessageNotReadableException: Invalid UTF-8 middle byte 0xd7` 오류
 - **원인**: `mvc:annotation-driven` 기본 설정에서 `MappingJackson2HttpMessageConverter`의 charset이 명시되지 않아 한글 파싱 실패
 - **해결**: `MappingJackson2HttpMessageConverter`에 `defaultCharset UTF-8` 명시 (위 코드 참고)
+
+### 3. LocalDateTime 직렬화 실패로 JSON 응답 중간에 잘림 (2026-04-28)
+- **증상**: `createdAt` 필드에서 JSON이 끊기고 500 에러 응답이 이어붙어 반환됨
+- **원인**: `jackson-datatype-jsr310` 미포함 — Jackson이 `LocalDateTime` 직렬화 방법을 몰라 응답 스트림 도중 예외 발생
+- **해결**: `pom.xml`에 `jackson-datatype-jsr310` 추가, `UserVO` 날짜 필드에 `@JsonFormat` 추가, `spring-mvc.xml`에 `JavaTimeModule` 등록
+- **상세**: `docs/troubleshooting-4단계-사용자관리API.md` 참고
+
+### 4. ObjectMapper 빈 직접 선언 시 Spring 컨텍스트 초기화 실패 (2026-04-28)
+- **증상**: `spring-mvc.xml`에 `ObjectMapper` 빈 추가 후 모든 API 빈 응답 반환
+- **원인**: `ObjectMapper`에 `setModules()` 메서드가 없어 `<property name="modules">` 주입 시 Spring 컨텍스트 초기화 실패
+- **해결**: `ObjectMapper` 직접 선언 대신 `Jackson2ObjectMapperFactoryBean` 사용 — `modulesToInstall` 프로퍼티로 모듈 등록
+- **상세**: `docs/troubleshooting-4단계-사용자관리API.md` 참고
