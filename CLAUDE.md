@@ -334,7 +334,21 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 - [x] `UserVO` — LocalDateTime 필드에 `@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")` 추가
 - [x] `spring-mvc.xml` — `Jackson2ObjectMapperFactoryBean`으로 JavaTimeModule 등록
 
+#### 5단계 — 과제 관리 API (2026-04-28)
+- [x] `ProjectVO`, `ProjectHistoryVO`, `ProjectRequestVO`, `StatusChangeRequestVO` — VO 4종 추가
+- [x] `ProjectMapper` + `ProjectMapper.xml` — findAll, findById, insertProject, updateProject, updateStatus, deleteProject, insertHistory, insertNotification, findHistoryByProjectId
+- [x] `ProjectService` — 목록/상세/등록/수정/삭제, 상태 전이 유효성 검증, RESEARCHER 본인 과제 수정 권한 체크
+- [x] `ProjectService.changeStatus()` — `@Transactional` 적용, 3가지 작업 원자적 처리 (status 업데이트 + 이력 INSERT + 알림 기록 INSERT)
+- [x] `ProjectController` — 7개 엔드포인트 구현
+- [x] `spring-mvc.xml` — `DataSourceTransactionManager` 빈 + `<tx:annotation-driven>` 추가 (Service 빈이 서블릿 컨텍스트에 있으므로 여기서 선언, `dataSource`는 루트 컨텍스트에서 참조)
+
 ### 다음 작업
+
+#### 6단계 — 연구비 관리 API
+- [ ] BudgetVO, BudgetRequestVO
+- [ ] BudgetMapper + BudgetMapper.xml — findByProjectId, insert, update, delete, summary
+- [ ] BudgetService — 목록/등록/수정/삭제/카테고리별 집계
+- [ ] BudgetController — GET/POST /api/projects/{id}/budget, PUT/DELETE /api/projects/{id}/budget/{bid}, GET /api/projects/{id}/budget/summary
 
 ---
 
@@ -374,3 +388,9 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 - **원인**: `ObjectMapper`에 `setModules()` 메서드가 없어 `<property name="modules">` 주입 시 Spring 컨텍스트 초기화 실패
 - **해결**: `ObjectMapper` 직접 선언 대신 `Jackson2ObjectMapperFactoryBean` 사용 — `modulesToInstall` 프로퍼티로 모듈 등록
 - **상세**: `docs/troubleshooting-4단계-사용자관리API.md` 참고
+
+### 5. @Transactional이 서블릿 컨텍스트 Service 빈에 적용되지 않는 문제 (2026-04-28)
+- **증상**: `spring-db.xml`에 `<tx:annotation-driven>` 추가했으나 `@Transactional` 미동작
+- **원인**: Spring MVC는 루트 컨텍스트(`spring-db.xml`)와 서블릿 컨텍스트(`spring-mvc.xml`)가 분리됨. `<tx:annotation-driven>`은 선언된 컨텍스트의 빈에만 적용되는데, Service 빈은 `spring-mvc.xml`의 `component-scan`으로 서블릿 컨텍스트에 등록됨
+- **해결**: `spring-mvc.xml`에도 `<tx:annotation-driven transaction-manager="transactionManager"/>` 추가
+- **상세**: `docs/transaction-컨텍스트-분리-이슈.md` 참고
