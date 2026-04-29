@@ -349,13 +349,21 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 - [x] `GlobalExceptionHandler` — `@Slf4j` + `log.error("Unhandled exception occurred", e)` 적용, 500 오류 시 스택트레이스 출력
 - [x] 로거 API 방침: 애플리케이션 코드 전체에서 `@Slf4j` (SLF4J) 사용 — 구현체(Log4j2) 교체 시 코드 변경 불필요
 
+#### 6단계 — 연구비 관리 API (2026-04-29)
+- [x] `BudgetVO`, `BudgetRequestVO` — VO 2종 추가
+- [x] `BudgetMapper` + `BudgetMapper.xml` — findByProjectId, findById, insert, update, delete, summary
+- [x] `BudgetService` — 목록/등록/수정/삭제/카테고리별 집계, 카테고리 유효성·금액·사용일시 검증
+- [x] `BudgetController` — 5개 엔드포인트 구현 (GET/POST /api/projects/{id}/budget, PUT/DELETE /api/projects/{id}/budget/{bid}, GET /api/projects/{id}/budget/summary)
+- [x] summary 응답 형태: `{ "PERSONNEL": 1000000, "TRAVEL": 500000, ..., "total": 1500000 }`
+
 ### 다음 작업
 
-#### 6단계 — 연구비 관리 API
-- [ ] BudgetVO, BudgetRequestVO
-- [ ] BudgetMapper + BudgetMapper.xml — findByProjectId, insert, update, delete, summary
-- [ ] BudgetService — 목록/등록/수정/삭제/카테고리별 집계
-- [ ] BudgetController — GET/POST /api/projects/{id}/budget, PUT/DELETE /api/projects/{id}/budget/{bid}, GET /api/projects/{id}/budget/summary
+#### 7단계 — 파일 관리 API
+- [ ] FileVO
+- [ ] FileMapper + FileMapper.xml — findByProjectId, insert, delete, findById
+- [ ] FileService — 목록/업로드/삭제/다운로드 (MultipartFile, 로컬 저장)
+- [ ] FileController — GET/POST /api/projects/{id}/files, DELETE/GET /api/projects/{id}/files/{fid}
+- [ ] spring-mvc.xml — MultipartResolver 빈 등록 (CommonsMultipartResolver)
 
 ---
 
