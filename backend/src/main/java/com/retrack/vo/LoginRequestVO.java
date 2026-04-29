@@ -6,6 +6,8 @@ import lombok.Setter;
 /**
  * 로그인 요청 바디 VO
  * POST /api/auth/login
+ *
+ * @since 2026-04-16
  */
 @Getter
 @Setter

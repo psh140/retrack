@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
  * projects 테이블 매핑 VO
  * 과제 상태 흐름: DRAFT → SUBMITTED → REVIEWING → APPROVED → IN_PROGRESS → COMPLETED
  *                                                           ↘ REJECTED
+ *
+ * @since 2026-04-28
  */
 @Getter
 @Setter

@@ -12,6 +12,8 @@ import java.lang.annotation.*;
  * @RequiredRole("ADMIN")       → ADMIN만 접근 가능
  *
  * 어노테이션이 없는 API는 로그인만 되어 있으면 누구나 접근 가능 (ALL)
+ *
+ * @since 2026-04-17
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

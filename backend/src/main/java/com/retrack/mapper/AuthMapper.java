@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Mapper;
 /**
  * 인증 관련 DB 쿼리 인터페이스
  * SQL은 resources/mapper/AuthMapper.xml 에 정의
+ *
+ * @since 2026-04-16
  */
 @Mapper
 public interface AuthMapper {

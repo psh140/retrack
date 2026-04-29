@@ -12,6 +12,8 @@ import java.util.Map;
  * 사용자 관리 API
  * 모든 엔드포인트는 ADMIN 권한 필요
  * 예외 처리는 GlobalExceptionHandler에 위임 (try-catch 없음)
+ *
+ * @since 2026-04-28
  */
 @RestController
 @RequestMapping("/api/users")

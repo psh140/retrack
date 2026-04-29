@@ -26,6 +26,8 @@ import java.util.List;
  * 5. 통과 시 request attribute에 userId, role 저장
  *
  * 적용 범위: /api/** (단, /api/auth/** 제외 — spring-mvc.xml에서 설정)
+ *
+ * @since 2026-04-17
  */
 @Component
 public class JwtInterceptor implements HandlerInterceptor {

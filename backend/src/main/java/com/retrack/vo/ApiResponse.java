@@ -11,6 +11,8 @@ import lombok.Getter;
  *
  * 응답 예시 (실패):
  * { "success": false, "message": "권한이 없습니다.", "data": null }
+ *
+ * @since 2026-04-16
  */
 @Getter
 public class ApiResponse<T> {

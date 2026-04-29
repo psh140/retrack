@@ -23,6 +23,8 @@ import java.util.Map;
  *   2. project_history 이력 INSERT
  *   3. k_notifications 알림 기록 INSERT
  * 카카오 알림톡 API 호출은 트랜잭션 외부에서 별도 처리 (8단계에서 구현)
+ *
+ * @since 2026-04-28
  */
 @Service
 public class ProjectService {

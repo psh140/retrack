@@ -19,6 +19,8 @@ import java.util.Date;
  * 사용처:
  * - 로그인 성공 시 토큰 발급 (AuthService)
  * - 요청마다 토큰 검증 (JwtInterceptor - 추후 구현)
+ *
+ * @since 2026-04-16
  */
 @Component
 public class JwtUtil {

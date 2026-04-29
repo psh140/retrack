@@ -17,6 +17,8 @@ import java.util.Map;
  * 인증 비즈니스 로직
  * - 회원가입: 이메일 중복 확인 → 비밀번호 BCrypt 암호화 → DB 저장
  * - 로그인: 이메일 조회 → 비밀번호 검증 → JWT 발급
+ *
+ * @since 2026-04-16
  */
 @Service
 public class AuthService {

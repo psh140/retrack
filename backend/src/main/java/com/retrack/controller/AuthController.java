@@ -7,6 +7,11 @@ import com.retrack.vo.RegisterRequestVO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * 인증 API (회원가입 / 로그인 / 로그아웃)
+ *
+ * @since 2026-04-16
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 /**
  * project_history 테이블 매핑 VO
  * 과제 상태 변경 시마다 이력이 INSERT됨 (UPDATE 없음)
+ *
+ * @since 2026-04-28
  */
 @Getter
 @Setter

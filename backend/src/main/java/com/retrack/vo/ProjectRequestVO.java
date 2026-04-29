@@ -9,6 +9,8 @@ import java.time.LocalDate;
 /**
  * 과제 등록/수정 요청 바디 VO
  * POST /api/projects, PUT /api/projects/{id} 에서 사용
+ *
+ * @since 2026-04-28
  */
 @Getter
 @Setter

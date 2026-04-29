@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletRequest;
  * - 상태 변경: MANAGER 이상
  * - 삭제: ADMIN만
  * 예외 처리는 GlobalExceptionHandler에 위임 (try-catch 없음)
+ *
+ * @since 2026-04-28
  */
 @RestController
 @RequestMapping("/api/projects")

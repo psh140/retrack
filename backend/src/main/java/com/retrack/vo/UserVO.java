@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 /**
  * users 테이블 매핑 VO
  * 권한(role): VIEWER / RESEARCHER / MANAGER / ADMIN
+ *
+ * @since 2026-04-16
  */
 @Getter
 @Setter

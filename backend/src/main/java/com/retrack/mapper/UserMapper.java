@@ -9,6 +9,8 @@ import java.util.List;
 /**
  * 사용자 관리 관련 DB 쿼리 인터페이스
  * SQL은 resources/mapper/UserMapper.xml 에 정의
+ *
+ * @since 2026-04-28
  */
 @Mapper
 public interface UserMapper {

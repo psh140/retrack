@@ -17,6 +17,8 @@ import java.util.List;
  * - 사용자 삭제
  *
  * 존재하지 않는 사용자 접근 시 NotFoundException → GlobalExceptionHandler가 404 응답
+ *
+ * @since 2026-04-28
  */
 @Service
 public class UserService {

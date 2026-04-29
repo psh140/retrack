@@ -10,6 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/**
+ * 전역 예외 처리 핸들러
+ * 커스텀 예외 → HTTP 상태 코드 매핑 (400 / 401 / 404 / 500)
+ *
+ * @since 2026-04-23
+ */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {

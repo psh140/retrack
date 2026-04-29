@@ -6,6 +6,8 @@ import lombok.Setter;
 /**
  * 과제 상태 변경 요청 바디 VO
  * PATCH /api/projects/{id}/status 에서 사용
+ *
+ * @since 2026-04-28
  */
 @Getter
 @Setter
