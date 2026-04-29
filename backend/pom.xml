@@ -17,6 +17,18 @@
     <spring.version>5.3.39</spring.version>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <!-- HikariCP 4.0.3이 slf4j-api:2.0.0-alpha1(SLF4J 2.x)을 끌어오는데,
+           log4j-slf4j-impl은 SLF4J 1.x 전용이므로 1.7.x로 고정 -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.7.36</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <!-- Spring MVC -->
     <dependency>
@@ -114,6 +126,24 @@
       <groupId>com.zaxxer</groupId>
       <artifactId>HikariCP</artifactId>
       <version>4.0.3</version>
+    </dependency>
+
+    <!-- Log4j2 -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.23.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.23.1</version>
+    </dependency>
+    <!-- SLF4J → Log4j2 브릿지: HikariCP, MyBatis 등의 SLF4J 로그를 Log4j2로 연결 -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>2.23.1</version>
     </dependency>
 
   </dependencies>

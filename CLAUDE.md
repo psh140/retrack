@@ -342,6 +342,13 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 - [x] `ProjectController` — 7개 엔드포인트 구현
 - [x] `spring-mvc.xml` — `DataSourceTransactionManager` 빈 + `<tx:annotation-driven>` 추가 (Service 빈이 서블릿 컨텍스트에 있으므로 여기서 선언, `dataSource`는 루트 컨텍스트에서 참조)
 
+#### 5.5단계 — 로깅 (2026-04-29)
+- [x] `pom.xml` — `log4j-api`, `log4j-core`, `log4j-slf4j-impl` 2.23.1 추가
+- [x] `pom.xml` — `<dependencyManagement>`로 `slf4j-api` 1.7.36 고정 (HikariCP 4.0.3이 끌어오는 `slf4j-api:2.0.0-alpha1`과 `log4j-slf4j-impl` 간 버전 충돌 방지)
+- [x] `log4j2.xml` — 콘솔 출력 설정 (`com.retrack` DEBUG, `com.retrack.mapper` DEBUG, Spring WARN, HikariCP INFO)
+- [x] `GlobalExceptionHandler` — `@Slf4j` + `log.error("Unhandled exception occurred", e)` 적용, 500 오류 시 스택트레이스 출력
+- [x] 로거 API 방침: 애플리케이션 코드 전체에서 `@Slf4j` (SLF4J) 사용 — 구현체(Log4j2) 교체 시 코드 변경 불필요
+
 ### 다음 작업
 
 #### 6단계 — 연구비 관리 API
@@ -354,28 +361,14 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 
 ## 트러블슈팅
 
-### 1. mvc:annotation-driven + RequestMappingHandlerAdapter 충돌 (2026-04-16)
-- **증상**: API 호출 시 Tomcat 400 HTML 응답 반환, Spring 컨트롤러까지 요청이 도달하지 않음
-- **원인**: `mvc:annotation-driven`과 수동 `RequestMappingHandlerAdapter` 빈을 동시에 선언하면 두 개의 핸들러 어댑터가 충돌
-- **해결**: 수동 `RequestMappingHandlerAdapter` 빈 제거, `mvc:annotation-driven` 내부에 `mvc:message-converters`로 통합
+트러블슈팅 내용은 `docs/` 폴더에서 관리합니다.
 
-```xml
-<mvc:annotation-driven>
-    <mvc:message-converters>
-        <bean class="org.springframework.http.converter.StringHttpMessageConverter">
-            <property name="defaultCharset" value="UTF-8"/>
-        </bean>
-        <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
-            <property name="defaultCharset" value="UTF-8"/>
-        </bean>
-    </mvc:message-converters>
-</mvc:annotation-driven>
-```
-
-### 2. Jackson 한글 JSON 파싱 오류 (Invalid UTF-8 middle byte) (2026-04-16)
-- **증상**: 한글이 포함된 JSON 요청 시 `HttpMessageNotReadableException: Invalid UTF-8 middle byte 0xd7` 오류
-- **원인**: `mvc:annotation-driven` 기본 설정에서 `MappingJackson2HttpMessageConverter`의 charset이 명시되지 않아 한글 파싱 실패
-- **해결**: `MappingJackson2HttpMessageConverter`에 `defaultCharset UTF-8` 명시 (위 코드 참고)
+| 파일 | 내용 |
+|---|---|
+| `docs/troubleshooting-초기설정.md` | mvc:annotation-driven 충돌, Jackson 한글 파싱 오류 |
+| `docs/troubleshooting-4단계-사용자관리API.md` | 4단계 개발 중 발생한 이슈 |
+| `docs/troubleshooting-5단계-과제관리API-테스트.md` | GlobalExceptionHandler 로그 미출력, Git Bash 인코딩 문제, 트랜잭션 확인 |
+| `docs/transaction-컨텍스트-분리-이슈.md` | 트랜잭션 매니저 서블릿 컨텍스트 분리 이슈 |
 
 ### 3. LocalDateTime 직렬화 실패로 JSON 응답 중간에 잘림 (2026-04-28)
 - **증상**: `createdAt` 필드에서 JSON이 끊기고 500 에러 응답이 이어붙어 반환됨
