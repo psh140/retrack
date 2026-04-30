@@ -258,6 +258,66 @@ DRAFT → SUBMITTED → REVIEWING → APPROVED → IN_PROGRESS → COMPLETED
 
 ---
 
+## 파일 저장소 아키텍처
+
+### 설계 방향
+
+파일 저장 구현체를 교체 가능하도록 Strategy 패턴으로 추상화합니다.
+현재는 Docker 볼륨 로컬 저장을 사용하고, 추후 AWS S3 또는 NFS로 교체할 수 있습니다.
+
+### 인터페이스
+
+```java
+// com.retrack.storage.FileStorageStrategy
+public interface FileStorageStrategy {
+    String store(MultipartFile file, String savedName) throws IOException;
+    Resource load(String filePath) throws IOException;
+    void delete(String filePath) throws IOException;
+}
+```
+
+### 구현체 구조
+
+```
+com.retrack/
+  storage/
+    FileStorageStrategy.java        ← 인터페이스
+    LocalFileStorageStrategy.java   ← 현재 구현체 (Docker 볼륨)
+    // S3FileStorageStrategy.java   ← 추후 추가
+    // NfsFileStorageStrategy.java  ← 추후 추가
+```
+
+### 구현체 교체 방법
+
+`spring-mvc.xml`의 빈 선언만 변경하면 됩니다. `FileService` 코드는 수정 불필요.
+
+```xml
+<!-- 현재: 로컬 저장 -->
+<bean id="fileStorageStrategy" class="com.retrack.storage.LocalFileStorageStrategy">
+    <constructor-arg value="/app/uploads/"/>
+</bean>
+
+<!-- S3 교체 시 -->
+<!-- <bean id="fileStorageStrategy" class="com.retrack.storage.S3FileStorageStrategy">
+    <constructor-arg value="my-bucket-name"/>
+</bean> -->
+```
+
+### Docker 볼륨 마운트
+
+파일이 컨테이너 재시작 시 유실되지 않도록 `docker-compose.yml`에 볼륨 마운트 설정.
+
+```yaml
+backend:
+  volumes:
+    - ./uploads:/app/uploads
+```
+
+Spring에서 파일 저장 경로: `/app/uploads/` (컨테이너 기준)
+DB `file_path` 컬럼에는 컨테이너 기준 경로 저장.
+
+---
+
 ## 트랜잭션 처리
 
 ### 과제 상태 변경 트랜잭션
@@ -359,11 +419,18 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 ### 다음 작업
 
 #### 7단계 — 파일 관리 API
-- [ ] FileVO
-- [ ] FileMapper + FileMapper.xml — findByProjectId, insert, delete, findById
-- [ ] FileService — 목록/업로드/삭제/다운로드 (MultipartFile, 로컬 저장)
-- [ ] FileController — GET/POST /api/projects/{id}/files, DELETE/GET /api/projects/{id}/files/{fid}
-- [ ] spring-mvc.xml — MultipartResolver 빈 등록 (CommonsMultipartResolver)
+- [ ] `FileStorageStrategy` 인터페이스 — `store()`, `load()`, `delete()` 메서드 정의
+- [ ] `LocalFileStorageStrategy` — 인터페이스 구현체 (Docker 볼륨 로컬 저장)
+- [ ] `spring-mvc.xml` — `LocalFileStorageStrategy` 빈 등록 (업로드 경로 `/app/uploads/` 주입)
+- [ ] `docker-compose.yml` — backend 볼륨 마운트 추가 (`./uploads:/app/uploads`)
+- [ ] `FileVO` — 파일 정보 VO (original_name, saved_name, file_path, file_size, content_type)
+- [ ] `FileMapper` + `FileMapper.xml` — findByProjectId, findById, insert, delete
+- [ ] `FileService` — 목록/업로드/삭제/다운로드, `FileStorageStrategy` 주입받아 사용
+- [ ] `FileController` — GET/POST /api/projects/{id}/files, DELETE/GET /api/projects/{id}/files/{fid}
+- [ ] `pom.xml` — `commons-fileupload` 의존성 추가 (CommonsMultipartResolver 필요)
+- [ ] `spring-mvc.xml` — `CommonsMultipartResolver` 빈 등록 (maxUploadSize 30MB)
+- [ ] 파일 검증: 확장자 `.pdf` + Content-Type `application/pdf` 둘 다 체크
+- [ ] 저장 파일명: UUID + `.pdf` (original_name은 DB 보관, 다운로드 응답 헤더에 반환)
 
 ---
 
