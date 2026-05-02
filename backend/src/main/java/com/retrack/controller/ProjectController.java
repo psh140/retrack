@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 /**
  * 과제 관리 API
@@ -100,7 +101,7 @@ public class ProjectController {
      */
     @RequiredRole("ADMIN")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> deleteProject(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<?>> deleteProject(@PathVariable Long id) throws IOException {
         projectService.deleteProject(id);
         return ResponseEntity.ok(ApiResponse.ok("과제가 삭제되었습니다."));
     }

@@ -21,6 +21,7 @@ services:
       - db
     volumes:
       - ./backend/target/retrack-backend-1.0-SNAPSHOT.war:/usr/local/tomcat/webapps/ROOT.war  # 빌드된 WAR 파일 마운트
+      - ./uploads:/app/uploads  # 업로드 파일 영속성 보장
     environment:
       DB_HOST: db
       DB_PORT: 5432

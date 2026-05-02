@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 최초 생성일: 2026-05-02 -->
+<mapper namespace="com.retrack.mapper.FileMapper">
+
+    <!-- files 테이블 컬럼 → FileVO 필드 매핑 -->
+    <resultMap id="fileResultMap" type="com.retrack.vo.FileVO">
+        <id property="fileId" column="file_id"/>
+        <result property="projectId" column="project_id"/>
+        <result property="fileName" column="file_name"/>
+        <result property="filePath" column="file_path"/>
+        <result property="fileType" column="file_type"/>
+        <result property="uploadedBy" column="uploaded_by"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <!-- 특정 과제의 파일 목록 조회 (등록일 역순) -->
+    <select id="findByProjectId" parameterType="Long" resultMap="fileResultMap">
+        SELECT file_id, project_id, file_name, file_path, file_type, uploaded_by, created_at
+        FROM files
+        WHERE project_id = #{projectId}
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 파일 단건 조회 (projectId 조건 추가로 타 과제 파일 접근 방지) -->
+    <select id="findById" resultMap="fileResultMap">
+        SELECT file_id, project_id, file_name, file_path, file_type, uploaded_by, created_at
+        FROM files
+        WHERE project_id = #{projectId}
+          AND file_id = #{fileId}
+    </select>
+
+    <!--
+        파일 정보 등록
+        useGeneratedKeys=true: INSERT 후 생성된 PK를 fileId 필드에 자동 주입
+    -->
+    <insert id="insert" parameterType="com.retrack.vo.FileVO"
+            useGeneratedKeys="true" keyProperty="fileId">
+        INSERT INTO files (project_id, file_name, file_path, file_type, uploaded_by)
+        VALUES (#{projectId}, #{fileName}, #{filePath}, #{fileType}, #{uploadedBy})
+    </insert>
+
+    <!-- 파일 삭제 (projectId 함께 확인) -->
+    <delete id="delete">
+        DELETE FROM files
+        WHERE project_id = #{projectId}
+          AND file_id = #{fileId}
+    </delete>
+
+    <!-- 과제에 속한 전체 파일 목록 — 과제 삭제 시 파일시스템 정리용 -->
+    <select id="findAllByProjectId" parameterType="Long" resultMap="fileResultMap">
+        SELECT file_id, project_id, file_name, file_path, file_type, uploaded_by, created_at
+        FROM files
+        WHERE project_id = #{projectId}
+    </select>
+
+</mapper>

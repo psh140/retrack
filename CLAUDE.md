@@ -416,6 +416,21 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 - [x] `BudgetController` — 5개 엔드포인트 구현 (GET/POST /api/projects/{id}/budget, PUT/DELETE /api/projects/{id}/budget/{bid}, GET /api/projects/{id}/budget/summary)
 - [x] summary 응답 형태: `{ "PERSONNEL": 1000000, "TRAVEL": 500000, ..., "total": 1500000 }`
 
+#### 7단계 — 파일 관리 API (2026-05-02)
+- [x] `pom.xml` — `commons-fileupload 1.5` 추가 (CommonsMultipartResolver 의존성)
+- [x] `FileStorageStrategy` — 파일 저장소 전략 인터페이스 (`store`, `load`, `delete`)
+- [x] `LocalFileStorageStrategy` — Docker 볼륨 로컬 저장 구현체, 생성자에서 디렉토리 자동 생성
+- [x] `FileVO` — files 테이블 매핑 VO
+- [x] `FileMapper` + `FileMapper.xml` — findByProjectId, findById, insert, delete, findAllByProjectId
+- [x] `FileService` — 목록/업로드/삭제/다운로드/과제별 전체 삭제
+  - 업로드: 원본 파일명 경로 구분자 제거, 확장자 화이트리스트(13종) 검증, UUID 저장명, DB INSERT 실패 시 파일 롤백
+  - 삭제: DB DELETE 먼저 → 파일시스템 삭제 순서, RESEARCHER는 본인 업로드만 가능
+  - 다운로드: `getFile()`로 메타데이터, `loadResource()`로 Resource 분리
+- [x] `FileController` — 4개 엔드포인트, 다운로드 시 RFC 5987 한글 파일명 인코딩
+- [x] `spring-mvc.xml` — `CommonsMultipartResolver`(maxUploadSize 10MB) + `LocalFileStorageStrategy` 빈 등록
+- [x] `docker-compose.yml` — backend volumes에 `./uploads:/app/uploads` 추가
+- [x] `ProjectService.deleteProject()` — 과제 삭제 전 파일시스템 파일 정리 (`deleteAllFilesByProject`) 추가
+
 #### 6.8단계 — 파일 업로드 예외 처리 (2026-05-02)
 - [x] `GlobalExceptionHandler` — `MaxUploadSizeExceededException` 핸들러 추가 → 400 응답 (기존 500으로 처리되던 버그 수정)
 
@@ -428,19 +443,7 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 
 ### 다음 작업
 
-#### 7단계 — 파일 관리 API
-- [ ] `FileStorageStrategy` 인터페이스 — `store()`, `load()`, `delete()` 메서드 정의
-- [ ] `LocalFileStorageStrategy` — 인터페이스 구현체 (Docker 볼륨 로컬 저장)
-- [ ] `spring-mvc.xml` — `LocalFileStorageStrategy` 빈 등록 (업로드 경로 `/app/uploads/` 주입)
-- [ ] `docker-compose.yml` — backend 볼륨 마운트 추가 (`./uploads:/app/uploads`)
-- [ ] `FileVO` — 파일 정보 VO (original_name, saved_name, file_path, file_size, content_type)
-- [ ] `FileMapper` + `FileMapper.xml` — findByProjectId, findById, insert, delete
-- [ ] `FileService` — 목록/업로드/삭제/다운로드, `FileStorageStrategy` 주입받아 사용
-- [ ] `FileController` — GET/POST /api/projects/{id}/files, DELETE/GET /api/projects/{id}/files/{fid}
-- [ ] `pom.xml` — `commons-fileupload` 의존성 추가 (CommonsMultipartResolver 필요)
-- [ ] `spring-mvc.xml` — `CommonsMultipartResolver` 빈 등록 (maxUploadSize 30MB)
-- [ ] 파일 검증: 확장자 `.pdf` + Content-Type `application/pdf` 둘 다 체크
-- [ ] 저장 파일명: UUID + `.pdf` (original_name은 DB 보관, 다운로드 응답 헤더에 반환)
+#### 8단계 — 알림 API
 
 ---
 

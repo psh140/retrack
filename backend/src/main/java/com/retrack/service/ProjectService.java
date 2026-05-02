@@ -7,9 +7,11 @@ import com.retrack.mapper.ProjectMapper;
 import com.retrack.vo.ProjectHistoryVO;
 import com.retrack.vo.ProjectRequestVO;
 import com.retrack.vo.ProjectVO;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -51,9 +53,12 @@ public class ProjectService {
     }
 
     private final ProjectMapper projectMapper;
+    private final FileService fileService;
 
-    public ProjectService(ProjectMapper projectMapper) {
+    /** FileService와 순환 의존성 방지를 위해 @Lazy 적용 */
+    public ProjectService(ProjectMapper projectMapper, @Lazy FileService fileService) {
         this.projectMapper = projectMapper;
+        this.fileService = fileService;
     }
 
     /** 전체 과제 목록 반환 */
@@ -175,10 +180,14 @@ public class ProjectService {
 
     /**
      * 과제 삭제
-     * 존재하지 않으면 NotFoundException 발생
+     * DB CASCADE로 FILES 레코드는 자동 삭제되지만 파일시스템은 직접 정리해야 함
+     * 파일시스템 정리 먼저 → DB 삭제 순서로 처리
+     *
+     * @throws IOException 파일시스템 정리 실패 시
      */
-    public void deleteProject(Long projectId) {
+    public void deleteProject(Long projectId) throws IOException {
         getProject(projectId); // 존재 여부 확인
+        fileService.deleteAllFilesByProject(projectId);
         projectMapper.deleteProject(projectId);
     }
 

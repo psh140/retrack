@@ -58,6 +58,25 @@
     <!-- @Transactional 어노테이션 활성화 -->
     <tx:annotation-driven transaction-manager="transactionManager"/>
 
+    <!--
+        파일 업로드 처리기 — 빈 ID는 반드시 multipartResolver 고정 (Spring MVC 규약)
+        maxUploadSize: 파일 1개당 최대 크기 10MB
+    -->
+    <bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="10485760"/>
+        <property name="defaultEncoding" value="UTF-8"/>
+    </bean>
+
+    <!--
+        파일 저장 전략 — 로컬 볼륨(Docker) 사용
+        S3 등 다른 저장소로 교체 시 class와 constructor-arg만 변경
+    -->
+    <bean id="fileStorageStrategy"
+          class="com.retrack.storage.LocalFileStorageStrategy">
+        <constructor-arg value="/app/uploads/"/>
+    </bean>
+
     <!-- Spring MVC 어노테이션 활성화 + Jackson JSON UTF-8 인코딩 설정 -->
     <mvc:annotation-driven>
         <mvc:message-converters>
