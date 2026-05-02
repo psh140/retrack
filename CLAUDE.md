@@ -450,6 +450,12 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 
 ### 다음 작업
 
+#### 중간 리팩토링
+- [ ] `GlobalExceptionHandler` — `IOException` 핸들러 추가 (파일 처리 오류 시 적절한 500 응답)
+- [ ] `JwtUtil.getUserId()` — `NumberFormatException` 처리 추가 (토큰 변조 방어)
+- [ ] `BudgetService`, `FileService` — `checkProjectExists()` 제거, `ProjectService` 메서드 호출로 교체 (ProjectMapper 직접 의존성 제거)
+- [ ] `ProjectService`, `BudgetService`, `FileService` — 소유권 검증 패턴 (`ADMIN` 또는 본인만 가능) 중복 제거
+
 #### 8단계 — 알림 API
 
 **사전 세팅 (코드 작업 전 완료 필요)**
