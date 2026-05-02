@@ -416,6 +416,13 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 - [x] `BudgetController` — 5개 엔드포인트 구현 (GET/POST /api/projects/{id}/budget, PUT/DELETE /api/projects/{id}/budget/{bid}, GET /api/projects/{id}/budget/summary)
 - [x] summary 응답 형태: `{ "PERSONNEL": 1000000, "TRAVEL": 500000, ..., "total": 1500000 }`
 
+#### 6.7단계 — DB 스키마 정비 (2026-05-02)
+- [x] `schema.sql` — 전체 FK에 `ON DELETE CASCADE` / `ON DELETE SET NULL` 명시 (기존 기본값 RESTRICT에서 변경)
+  - PROJECTS 삭제 시: PROJECT_HISTORY, BUDGET, FILES → CASCADE / K_NOTIFICATIONS.project_id → SET NULL
+  - USERS 삭제 시: PROJECTS(user_id), PROJECT_HISTORY, BUDGET, FILES, ACTIVITY_LOGS, K_NOTIFICATIONS → CASCADE / PROJECTS(manager_id) → SET NULL
+- [x] `schema.sql` — `FILES.file_type` `VARCHAR(30)` → `VARCHAR(100)` (MIME 타입 저장 시 오버플로 방지, pptx/docx MIME이 최대 73자)
+- [x] `docker-compose.yml` — db 서비스에 `./sql/schema.sql:/docker-entrypoint-initdb.d/schema.sql` 마운트 추가 (볼륨 초기화 시 스키마 자동 적용)
+
 ### 다음 작업
 
 #### 7단계 — 파일 관리 API
