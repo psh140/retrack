@@ -162,6 +162,21 @@
         <artifactId>maven-war-plugin</artifactId>
         <version>3.4.0</version>
       </plugin>
+      <!-- Lombok 어노테이션 프로세서 명시 등록 — mvn 커맨드라인 빌드 시 필요 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>1.18.34</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

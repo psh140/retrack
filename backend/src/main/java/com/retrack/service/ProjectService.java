@@ -7,7 +7,6 @@ import com.retrack.mapper.ProjectMapper;
 import com.retrack.vo.ProjectHistoryVO;
 import com.retrack.vo.ProjectRequestVO;
 import com.retrack.vo.ProjectVO;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,8 +54,7 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final FileService fileService;
 
-    /** FileService와 순환 의존성 방지를 위해 @Lazy 적용 */
-    public ProjectService(ProjectMapper projectMapper, @Lazy FileService fileService) {
+    public ProjectService(ProjectMapper projectMapper, FileService fileService) {
         this.projectMapper = projectMapper;
         this.fileService = fileService;
     }

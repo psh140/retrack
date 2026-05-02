@@ -40,7 +40,7 @@ public class FileController {
      * 파일 목록 조회
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getFileList(@PathVariable Long id) throws IOException {
+    public ResponseEntity<ApiResponse<?>> getFileList(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok("파일 목록 조회 성공", fileService.getFileList(id)));
     }
 
