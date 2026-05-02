@@ -24,7 +24,7 @@
 | Container | Docker / Docker Compose | - |
 | Deploy | AWS EC2 | - |
 | VCS | Git / GitHub | - |
-| External API | Kakao 알림톡 API | - |
+| External API | Kakao 알림톡 API (솔라피 대행) | - |
 
 ---
 
@@ -214,6 +214,13 @@ DRAFT → SUBMITTED → REVIEWING → APPROVED → IN_PROGRESS → COMPLETED
 | Method | URL | 권한 | 설명 |
 |---|---|---|---|
 | GET | /api/dashboard | ALL | 대시보드 요약 데이터 조회 |
+
+---
+
+## 협업 규칙
+
+### 커밋 / 푸시
+파일 생성, 수정, 제거, 이동 등 모든 작업 후 커밋 및 푸시는 반드시 사용자 허락을 받은 후 진행한다. 작업 완료 후 자동으로 커밋/푸시하지 않는다.
 
 ---
 
@@ -445,6 +452,37 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 
 #### 8단계 — 알림 API
 
+**사전 세팅 (코드 작업 전 완료 필요)**
+- [ ] 솔라피(solapi.com) 가입 및 API Key / API Secret 발급
+- [ ] 카카오 비즈니스 채널 개설 (kakao.com/business)
+- [ ] 솔라피 콘솔에서 카카오 채널 연동
+- [ ] 알림톡 템플릿 등록 및 심사 (과제 상태별 메시지 — 심사 1~3일 소요)
+- [ ] 발급된 API Key, API Secret, 채널 검색용 아이디, 템플릿 코드 확보
+
+**구현**
+- [ ] `pom.xml` — 솔라피 Java SDK 의존성 추가
+- [ ] `NotificationVO` — k_notifications 테이블 매핑 VO
+- [ ] `NotificationMapper` + `NotificationMapper.xml` — findByUserId, findById, insert, updateStatus
+- [ ] `NotificationService` — 내 알림 목록/상세 조회, 알림 발송 (솔라피 API 호출 `@Async` 비동기 처리)
+- [ ] `NotificationController` — GET /api/notifications, POST /api/notifications/send, GET /api/notifications/{id}
+- [ ] `spring-mvc.xml` — `@Async` 활성화를 위한 `<task:annotation-driven>` 추가
+- [ ] `docker-compose.yml` — 솔라피 API Key, Secret, 채널 아이디, 템플릿 코드 환경변수 추가
+
+#### 9단계 — 활동 로그 API
+- [ ] `ActivityLogVO` — activity_logs 테이블 매핑 VO
+- [ ] `ActivityLogMapper` + `ActivityLogMapper.xml` — findAll, findByUserId
+- [ ] `ActivityLogService` — 전체 로그 조회, 특정 사용자 로그 조회
+- [ ] `ActivityLogController` — GET /api/logs, GET /api/logs/users/{id}
+
+#### 10단계 — 통계 API
+- [ ] `StatsMapper` + `StatsMapper.xml` — 과제 상태별 현황, 연구비 카테고리별 집계, 연구비 소진율, 월별 알림 발송 건수
+- [ ] `StatsService` — 통계 데이터 가공
+- [ ] `StatsController` — GET /api/stats/projects/status, /api/stats/budget/category, /api/stats/budget/burnrate, /api/stats/notifications/monthly
+
+#### 11단계 — 대시보드 API
+- [ ] `DashboardService` — 역할별 요약 데이터 집계 (진행 중 과제 수, 총 연구비, 최근 알림 등)
+- [ ] `DashboardController` — GET /api/dashboard
+
 ---
 
 ## 트러블슈팅
@@ -457,6 +495,7 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 | `docs/troubleshooting-4단계-사용자관리API.md` | 4단계 개발 중 발생한 이슈 |
 | `docs/troubleshooting-5단계-과제관리API-테스트.md` | GlobalExceptionHandler 로그 미출력, Git Bash 인코딩 문제, 트랜잭션 확인 |
 | `docs/transaction-컨텍스트-분리-이슈.md` | 트랜잭션 매니저 서블릿 컨텍스트 분리 이슈 |
+| `docs/troubleshooting-7단계-파일관리API.md` | Maven 커맨드라인 빌드 시 Lombok 미처리, Maven Java 버전 충돌 |
 
 ### 3. LocalDateTime 직렬화 실패로 JSON 응답 중간에 잘림 (2026-04-28)
 - **증상**: `createdAt` 필드에서 JSON이 끊기고 500 에러 응답이 이어붙어 반환됨
