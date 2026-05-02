@@ -416,6 +416,9 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 - [x] `BudgetController` — 5개 엔드포인트 구현 (GET/POST /api/projects/{id}/budget, PUT/DELETE /api/projects/{id}/budget/{bid}, GET /api/projects/{id}/budget/summary)
 - [x] summary 응답 형태: `{ "PERSONNEL": 1000000, "TRAVEL": 500000, ..., "total": 1500000 }`
 
+#### 6.8단계 — 파일 업로드 예외 처리 (2026-05-02)
+- [x] `GlobalExceptionHandler` — `MaxUploadSizeExceededException` 핸들러 추가 → 400 응답 (기존 500으로 처리되던 버그 수정)
+
 #### 6.7단계 — DB 스키마 정비 (2026-05-02)
 - [x] `schema.sql` — 전체 FK에 `ON DELETE CASCADE` / `ON DELETE SET NULL` 명시 (기존 기본값 RESTRICT에서 변경)
   - PROJECTS 삭제 시: PROJECT_HISTORY, BUDGET, FILES → CASCADE / K_NOTIFICATIONS.project_id → SET NULL
