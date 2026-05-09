@@ -114,7 +114,7 @@ Password: retrack1234
 | BUDGET | 연구비 사용 내역 |
 | FILES | 첨부파일 |
 | ACTIVITY_LOGS | 사용자 활동 로그 |
-| K_NOTIFICATIONS | 이메일 알림 발송 이력 |
+| NOTIFICATIONS | 이메일 알림 발송 이력 |
 
 ### 주요 관계
 
@@ -123,9 +123,9 @@ Password: retrack1234
 - PROJECTS 1 : N PROJECT_HISTORY
 - PROJECTS 1 : N BUDGET
 - PROJECTS 1 : N FILES
-- PROJECTS 1 : N K_NOTIFICATIONS
+- PROJECTS 1 : N NOTIFICATIONS
 - USERS 1 : N ACTIVITY_LOGS
-- USERS 1 : N K_NOTIFICATIONS
+- USERS 1 : N NOTIFICATIONS
 
 ### 과제 상태 흐름
 
@@ -333,7 +333,7 @@ DB `file_path` 컬럼에는 컨테이너 기준 경로 저장.
 
 1. PROJECTS 테이블 status 업데이트
 2. PROJECT_HISTORY 테이블 이력 INSERT
-3. K_NOTIFICATIONS 테이블 알림 기록 INSERT (테이블명은 유지, 용도는 SMS 발송 이력으로 변경)
+3. NOTIFICATIONS 테이블 알림 기록 INSERT (테이블명은 유지, 용도는 SMS 발송 이력으로 변경)
 
 구현 위치: ProjectService.changeStatus() 메서드
 어노테이션: @Transactional (org.springframework.transaction.annotation.Transactional)
@@ -441,10 +441,18 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 #### 6.8단계 — 파일 업로드 예외 처리 (2026-05-02)
 - [x] `GlobalExceptionHandler` — `MaxUploadSizeExceededException` 핸들러 추가 → 400 응답 (기존 500으로 처리되던 버그 수정)
 
+#### 6.9단계 — 카카오 알림톡 흔적 제거 (2026-05-09)
+- [x] `schema.sql` — `K_NOTIFICATIONS` → `NOTIFICATIONS` 테이블명 변경 (K_ prefix가 Kakao에서 유래)
+- [x] `NotificationMapper.xml`, `ProjectMapper.xml` — `k_notifications` → `notifications` 테이블명 변경
+- [x] `ProjectService.java`, `ProjectMapper.java`, `NotificationVO.java` — 카카오 알림톡 관련 주석 제거
+- [x] `UserVO.java` — phone 필드 카카오 알림톡 관련 주석 제거
+- [x] CLAUDE.md — 전체 카카오/솔라피 관련 내용 이메일 알림으로 변경
+- [x] DB 재생성 (볼륨 삭제 후 재시작)
+
 #### 6.7단계 — DB 스키마 정비 (2026-05-02)
 - [x] `schema.sql` — 전체 FK에 `ON DELETE CASCADE` / `ON DELETE SET NULL` 명시 (기존 기본값 RESTRICT에서 변경)
-  - PROJECTS 삭제 시: PROJECT_HISTORY, BUDGET, FILES → CASCADE / K_NOTIFICATIONS.project_id → SET NULL
-  - USERS 삭제 시: PROJECTS(user_id), PROJECT_HISTORY, BUDGET, FILES, ACTIVITY_LOGS, K_NOTIFICATIONS → CASCADE / PROJECTS(manager_id) → SET NULL
+  - PROJECTS 삭제 시: PROJECT_HISTORY, BUDGET, FILES → CASCADE / NOTIFICATIONS.project_id → SET NULL
+  - USERS 삭제 시: PROJECTS(user_id), PROJECT_HISTORY, BUDGET, FILES, ACTIVITY_LOGS, NOTIFICATIONS → CASCADE / PROJECTS(manager_id) → SET NULL
 - [x] `schema.sql` — `FILES.file_type` `VARCHAR(30)` → `VARCHAR(100)` (MIME 타입 저장 시 오버플로 방지, pptx/docx MIME이 최대 73자)
 - [x] `docker-compose.yml` — db 서비스에 `./sql/schema.sql:/docker-entrypoint-initdb.d/schema.sql` 마운트 추가 (볼륨 초기화 시 스키마 자동 적용)
 
@@ -461,16 +469,62 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 **사전 세팅 (완료)**
 - [x] Gmail 계정 앱 비밀번호 발급 (Google 계정 → 보안 → 앱 비밀번호)
 
-**구현**
-- [ ] `pom.xml` — `spring-context-support` 의존성 추가 (JavaMailSender)
-- [ ] `NotificationVO` — k_notifications 테이블 매핑 VO
-- [ ] `NotificationMapper` + `NotificationMapper.xml` — findByUserId, findById, insert, updateStatus
-- [ ] `NotificationService` — 내 알림 목록/상세 조회, 이메일 발송 (JavaMailSender `@Async` 비동기 처리)
-- [ ] `NotificationController` — GET /api/notifications, POST /api/notifications/send, GET /api/notifications/{id}
-- [ ] `spring-mvc.xml` — JavaMailSender 빈 설정 + `<task:annotation-driven>` 추가
-- [ ] `docker-compose.yml` — Gmail 계정(MAIL_USERNAME), 앱 비밀번호(MAIL_PASSWORD) 환경변수 추가
+**이메일 발송 트리거**
+
+| 트리거 | 수신자 | notifications 기록 | 이메일 발송 |
+|---|---|---|---|
+| 회원가입 | 가입자 본인 | X | O |
+| 과제 상태 변경 | 과제 신청자 | O | O |
+| MANAGER/ADMIN 수동 발송 | 지정 사용자 | O | O |
+
+**이메일 템플릿**
+- 템플릿 엔진: Freemarker (Spring Framework 5.x 호환, 공공기관/SI 환경 표준)
+- 템플릿 파일 위치: `src/main/resources/templates/`
+- 템플릿 종류 (3가지):
+  - `welcome-email.ftl` — 회원가입 환영
+  - `status-change-email.ftl` — 과제 상태 변경 알림
+  - `manual-email.ftl` — 수동 발송
+- 이메일 제목:
+  - 회원가입: `[Retrack] 가입을 환영합니다`
+  - 상태 변경: `[Retrack] 연구과제 상태가 변경됐습니다`
+  - 수동 발송: `[Retrack] 연구과제 알림`
+
+**완료된 구현**
+- [x] `pom.xml` — `spring-context-support`, `javax.mail` 의존성 추가
+- [x] `NotificationVO` — notifications 테이블 매핑 VO
+- [x] `NotificationRequestVO` — 수동 발송 요청 바디 VO
+- [x] `NotificationMapper` + `NotificationMapper.xml` — findByUserId, findById, insert, updateStatus
+- [x] `EmailSender` — @Async 이메일 발송 전담 컴포넌트 (self-invocation 방지용 분리)
+- [x] `NotificationService` — 내 알림 목록/상세 조회, 수동 발송
+- [x] `NotificationController` — GET /api/notifications, POST /api/notifications/send, GET /api/notifications/{id}
+- [x] `spring-mvc.xml` — JavaMailSender 빈 설정 + `<task:annotation-driven>` 추가
+- [x] `docker-compose.yml` — MAIL_USERNAME, MAIL_PASSWORD 환경변수 추가
+- [x] `.env` — MAIL_USERNAME, MAIL_PASSWORD 실제 값 저장 (docker-compose가 자동 로드, Git 제외 대상)
+- [x] `EmailSender` — 발신자 표시 이름 "Retrack 알림" 설정 (`helper.setFrom()`)
+- [x] `NotificationMapper.xml` — `<resultMap>` 추가 (snake_case → camelCase 매핑 누락으로 ID 필드 null 반환되던 버그 수정)
+
+**남은 구현**
+- [ ] `src/main/resources/templates/` — welcome-email.html, status-change-email.html, manual-email.html 작성 (변수 치환: String.replace())
+- [ ] `EmailSender` — 리소스 파일 로드 후 HTML 템플릿 이메일 발송으로 교체
+- [ ] `AuthService` — 회원가입 완료 후 환영 이메일 발송 (notifications 기록 없이 EmailSender 직접 호출)
+- [ ] `ProjectService.changeStatus()` — 상태 변경 후 신청자에게 자동 이메일 발송 (notifications 기록 후 EmailSender 호출, 신청자 이메일 조회를 위해 UserMapper 의존성 추가)
 
 #### 9단계 — 활동 로그 API
+AOP로 사용자 행동을 `activity_logs` 테이블에 자동 기록 (비즈니스 로직과 로깅 관심사 분리)
+
+**AOP 설정**
+- [ ] `pom.xml` — AspectJ 의존성 추가
+- [ ] `spring-mvc.xml` — `<aop:aspectj-autoproxy/>` 추가
+- [ ] `ActivityLogAspect` — `@Around` 또는 `@AfterReturning`으로 대상 메서드 자동 로깅
+
+**로깅 대상 메서드** (확정 필요)
+- 로그인 / 로그아웃
+- 과제 등록 / 수정 / 삭제 / 상태 변경
+- 연구비 등록 / 수정 / 삭제
+- 파일 업로드 / 삭제
+- 알림 발송
+
+**조회 API**
 - [ ] `ActivityLogVO` — activity_logs 테이블 매핑 VO
 - [ ] `ActivityLogMapper` + `ActivityLogMapper.xml` — findAll, findByUserId
 - [ ] `ActivityLogService` — 전체 로그 조회, 특정 사용자 로그 조회
@@ -484,6 +538,11 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 #### 11단계 — 대시보드 API
 - [ ] `DashboardService` — 역할별 요약 데이터 집계 (진행 중 과제 수, 총 연구비, 최근 알림 등)
 - [ ] `DashboardController` — GET /api/dashboard
+
+#### 11.5단계 — DB 인덱스 추가
+전체 기능 구현 완료 후 실제 쿼리 패턴을 기반으로 필요한 컬럼에 인덱스 추가
+- `schema.sql` 업데이트
+- 대상 컬럼은 11단계 완료 시점에 결정
 
 ---
 

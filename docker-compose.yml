@@ -29,6 +29,8 @@ services:
       DB_USER: retrack
       DB_PASSWORD: retrack1234
       JWT_SECRET: retrack-secret-key-must-be-at-least-32-bytes!!
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
 
   frontend:
     build: ./frontend           # ./frontend 폴더의 Dockerfile로 이미지 빌드

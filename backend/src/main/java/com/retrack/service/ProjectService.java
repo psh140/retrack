@@ -22,10 +22,11 @@ import java.util.Map;
  * 상태 변경(changeStatus)은 아래 3가지 작업이 하나의 트랜잭션으로 묶임:
  *   1. projects 테이블 status 업데이트
  *   2. project_history 이력 INSERT
- *   3. k_notifications 알림 기록 INSERT
- * 카카오 알림톡 API 호출은 트랜잭션 외부에서 별도 처리 (8단계에서 구현)
+ *   3. notifications 알림 기록 INSERT
+ * 이메일 발송은 트랜잭션 외부에서 EmailSender를 통해 비동기 처리
  *
  * @since 2026-04-28
+ * @modified 2026-05-09 카카오 알림톡 관련 주석 제거, 이메일 발송 방식으로 변경
  */
 @Service
 public class ProjectService {
@@ -135,7 +136,7 @@ public class ProjectService {
      * 3가지 DB 작업이 하나의 트랜잭션으로 묶임:
      *   1. projects.status 업데이트
      *   2. project_history 이력 INSERT
-     *   3. k_notifications 알림 기록 INSERT
+     *   3. notifications 알림 기록 INSERT (이메일 발송은 트랜잭션 외부)
      *
      * @param projectId   상태 변경할 과제 ID
      * @param newStatus   변경할 상태
@@ -171,7 +172,7 @@ public class ProjectService {
         history.setComment(comment);
         projectMapper.insertHistory(history);
 
-        // 3. 알림 기록 INSERT (카카오 발송은 트랜잭션 외부 — 8단계에서 구현)
+        // 3. 알림 기록 INSERT (이메일 발송은 트랜잭션 외부에서 EmailSender 비동기 처리)
         String message = buildNotificationMessage(project.getTitle(), newStatus);
         projectMapper.insertNotification(project.getUserId(), projectId, message);
     }

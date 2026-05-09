@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+    NotificationMapper.xml
+    notifications 테이블 쿼리 정의
+-->
+<mapper namespace="com.retrack.mapper.NotificationMapper">
+
+    <!-- notifications 컬럼(snake_case) → NotificationVO 필드(camelCase) 매핑 -->
+    <resultMap id="notificationResultMap" type="com.retrack.vo.NotificationVO">
+        <id property="notificationId" column="notification_id"/>
+        <result property="userId"      column="user_id"/>
+        <result property="projectId"   column="project_id"/>
+        <result property="message"     column="message"/>
+        <result property="status"      column="status"/>
+        <result property="sentAt"      column="sent_at"/>
+    </resultMap>
+
+    <!-- 특정 사용자의 알림 목록 조회 (최신순) -->
+    <select id="findByUserId" parameterType="long" resultMap="notificationResultMap">
+        SELECT notification_id, user_id, project_id, message, status, sent_at
+        FROM notifications
+        WHERE user_id = #{userId}
+        ORDER BY notification_id DESC
+    </select>
+
+    <!-- 알림 단건 조회 -->
+    <select id="findById" parameterType="long" resultMap="notificationResultMap">
+        SELECT notification_id, user_id, project_id, message, status, sent_at
+        FROM notifications
+        WHERE notification_id = #{notificationId}
+    </select>
+
+    <!-- 알림 저장 (status는 XML에서 PENDING으로 고정) -->
+    <insert id="insert" parameterType="com.retrack.vo.NotificationVO"
+            useGeneratedKeys="true" keyProperty="notificationId">
+        INSERT INTO notifications (user_id, project_id, message, status)
+        VALUES (#{userId}, #{projectId}, #{message}, 'PENDING')
+    </insert>
+
+    <!-- 발송 상태 업데이트 (SENT / FAILED) -->
+    <update id="updateStatus">
+        UPDATE notifications
+        SET status = #{status}, sent_at = #{sentAt}
+        WHERE notification_id = #{notificationId}
+    </update>
+
+</mapper>

@@ -47,8 +47,8 @@ public interface ProjectMapper {
     void insertHistory(ProjectHistoryVO history);
 
     /**
-     * 알림 기록 INSERT (카카오 발송 전 DB 선기록)
-     * changeStatus() 트랜잭션 내 3번 작업
+     * 알림 기록 INSERT
+     * changeStatus() 트랜잭션 내 3번 작업, 이메일 발송은 트랜잭션 외부에서 처리
      */
     void insertNotification(@Param("userId") Long userId,
                             @Param("projectId") Long projectId,

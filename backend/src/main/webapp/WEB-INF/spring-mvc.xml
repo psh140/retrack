@@ -4,6 +4,7 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="
            http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans.xsd
@@ -12,7 +13,9 @@
            http://www.springframework.org/schema/mvc
            http://www.springframework.org/schema/mvc/spring-mvc.xsd
            http://www.springframework.org/schema/tx
-           http://www.springframework.org/schema/tx/spring-tx.xsd">
+           http://www.springframework.org/schema/tx/spring-tx.xsd
+           http://www.springframework.org/schema/task
+           http://www.springframework.org/schema/task/spring-task.xsd">
 
     <!-- 컴포넌트 스캔 - com.retrack 패키지 자동 인식 -->
     <context:component-scan base-package="com.retrack"/>
@@ -76,6 +79,26 @@
           class="com.retrack.storage.LocalFileStorageStrategy">
         <constructor-arg value="/app/uploads/"/>
     </bean>
+
+    <!--
+        Gmail SMTP 이메일 발송 설정
+        MAIL_USERNAME, MAIL_PASSWORD는 docker-compose.yml 환경변수에서 주입
+    -->
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="smtp.gmail.com"/>
+        <property name="port" value="587"/>
+        <property name="username" value="#{systemEnvironment['MAIL_USERNAME']}"/>
+        <property name="password" value="#{systemEnvironment['MAIL_PASSWORD']}"/>
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- @Async 비동기 처리 활성화 -->
+    <task:annotation-driven/>
 
     <!-- Spring MVC 어노테이션 활성화 + Jackson JSON UTF-8 인코딩 설정 -->
     <mvc:annotation-driven>

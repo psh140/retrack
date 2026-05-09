@@ -94,9 +94,9 @@
         VALUES (#{projectId}, #{changedBy}, #{prevStatus}, #{newStatus}, #{comment})
     </insert>
 
-    <!-- 알림 기록 INSERT — 카카오 발송 전 DB 선기록 (changeStatus 트랜잭션 3번) -->
+    <!-- 알림 기록 INSERT — changeStatus 트랜잭션 3번, 이메일 발송은 트랜잭션 외부에서 처리 -->
     <insert id="insertNotification">
-        INSERT INTO k_notifications (user_id, project_id, message)
+        INSERT INTO notifications (user_id, project_id, message)
         VALUES (#{userId}, #{projectId}, #{message})
     </insert>
 

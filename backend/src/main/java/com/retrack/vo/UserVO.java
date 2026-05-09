@@ -20,7 +20,7 @@ public class UserVO {
     private String username;        // 사용자 이름
     private String password;        // BCrypt 암호화된 비밀번호
     private String email;           // 로그인 ID로 사용 (UNIQUE)
-    private String phone;           // 연락처 (카카오 알림톡 발송용)
+    private String phone;           // 연락처
     private String role;            // 권한 (기본값: VIEWER)
     private boolean isVerified;     // 연구자 인증 여부
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
