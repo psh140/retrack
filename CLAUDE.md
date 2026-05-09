@@ -2,7 +2,7 @@
 
 ## 프로젝트 개요
 
-연구과제의 등록, 상태 관리, 연구비 집계, 파일 첨부, 카카오 알림톡 발송 기능을 제공하는 웹 기반 연구과제 관리 시스템입니다.
+연구과제의 등록, 상태 관리, 연구비 집계, 파일 첨부, 이메일 알림 발송 기능을 제공하는 웹 기반 연구과제 관리 시스템입니다.
 
 - 개발 목적: 포트폴리오 (공공기관 / SI 취업 타겟)
 - 개발 배경: 식약처 디스패치 근무 당시 연구과제 관리 시스템 실무 경험을 바탕으로 기획
@@ -24,7 +24,7 @@
 | Container | Docker / Docker Compose | - |
 | Deploy | AWS EC2 | - |
 | VCS | Git / GitHub | - |
-| External API | Kakao 알림톡 API (솔라피 대행) | - |
+| External API | Gmail SMTP (Spring JavaMailSender) | - |
 
 ---
 
@@ -114,7 +114,7 @@ Password: retrack1234
 | BUDGET | 연구비 사용 내역 |
 | FILES | 첨부파일 |
 | ACTIVITY_LOGS | 사용자 활동 로그 |
-| K_NOTIFICATIONS | 카카오 알림톡 발송 이력 |
+| K_NOTIFICATIONS | 이메일 알림 발송 이력 |
 
 ### 주요 관계
 
@@ -333,7 +333,7 @@ DB `file_path` 컬럼에는 컨테이너 기준 경로 저장.
 
 1. PROJECTS 테이블 status 업데이트
 2. PROJECT_HISTORY 테이블 이력 INSERT
-3. K_NOTIFICATIONS 테이블 알림 기록 INSERT
+3. K_NOTIFICATIONS 테이블 알림 기록 INSERT (테이블명은 유지, 용도는 SMS 발송 이력으로 변경)
 
 구현 위치: ProjectService.changeStatus() 메서드
 어노테이션: @Transactional (org.springframework.transaction.annotation.Transactional)
@@ -345,11 +345,11 @@ public void changeStatus(Long projectId, String newStatus, Long changedBy, Strin
     // 1. 과제 상태 변경
     // 2. 이력 저장
     // 3. 알림 기록 저장
-    // 4. 카카오 알림톡 API 호출 (트랜잭션 외부에서 처리 권장)
+    // 4. Gmail SMTP 이메일 발송 (트랜잭션 외부에서 처리 권장)
 }
 ```
 
-주의: 카카오 알림톡 API 호출은 외부 API라 트랜잭션 안에 포함하지 않습니다.
+주의: Gmail SMTP 이메일 발송은 외부 API라 트랜잭션 안에 포함하지 않습니다.
 DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 
 ---
@@ -451,28 +451,24 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 ### 다음 작업
 
 #### 중간 리팩토링
-- [ ] `GlobalExceptionHandler` — `IOException` 핸들러 추가 (파일 처리 오류 시 적절한 500 응답)
-- [ ] `JwtUtil.getUserId()` — `NumberFormatException` 처리 추가 (토큰 변조 방어)
-- [ ] `BudgetService`, `FileService` — `checkProjectExists()` 제거, `ProjectService` 메서드 호출로 교체 (ProjectMapper 직접 의존성 제거)
-- [ ] `ProjectService`, `BudgetService`, `FileService` — 소유권 검증 패턴 (`ADMIN` 또는 본인만 가능) 중복 제거
+- [x] `GlobalExceptionHandler` — `IOException` 핸들러 추가 (파일 처리 오류 시 적절한 500 응답)
+- [x] `JwtUtil.getUserId()` — `NumberFormatException` 처리를 `JwtInterceptor`에서 처리 (토큰 변조 방어, JwtUtil은 순수 유틸 유지)
+- [-] `BudgetService`, `FileService` — `checkProjectExists()` 교체 검토 → `FileService` 순환 의존성 문제로 스킵 (일관성 유지를 위해 둘 다 현행 유지)
+- [-] `ProjectService`, `BudgetService`, `FileService` — 소유권 검증 패턴 중복 제거 검토 → 서비스마다 검증 조건이 달라 공통화 불가, 스킵
 
 #### 8단계 — 알림 API
 
-**사전 세팅 (코드 작업 전 완료 필요)**
-- [ ] 솔라피(solapi.com) 가입 및 API Key / API Secret 발급
-- [ ] 카카오 비즈니스 채널 개설 (kakao.com/business)
-- [ ] 솔라피 콘솔에서 카카오 채널 연동
-- [ ] 알림톡 템플릿 등록 및 심사 (과제 상태별 메시지 — 심사 1~3일 소요)
-- [ ] 발급된 API Key, API Secret, 채널 검색용 아이디, 템플릿 코드 확보
+**사전 세팅 (완료)**
+- [x] Gmail 계정 앱 비밀번호 발급 (Google 계정 → 보안 → 앱 비밀번호)
 
 **구현**
-- [ ] `pom.xml` — 솔라피 Java SDK 의존성 추가
+- [ ] `pom.xml` — `spring-context-support` 의존성 추가 (JavaMailSender)
 - [ ] `NotificationVO` — k_notifications 테이블 매핑 VO
 - [ ] `NotificationMapper` + `NotificationMapper.xml` — findByUserId, findById, insert, updateStatus
-- [ ] `NotificationService` — 내 알림 목록/상세 조회, 알림 발송 (솔라피 API 호출 `@Async` 비동기 처리)
+- [ ] `NotificationService` — 내 알림 목록/상세 조회, 이메일 발송 (JavaMailSender `@Async` 비동기 처리)
 - [ ] `NotificationController` — GET /api/notifications, POST /api/notifications/send, GET /api/notifications/{id}
-- [ ] `spring-mvc.xml` — `@Async` 활성화를 위한 `<task:annotation-driven>` 추가
-- [ ] `docker-compose.yml` — 솔라피 API Key, Secret, 채널 아이디, 템플릿 코드 환경변수 추가
+- [ ] `spring-mvc.xml` — JavaMailSender 빈 설정 + `<task:annotation-driven>` 추가
+- [ ] `docker-compose.yml` — Gmail 계정(MAIL_USERNAME), 앱 비밀번호(MAIL_PASSWORD) 환경변수 추가
 
 #### 9단계 — 활동 로그 API
 - [ ] `ActivityLogVO` — activity_logs 테이블 매핑 VO

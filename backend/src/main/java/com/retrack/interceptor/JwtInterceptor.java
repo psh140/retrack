@@ -28,6 +28,7 @@ import java.util.List;
  * 적용 범위: /api/** (단, /api/auth/** 제외 — spring-mvc.xml에서 설정)
  *
  * @since 2026-04-17
+ * @modified 2026-05-09 getUserId() 호출부에 NumberFormatException 처리 추가 (토큰 변조 방어)
  */
 @Component
 public class JwtInterceptor implements HandlerInterceptor {
@@ -65,8 +66,14 @@ public class JwtInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        // 3. 토큰에서 사용자 정보 추출
-        Long userId = jwtUtil.getUserId(token);
+        // 3. 토큰에서 사용자 정보 추출 (subject가 숫자가 아니면 변조된 토큰)
+        Long userId;
+        try {
+            userId = jwtUtil.getUserId(token);
+        } catch (NumberFormatException e) {
+            sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰입니다.");
+            return false;
+        }
         String role = jwtUtil.getRole(token);
 
         // 4. @RequiredRole 어노테이션으로 권한 체크
