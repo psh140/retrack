@@ -121,116 +121,13 @@ Password: retrack1234
 
 ## ERD 요약
 
-### 테이블 목록
-
-| 테이블명 | 설명 |
-|---|---|
-| USERS | 사용자 (권한: VIEWER / RESEARCHER / MANAGER / ADMIN) |
-| PROJECTS | 연구과제 |
-| PROJECT_HISTORY | 과제 상태 변경 이력 |
-| BUDGET | 연구비 사용 내역 |
-| FILES | 첨부파일 |
-| ACTIVITY_LOGS | 사용자 활동 로그 |
-| NOTIFICATIONS | 이메일 알림 발송 이력 |
-
-### 주요 관계
-
-- USERS 1 : N PROJECTS (신청자)
-- USERS 1 : N PROJECTS (담당자)
-- PROJECTS 1 : N PROJECT_HISTORY
-- PROJECTS 1 : N BUDGET
-- PROJECTS 1 : N FILES
-- PROJECTS 1 : N NOTIFICATIONS
-- USERS 1 : N ACTIVITY_LOGS
-- USERS 1 : N NOTIFICATIONS
-
-### 과제 상태 흐름
-
-```
-DRAFT → SUBMITTED → REVIEWING → APPROVED → IN_PROGRESS → COMPLETED
-                                          ↘ REJECTED
-```
-
-### BUDGET 카테고리
-
-- PERSONNEL: 인건비
-- TRAVEL: 여비
-- RESEARCH_ACTIVITY: 연구활동비
-- ETC: 기타
+→ [`docs/erd.md`](docs/erd.md) 참고
 
 ---
 
 ## API 목록
 
-### 인증
-| Method | URL | 권한 | 설명 |
-|---|---|---|---|
-| POST | /api/auth/register | 없음 | 회원가입 |
-| POST | /api/auth/login | 없음 | 로그인 |
-| POST | /api/auth/logout | ALL | 로그아웃 |
-
-### 사용자 관리
-| Method | URL | 권한 | 설명 |
-|---|---|---|---|
-| GET | /api/users | ADMIN | 사용자 목록 조회 |
-| GET | /api/users/{id} | ADMIN | 사용자 상세 조회 |
-| PATCH | /api/users/{id}/role | ADMIN | 권한 변경 |
-| PATCH | /api/users/{id}/verify | ADMIN | 연구자 인증 승인 |
-| DELETE | /api/users/{id} | ADMIN | 사용자 삭제 |
-
-### 과제 관리
-| Method | URL | 권한 | 설명 |
-|---|---|---|---|
-| GET | /api/projects | ALL | 과제 목록 조회 |
-| GET | /api/projects/{id} | ALL | 과제 상세 조회 |
-| POST | /api/projects | RESEARCHER | 과제 등록 |
-| PUT | /api/projects/{id} | RESEARCHER | 과제 수정 |
-| PATCH | /api/projects/{id}/status | MANAGER / ADMIN | 과제 상태 변경 |
-| DELETE | /api/projects/{id} | ADMIN | 과제 삭제 |
-| GET | /api/projects/{id}/history | ALL | 상태 변경 이력 조회 |
-
-### 연구비 관리
-| Method | URL | 권한 | 설명 |
-|---|---|---|---|
-| GET | /api/projects/{id}/budget | ALL | 연구비 목록 조회 |
-| POST | /api/projects/{id}/budget | RESEARCHER | 연구비 등록 |
-| PUT | /api/projects/{id}/budget/{bid} | RESEARCHER | 연구비 수정 |
-| DELETE | /api/projects/{id}/budget/{bid} | ADMIN | 연구비 삭제 |
-| GET | /api/projects/{id}/budget/summary | ALL | 연구비 집계 조회 |
-
-### 파일 관리
-| Method | URL | 권한 | 설명 |
-|---|---|---|---|
-| GET | /api/projects/{id}/files | ALL | 파일 목록 조회 |
-| POST | /api/projects/{id}/files | RESEARCHER | 파일 업로드 |
-| DELETE | /api/projects/{id}/files/{fid} | RESEARCHER / ADMIN | 파일 삭제 |
-| GET | /api/projects/{id}/files/{fid} | ALL | 파일 다운로드 |
-
-### 알림
-| Method | URL | 권한 | 설명 |
-|---|---|---|---|
-| GET | /api/notifications | ALL | 내 알림 목록 조회 |
-| POST | /api/notifications/send | MANAGER / ADMIN | 알림 발송 |
-| GET | /api/notifications/{id} | ALL | 알림 상세 조회 |
-
-### 활동 로그
-| Method | URL | 권한 | 설명 |
-|---|---|---|---|
-| GET | /api/logs | ADMIN | 전체 활동 로그 조회 |
-| GET | /api/logs/users/{id} | ADMIN | 특정 사용자 활동 로그 조회 |
-
-### 통계
-| Method | URL | 권한 | 설명 |
-|---|---|---|---|
-| GET | /api/stats/projects/status | ADMIN | 과제 상태별 현황 |
-| GET | /api/stats/budget/category | ADMIN | 연구비 카테고리별 집계 |
-| GET | /api/stats/budget/burnrate | ADMIN | 과제별 연구비 소진율 |
-| GET | /api/stats/notifications/monthly | ADMIN | 월별 알림 발송 건수 |
-
-### 대시보드
-| Method | URL | 권한 | 설명 |
-|---|---|---|---|
-| GET | /api/dashboard | ALL | 대시보드 요약 데이터 조회 |
+→ [`docs/api-spec.md`](docs/api-spec.md) 참고
 
 ---
 
@@ -575,20 +472,3 @@ AOP로 사용자 행동을 `activity_logs` 테이블에 자동 기록 (비즈니
 | `docs/transaction-컨텍스트-분리-이슈.md` | 트랜잭션 매니저 서블릿 컨텍스트 분리 이슈 |
 | `docs/troubleshooting-7단계-파일관리API.md` | Maven 커맨드라인 빌드 시 Lombok 미처리, Maven Java 버전 충돌 |
 
-### 3. LocalDateTime 직렬화 실패로 JSON 응답 중간에 잘림 (2026-04-28)
-- **증상**: `createdAt` 필드에서 JSON이 끊기고 500 에러 응답이 이어붙어 반환됨
-- **원인**: `jackson-datatype-jsr310` 미포함 — Jackson이 `LocalDateTime` 직렬화 방법을 몰라 응답 스트림 도중 예외 발생
-- **해결**: `pom.xml`에 `jackson-datatype-jsr310` 추가, `UserVO` 날짜 필드에 `@JsonFormat` 추가, `spring-mvc.xml`에 `JavaTimeModule` 등록
-- **상세**: `docs/troubleshooting-4단계-사용자관리API.md` 참고
-
-### 4. ObjectMapper 빈 직접 선언 시 Spring 컨텍스트 초기화 실패 (2026-04-28)
-- **증상**: `spring-mvc.xml`에 `ObjectMapper` 빈 추가 후 모든 API 빈 응답 반환
-- **원인**: `ObjectMapper`에 `setModules()` 메서드가 없어 `<property name="modules">` 주입 시 Spring 컨텍스트 초기화 실패
-- **해결**: `ObjectMapper` 직접 선언 대신 `Jackson2ObjectMapperFactoryBean` 사용 — `modulesToInstall` 프로퍼티로 모듈 등록
-- **상세**: `docs/troubleshooting-4단계-사용자관리API.md` 참고
-
-### 5. @Transactional이 서블릿 컨텍스트 Service 빈에 적용되지 않는 문제 (2026-04-28)
-- **증상**: `spring-db.xml`에 `<tx:annotation-driven>` 추가했으나 `@Transactional` 미동작
-- **원인**: Spring MVC는 루트 컨텍스트(`spring-db.xml`)와 서블릿 컨텍스트(`spring-mvc.xml`)가 분리됨. `<tx:annotation-driven>`은 선언된 컨텍스트의 빈에만 적용되는데, Service 빈은 `spring-mvc.xml`의 `component-scan`으로 서블릿 컨텍스트에 등록됨
-- **해결**: `spring-mvc.xml`에도 `<tx:annotation-driven transaction-manager="transactionManager"/>` 추가
-- **상세**: `docs/transaction-컨텍스트-분리-이슈.md` 참고
