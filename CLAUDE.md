@@ -1,5 +1,22 @@
 # Retrack — 연구과제 관리 시스템
 
+## 하네스: Retrack 백엔드
+
+**목표:** Controller-Service-Mapper-VO-XML 5종 세트 반복 구현을 에이전트 팀으로 자동화
+
+**트리거:**
+- 백엔드 (Java/MyBatis/Spring) 작업 → `retrack-backend` 스킬
+- 프론트엔드 (React/axios/컴포넌트) 작업 → `retrack-frontend` 스킬
+- 단순 질문이나 파일 조회는 직접 응답 가능
+
+**변경 이력:**
+| 날짜 | 변경 내용 | 대상 | 사유 |
+|------|----------|------|------|
+| 2026-05-10 | 초기 구성 (백엔드 팀) | backend-leader, java-implementer, mybatis-specialist, quality-guardian | 반복 구현 패턴 자동화 |
+| 2026-05-10 | 프론트엔드 팀 추가 | frontend-leader, ui-builder, api-connector | 페이지 단위 React 구현 자동화 |
+
+---
+
 ## 프로젝트 개요
 
 연구과제의 등록, 상태 관리, 연구비 집계, 파일 첨부, 이메일 알림 발송 기능을 제공하는 웹 기반 연구과제 관리 시스템입니다.
