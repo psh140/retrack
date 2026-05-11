@@ -461,6 +461,26 @@ Spring AOP + 커스텀 어노테이션 방식으로 구현. 각 Service는 @LogA
 
 ---
 
+## 프론트엔드 작업 시작 전 필수 결정 사항
+
+**백엔드 작업 완료 후, 프론트엔드 작업 들어가기 전에 아래 항목을 모두 확정해야 한다.**
+
+| 항목 | 후보 | 비고 |
+|---|---|---|
+| 언어 | JavaScript / TypeScript | 백엔드 포트폴리오 타겟이면 JS 추천 |
+| 빌드 도구 | Vite | Create React App은 구식 |
+| 상태관리 | Zustand / Redux | 공공/SI 타겟이면 둘 다 무난, Zustand가 코드 간결 |
+| HTTP 클라이언트 | axios | 실무 표준, JWT 헤더 자동 추가 편리 |
+| 라우팅 | React Router v6 | 표준 |
+| UI 라이브러리 | Ant Design / MUI | Ant Design이 공공/SI에서 자주 쓰임 |
+| 날짜 처리 | dayjs | LocalDateTime 응답 파싱용 |
+| CSS 방식 | CSS Modules / Ant Design 내장 | Ant Design 쓰면 별도 CSS 거의 불필요 |
+| 환경변수 | .env | API base URL 분리 (VITE_API_URL) |
+
+확정 후 CLAUDE.md 프론트엔드 기술 스택 섹션에 선택 결과를 기록하고 작업을 시작한다.
+
+---
+
 ## 트러블슈팅
 
 트러블슈팅 내용은 `docs/` 폴더에서 관리합니다.
