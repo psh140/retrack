@@ -417,11 +417,13 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 - [x] `EmailSender` — 발신자 표시 이름 "Retrack 알림" 설정 (`helper.setFrom()`)
 - [x] `NotificationMapper.xml` — `<resultMap>` 추가 (snake_case → camelCase 매핑 누락으로 ID 필드 null 반환되던 버그 수정)
 
-**남은 구현**
-- [ ] `src/main/resources/templates/` — welcome-email.html, status-change-email.html, manual-email.html 작성 (변수 치환: String.replace())
-- [ ] `EmailSender` — 리소스 파일 로드 후 HTML 템플릿 이메일 발송으로 교체
-- [ ] `AuthService` — 회원가입 완료 후 환영 이메일 발송 (notifications 기록 없이 EmailSender 직접 호출)
-- [ ] `ProjectService.changeStatus()` — 상태 변경 후 신청자에게 자동 이메일 발송 (notifications 기록 후 EmailSender 호출, 신청자 이메일 조회를 위해 UserMapper 의존성 추가)
+**완료된 구현 (2026-05-11 추가)**
+- [x] `src/main/resources/templates/notification.html` — 단일 HTML 템플릿 (과제 상태 변경 알림용, 플레이스홀더 String.replace() 치환 방식)
+- [x] `EmailSender.sendStatusChangeEmailAsync()` — 템플릿 로드 + 플레이스홀더 치환 후 HTML 이메일 발송 (상태별 한글 텍스트 분기 포함)
+- [x] `ProjectService.changeStatus()` — 트랜잭션 완료 후 신청자에게 자동 이메일 발송 연결 (`NotificationMapper`, `UserMapper`, `EmailSender` 의존성 추가)
+
+**보류**
+- 회원가입 환영 이메일 — 핵심 기능 완성 후 추가 예정
 
 #### 9단계 — 활동 로그 API
 AOP로 사용자 행동을 `activity_logs` 테이블에 자동 기록 (비즈니스 로직과 로깅 관심사 분리)

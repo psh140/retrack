@@ -3,14 +3,19 @@ package com.retrack.service;
 import com.retrack.exception.BadRequestException;
 import com.retrack.exception.NotFoundException;
 import com.retrack.exception.UnauthorizedException;
+import com.retrack.mapper.NotificationMapper;
 import com.retrack.mapper.ProjectMapper;
+import com.retrack.mapper.UserMapper;
+import com.retrack.vo.NotificationVO;
 import com.retrack.vo.ProjectHistoryVO;
 import com.retrack.vo.ProjectRequestVO;
 import com.retrack.vo.ProjectVO;
+import com.retrack.vo.UserVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +31,7 @@ import java.util.Map;
  * 이메일 발송은 트랜잭션 외부에서 EmailSender를 통해 비동기 처리
  *
  * @since 2026-04-28
- * @modified 2026-05-09 카카오 알림톡 관련 주석 제거, 이메일 발송 방식으로 변경
+ * @modified 2026-05-11 상태 변경 시 HTML 템플릿 이메일 자동 발송 연결
  */
 @Service
 public class ProjectService {
@@ -54,10 +59,18 @@ public class ProjectService {
 
     private final ProjectMapper projectMapper;
     private final FileService fileService;
+    private final NotificationMapper notificationMapper;
+    private final UserMapper userMapper;
+    private final EmailSender emailSender;
 
-    public ProjectService(ProjectMapper projectMapper, FileService fileService) {
+    public ProjectService(ProjectMapper projectMapper, FileService fileService,
+                          NotificationMapper notificationMapper, UserMapper userMapper,
+                          EmailSender emailSender) {
         this.projectMapper = projectMapper;
         this.fileService = fileService;
+        this.notificationMapper = notificationMapper;
+        this.userMapper = userMapper;
+        this.emailSender = emailSender;
     }
 
     /** 전체 과제 목록 반환 */
@@ -97,15 +110,15 @@ public class ProjectService {
         project.setBudgetTotal(req.getBudgetTotal() != null ? req.getBudgetTotal() : 0L);
 
         projectMapper.insertProject(project);
-        return project.getProjectId(); // useGeneratedKeys로 자동 주입된 PK
+        return project.getProjectId();
     }
 
     /**
      * 과제 수정
      * RESEARCHER는 본인 과제만 수정 가능, MANAGER/ADMIN은 모든 과제 수정 가능
      *
-     * @param projectId     수정할 과제 ID
-     * @param req           요청 바디
+     * @param projectId       수정할 과제 ID
+     * @param req             요청 바디
      * @param requesterUserId 요청자 ID
      * @param requesterRole   요청자 권한
      */
@@ -113,7 +126,6 @@ public class ProjectService {
                               Long requesterUserId, String requesterRole) {
         ProjectVO project = getProject(projectId);
 
-        // RESEARCHER는 본인 과제만 수정 가능
         if ("RESEARCHER".equals(requesterRole) && !project.getUserId().equals(requesterUserId)) {
             throw new UnauthorizedException("본인이 등록한 과제만 수정할 수 있습니다.");
         }
@@ -136,23 +148,22 @@ public class ProjectService {
      * 3가지 DB 작업이 하나의 트랜잭션으로 묶임:
      *   1. projects.status 업데이트
      *   2. project_history 이력 INSERT
-     *   3. notifications 알림 기록 INSERT (이메일 발송은 트랜잭션 외부)
+     *   3. notifications 알림 기록 INSERT
+     * 이메일 발송은 @Async로 트랜잭션 외부 스레드에서 비동기 처리
      *
-     * @param projectId   상태 변경할 과제 ID
-     * @param newStatus   변경할 상태
-     * @param comment     변경 사유
-     * @param changedBy   처리자 ID
+     * @param projectId 상태 변경할 과제 ID
+     * @param newStatus 변경할 상태
+     * @param comment   변경 사유 (nullable)
+     * @param changedBy 처리자 ID
      */
     @Transactional
     public void changeStatus(Long projectId, String newStatus, String comment, Long changedBy) {
         ProjectVO project = getProject(projectId);
 
-        // 유효한 상태값인지 확인
         if (!VALID_STATUSES.contains(newStatus)) {
             throw new BadRequestException("유효하지 않은 상태값입니다.");
         }
 
-        // 허용된 전이인지 확인
         List<String> allowedNext = VALID_TRANSITIONS.get(project.getStatus());
         if (allowedNext == null || !allowedNext.contains(newStatus)) {
             throw new BadRequestException(
@@ -172,27 +183,43 @@ public class ProjectService {
         history.setComment(comment);
         projectMapper.insertHistory(history);
 
-        // 3. 알림 기록 INSERT (이메일 발송은 트랜잭션 외부에서 EmailSender 비동기 처리)
+        // 3. 알림 기록 INSERT (useGeneratedKeys로 notificationId 자동 채워짐)
         String message = buildNotificationMessage(project.getTitle(), newStatus);
-        projectMapper.insertNotification(project.getUserId(), projectId, message);
+        NotificationVO notification = new NotificationVO();
+        notification.setUserId(project.getUserId());
+        notification.setProjectId(projectId);
+        notification.setMessage(message);
+        notificationMapper.insert(notification);
+
+        // 이메일 비동기 발송 — @Async로 별도 스레드에서 실행되므로 트랜잭션에 영향 없음
+        UserVO recipient = userMapper.findById(project.getUserId());
+        if (recipient != null && recipient.getEmail() != null) {
+            emailSender.sendStatusChangeEmailAsync(
+                    notification.getNotificationId(),
+                    recipient.getEmail(),
+                    project.getTitle(),
+                    newStatus,
+                    LocalDateTime.now(),
+                    comment
+            );
+        }
     }
 
     /**
      * 과제 삭제
      * DB CASCADE로 FILES 레코드는 자동 삭제되지만 파일시스템은 직접 정리해야 함
-     * 파일시스템 정리 먼저 → DB 삭제 순서로 처리
      *
      * @throws IOException 파일시스템 정리 실패 시
      */
     public void deleteProject(Long projectId) throws IOException {
-        getProject(projectId); // 존재 여부 확인
+        getProject(projectId);
         fileService.deleteAllFilesByProject(projectId);
         projectMapper.deleteProject(projectId);
     }
 
     /** 특정 과제의 상태 변경 이력 목록 반환 */
     public List<ProjectHistoryVO> getHistory(Long projectId) {
-        getProject(projectId); // 과제 존재 여부 확인
+        getProject(projectId);
         return projectMapper.findHistoryByProjectId(projectId);
     }
 
