@@ -425,26 +425,25 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 **보류**
 - 회원가입 환영 이메일 — 핵심 기능 완성 후 추가 예정
 
-#### 9단계 — 활동 로그 API
-AOP로 사용자 행동을 `activity_logs` 테이블에 자동 기록 (비즈니스 로직과 로깅 관심사 분리)
+#### 9단계 — 활동 로그 API (2026-05-11)
+Spring AOP + 커스텀 어노테이션 방식으로 구현. 각 Service는 @LogActivity만 선언, 실제 삽입은 ActivityLogAspect가 처리
 
-**AOP 설정**
-- [ ] `pom.xml` — AspectJ 의존성 추가
-- [ ] `spring-mvc.xml` — `<aop:aspectj-autoproxy/>` 추가
-- [ ] `ActivityLogAspect` — `@Around` 또는 `@AfterReturning`으로 대상 메서드 자동 로깅
-
-**로깅 대상 메서드** (확정 필요)
-- 로그인 / 로그아웃
-- 과제 등록 / 수정 / 삭제 / 상태 변경
-- 연구비 등록 / 수정 / 삭제
-- 파일 업로드 / 삭제
-- 알림 발송
-
-**조회 API**
-- [ ] `ActivityLogVO` — activity_logs 테이블 매핑 VO
-- [ ] `ActivityLogMapper` + `ActivityLogMapper.xml` — findAll, findByUserId
-- [ ] `ActivityLogService` — 전체 로그 조회, 특정 사용자 로그 조회
-- [ ] `ActivityLogController` — GET /api/logs, GET /api/logs/users/{id}
+- [x] `ActivityLogVO` — activity_logs 테이블 매핑 VO
+- [x] `ActivityLogMapper` + `ActivityLogMapper.xml` — insert, findAll, findByUserId
+- [x] `ActivityLogService` — 전체 로그 조회, 특정 사용자 로그 조회 (존재하지 않는 userId → NotFoundException)
+- [x] `ActivityLogController` — GET /api/logs, GET /api/logs/users/{id} (ADMIN 전용)
+- [x] `@LogActivity` — 커스텀 어노테이션 (`com.retrack.annotation`), action/targetType/userIdParam/targetIdParam/descriptionParam 속성 보유
+- [x] `ActivityLogAspect` — `@Aspect @Component @Order(1)`, `@Around("@annotation(logActivity)")` 어드바이스. `@Order(1)`로 `@Transactional` 프록시 바깥에서 실행 → 트랜잭션 커밋 후 로그 삽입
+- [x] `pom.xml` — `aspectjweaver 1.9.19` 의존성 추가
+- [x] `spring-mvc.xml` — `aop` 네임스페이스 + `<aop:aspectj-autoproxy/>` 추가
+- [x] `AuthService` — `@LogActivity(action="LOGIN", userIdFromReturn=true)` / `@LogActivity(action="LOGOUT", userIdParam=0)`, ActivityLogMapper 의존성 제거
+- [x] `AuthController` — 로그아웃 시 userId 추출 후 authService.logout() 호출 (기존 유지)
+- [x] `ProjectService` — createProject/updateProject/deleteProject/changeStatus에 @LogActivity 추가, ActivityLogMapper 의존성 제거
+- [x] `BudgetService` — createBudget/updateBudget/deleteBudget에 @LogActivity 추가, ActivityLogMapper 의존성 제거
+- [x] `FileService` — uploadFile/deleteFile에 @LogActivity 추가, ActivityLogMapper 의존성 제거
+- [x] `NotificationService` — sendNotification에 @LogActivity 추가, ActivityLogMapper 의존성 제거
+- [x] `UserService` — updateRole/verifyUser/deleteUser에 @LogActivity 추가, ActivityLogMapper 의존성 제거
+- [x] 로그 삽입은 Aspect 내 try-catch로 감싸 실패해도 핵심 비즈니스 로직에 영향 없음
 
 #### 10단계 — 통계 API
 - [ ] `StatsMapper` + `StatsMapper.xml` — 과제 상태별 현황, 연구비 카테고리별 집계, 연구비 소진율, 월별 알림 발송 건수

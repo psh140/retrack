@@ -1,5 +1,6 @@
 package com.retrack.service;
 
+import com.retrack.annotation.LogActivity;
 import com.retrack.exception.BadRequestException;
 import com.retrack.exception.NotFoundException;
 import com.retrack.exception.UnauthorizedException;
@@ -18,8 +19,10 @@ import java.util.Map;
 /**
  * 연구비 관리 비즈니스 로직
  * 카테고리: PERSONNEL(인건비), TRAVEL(여비), RESEARCH_ACTIVITY(연구활동비), ETC(기타)
+ * 활동 로그는 @LogActivity AOP 어드바이스가 자동 기록한다.
  *
  * @since 2026-04-29
+ * @modified 2026-05-11 활동 로그 @LogActivity AOP로 전환
  */
 @Service
 public class BudgetService {
@@ -47,13 +50,16 @@ public class BudgetService {
 
     /**
      * 연구비 등록
-     * 과제 존재 여부, 카테고리 유효성, 금액 양수 여부, 사용 일시 필수 검증
+     * ActivityLogAspect가 Long 반환값을 targetId로 사용하여 BUDGET_CREATE 로그를 기록한다
+     * (userIdParam=2, targetIdFromReturn=true).
      *
      * @param projectId 대상 과제 ID
      * @param req       요청 바디
-     * @param userId    로그인 사용자 ID (used_by 에 저장)
+     * @param userId    로그인 사용자 ID (index=2)
      * @return 생성된 budgetId
      */
+    @LogActivity(action = "BUDGET_CREATE", targetType = "BUDGET",
+                 userIdParam = 2, targetIdFromReturn = true)
     public Long createBudget(Long projectId, BudgetRequestVO req, Long userId) {
         checkProjectExists(projectId);
         validateRequest(req);
@@ -72,21 +78,23 @@ public class BudgetService {
 
     /**
      * 연구비 수정
-     * ADMIN은 모든 과제 연구비 수정 가능, 그 외에는 본인이 신청한 과제의 연구비만 수정 가능
+     * ADMIN은 모든 과제 연구비 수정 가능, 그 외에는 본인이 신청한 과제의 연구비만 수정 가능.
+     * ActivityLogAspect가 BUDGET_UPDATE 로그를 기록한다 (userIdParam=3, targetIdParam=1).
      *
-     * @param projectId       과제 ID
-     * @param budgetId        수정할 연구비 ID
+     * @param projectId       과제 ID (index=0)
+     * @param budgetId        수정할 연구비 ID (index=1)
      * @param req             요청 바디
-     * @param requesterUserId 요청자 ID
+     * @param requesterUserId 요청자 ID (index=3)
      * @param requesterRole   요청자 권한
      */
+    @LogActivity(action = "BUDGET_UPDATE", targetType = "BUDGET",
+                 userIdParam = 3, targetIdParam = 1)
     public void updateBudget(Long projectId, Long budgetId, BudgetRequestVO req,
                              Long requesterUserId, String requesterRole) {
         ProjectVO project = projectMapper.findById(projectId);
         if (project == null) {
             throw new NotFoundException("존재하지 않는 과제입니다.");
         }
-        // ADMIN이 아니면 본인이 신청한 과제의 연구비만 수정 가능
         if (!"ADMIN".equals(requesterRole) && !project.getUserId().equals(requesterUserId)) {
             throw new UnauthorizedException("본인이 등록한 과제의 연구비만 수정할 수 있습니다.");
         }
@@ -106,12 +114,15 @@ public class BudgetService {
 
     /**
      * 연구비 삭제
-     * 해당 과제에 속한 항목인지 확인 후 삭제
+     * ActivityLogAspect가 BUDGET_DELETE 로그를 기록한다 (userIdParam=2, targetIdParam=1).
      *
-     * @param projectId 과제 ID
-     * @param budgetId  삭제할 연구비 ID
+     * @param projectId       과제 ID (index=0)
+     * @param budgetId        삭제할 연구비 ID (index=1)
+     * @param requesterUserId 삭제 요청자 ID (index=2)
      */
-    public void deleteBudget(Long projectId, Long budgetId) {
+    @LogActivity(action = "BUDGET_DELETE", targetType = "BUDGET",
+                 userIdParam = 2, targetIdParam = 1)
+    public void deleteBudget(Long projectId, Long budgetId, Long requesterUserId) {
         checkBudgetExists(projectId, budgetId);
         budgetMapper.delete(projectId, budgetId);
     }

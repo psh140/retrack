@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
  * 예외 처리는 GlobalExceptionHandler에 위임 (try-catch 없음)
  *
  * @since 2026-04-29
+ * @modified 2026-05-11 deleteBudget에 userId 파라미터 추가 (활동 로그용)
  */
 @RestController
 @RequestMapping("/api/projects/{id}/budget")
@@ -71,12 +72,15 @@ public class BudgetController {
     /**
      * DELETE /api/projects/{id}/budget/{bid}
      * 연구비 삭제 (ADMIN만)
+     * userId를 추출하여 활동 로그 기록에 사용
      */
     @RequiredRole("ADMIN")
     @DeleteMapping("/{bid}")
     public ResponseEntity<ApiResponse<?>> deleteBudget(@PathVariable Long id,
-                                                       @PathVariable Long bid) {
-        budgetService.deleteBudget(id, bid);
+                                                       @PathVariable Long bid,
+                                                       HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        budgetService.deleteBudget(id, bid, userId);
         return ResponseEntity.ok(ApiResponse.ok("연구비가 삭제되었습니다."));
     }
 

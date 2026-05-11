@@ -1,5 +1,6 @@
 package com.retrack.service;
 
+import com.retrack.annotation.LogActivity;
 import com.retrack.exception.BadRequestException;
 import com.retrack.exception.NotFoundException;
 import com.retrack.mapper.NotificationMapper;
@@ -13,9 +14,11 @@ import java.util.List;
 
 /**
  * 알림 관리 비즈니스 로직
- * 이메일 발송은 EmailSender(@Async)에 위임하여 비동기 처리
+ * 이메일 발송은 EmailSender(@Async)에 위임하여 비동기 처리.
+ * 활동 로그는 @LogActivity AOP 어드바이스가 자동 기록한다.
  *
  * @since 2026-05-09
+ * @modified 2026-05-11 활동 로그 @LogActivity AOP로 전환
  */
 @Service
 public class NotificationService {
@@ -57,13 +60,17 @@ public class NotificationService {
 
     /**
      * 알림 발송
-     * DB에 PENDING 상태로 저장 후 EmailSender를 통해 비동기 이메일 발송
-     * 발송 결과(SENT/FAILED)는 EmailSender에서 비동기로 업데이트
+     * DB에 PENDING 상태로 저장 후 EmailSender를 통해 비동기 이메일 발송.
+     * ActivityLogAspect가 Long 반환값을 targetId로 사용하여 NOTIFICATION_SEND 로그를 기록한다
+     * (userIdParam=1, targetIdFromReturn=true).
      *
-     * @param req 수신자 ID, 과제 ID, 메시지 내용
+     * @param req      수신자 ID, 과제 ID, 메시지 내용 (index=0)
+     * @param senderId 발송자(MANAGER/ADMIN) ID (index=1)
      * @return 생성된 notificationId
      */
-    public Long sendNotification(NotificationRequestVO req) {
+    @LogActivity(action = "NOTIFICATION_SEND", targetType = "NOTIFICATION",
+                 userIdParam = 1, targetIdFromReturn = true)
+    public Long sendNotification(NotificationRequestVO req, Long senderId) {
         if (req.getUserId() == null) {
             throw new BadRequestException("수신자 ID는 필수입니다.");
         }

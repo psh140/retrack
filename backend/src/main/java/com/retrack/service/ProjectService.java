@@ -1,5 +1,6 @@
 package com.retrack.service;
 
+import com.retrack.annotation.LogActivity;
 import com.retrack.exception.BadRequestException;
 import com.retrack.exception.NotFoundException;
 import com.retrack.exception.UnauthorizedException;
@@ -28,10 +29,12 @@ import java.util.Map;
  *   1. projects 테이블 status 업데이트
  *   2. project_history 이력 INSERT
  *   3. notifications 알림 기록 INSERT
- * 이메일 발송은 트랜잭션 외부에서 EmailSender를 통해 비동기 처리
+ * 이메일 발송은 트랜잭션 외부에서 EmailSender를 통해 비동기 처리.
+ * 활동 로그는 @LogActivity AOP 어드바이스가 트랜잭션 커밋 후 자동 기록한다.
  *
  * @since 2026-04-28
  * @modified 2026-05-11 상태 변경 시 HTML 템플릿 이메일 자동 발송 연결
+ * @modified 2026-05-11 활동 로그 @LogActivity AOP로 전환
  */
 @Service
 public class ProjectService {
@@ -92,10 +95,14 @@ public class ProjectService {
 
     /**
      * 과제 등록
+     * ActivityLogAspect가 Long 반환값을 targetId로 사용하여 PROJECT_CREATE 로그를 기록한다.
+     *
      * @param req    요청 바디
-     * @param userId 로그인 사용자 ID (신청자)
+     * @param userId 로그인 사용자 ID (신청자, index=1)
      * @return 생성된 projectId
      */
+    @LogActivity(action = "PROJECT_CREATE", targetType = "PROJECT",
+                 userIdParam = 1, targetIdFromReturn = true)
     public Long createProject(ProjectRequestVO req, Long userId) {
         if (req.getTitle() == null || req.getTitle().trim().isEmpty()) {
             throw new BadRequestException("과제명은 필수입니다.");
@@ -115,13 +122,16 @@ public class ProjectService {
 
     /**
      * 과제 수정
-     * RESEARCHER는 본인 과제만 수정 가능, MANAGER/ADMIN은 모든 과제 수정 가능
+     * RESEARCHER는 본인 과제만 수정 가능, MANAGER/ADMIN은 모든 과제 수정 가능.
+     * ActivityLogAspect가 PROJECT_UPDATE 로그를 기록한다 (userIdParam=2, targetIdParam=0).
      *
-     * @param projectId       수정할 과제 ID
+     * @param projectId       수정할 과제 ID (index=0)
      * @param req             요청 바디
-     * @param requesterUserId 요청자 ID
+     * @param requesterUserId 요청자 ID (index=2)
      * @param requesterRole   요청자 권한
      */
+    @LogActivity(action = "PROJECT_UPDATE", targetType = "PROJECT",
+                 userIdParam = 2, targetIdParam = 0)
     public void updateProject(Long projectId, ProjectRequestVO req,
                               Long requesterUserId, String requesterRole) {
         ProjectVO project = getProject(projectId);
@@ -149,13 +159,17 @@ public class ProjectService {
      *   1. projects.status 업데이트
      *   2. project_history 이력 INSERT
      *   3. notifications 알림 기록 INSERT
-     * 이메일 발송은 @Async로 트랜잭션 외부 스레드에서 비동기 처리
+     * 이메일 발송은 @Async로 별도 스레드에서 비동기 처리.
+     * ActivityLogAspect가 트랜잭션 커밋 후 PROJECT_STATUS_CHANGE 로그를 기록한다
+     * (userIdParam=3, targetIdParam=0, descriptionParam=1 → "→ SUBMITTED" 형태).
      *
-     * @param projectId 상태 변경할 과제 ID
-     * @param newStatus 변경할 상태
+     * @param projectId 상태 변경할 과제 ID (index=0)
+     * @param newStatus 변경할 상태 (index=1)
      * @param comment   변경 사유 (nullable)
-     * @param changedBy 처리자 ID
+     * @param changedBy 처리자 ID (index=3)
      */
+    @LogActivity(action = "PROJECT_STATUS_CHANGE", targetType = "PROJECT",
+                 userIdParam = 3, targetIdParam = 0, descriptionParam = 1)
     @Transactional
     public void changeStatus(Long projectId, String newStatus, String comment, Long changedBy) {
         ProjectVO project = getProject(projectId);
@@ -207,11 +221,16 @@ public class ProjectService {
 
     /**
      * 과제 삭제
-     * DB CASCADE로 FILES 레코드는 자동 삭제되지만 파일시스템은 직접 정리해야 함
+     * DB CASCADE로 FILES 레코드는 자동 삭제되지만 파일시스템은 직접 정리해야 함.
+     * ActivityLogAspect가 PROJECT_DELETE 로그를 기록한다 (userIdParam=1, targetIdParam=0).
      *
+     * @param projectId 삭제할 과제 ID (index=0)
+     * @param userId    삭제 요청자 ID (index=1)
      * @throws IOException 파일시스템 정리 실패 시
      */
-    public void deleteProject(Long projectId) throws IOException {
+    @LogActivity(action = "PROJECT_DELETE", targetType = "PROJECT",
+                 userIdParam = 1, targetIdParam = 0)
+    public void deleteProject(Long projectId, Long userId) throws IOException {
         getProject(projectId);
         fileService.deleteAllFilesByProject(projectId);
         projectMapper.deleteProject(projectId);

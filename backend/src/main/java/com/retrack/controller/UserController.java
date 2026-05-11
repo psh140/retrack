@@ -6,6 +6,7 @@ import com.retrack.vo.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -14,6 +15,7 @@ import java.util.Map;
  * 예외 처리는 GlobalExceptionHandler에 위임 (try-catch 없음)
  *
  * @since 2026-04-28
+ * @modified 2026-05-11 권한변경/인증승인/삭제에 adminUserId 전달 (활동 로그용)
  */
 @RestController
 @RequestMapping("/api/users")
@@ -49,34 +51,43 @@ public class UserController {
      * PATCH /api/users/{id}/role
      * 사용자 권한 변경
      * Body: { "role": "RESEARCHER" }
+     * adminUserId를 추출하여 활동 로그 기록에 사용
      */
     @RequiredRole("ADMIN")
     @PatchMapping("/{id}/role")
     public ResponseEntity<ApiResponse<?>> updateRole(@PathVariable Long id,
-                                                     @RequestBody Map<String, String> body) {
-        userService.updateRole(id, body.get("role"));
+                                                     @RequestBody Map<String, String> body,
+                                                     HttpServletRequest request) {
+        Long adminUserId = (Long) request.getAttribute("userId");
+        userService.updateRole(id, body.get("role"), adminUserId);
         return ResponseEntity.ok(ApiResponse.ok("권한이 변경되었습니다."));
     }
 
     /**
      * PATCH /api/users/{id}/verify
      * 연구자 인증 승인 (is_verified = TRUE)
+     * adminUserId를 추출하여 활동 로그 기록에 사용
      */
     @RequiredRole("ADMIN")
     @PatchMapping("/{id}/verify")
-    public ResponseEntity<ApiResponse<?>> verifyUser(@PathVariable Long id) {
-        userService.verifyUser(id);
+    public ResponseEntity<ApiResponse<?>> verifyUser(@PathVariable Long id,
+                                                     HttpServletRequest request) {
+        Long adminUserId = (Long) request.getAttribute("userId");
+        userService.verifyUser(id, adminUserId);
         return ResponseEntity.ok(ApiResponse.ok("연구자 인증이 승인되었습니다."));
     }
 
     /**
      * DELETE /api/users/{id}
      * 사용자 삭제
+     * adminUserId를 추출하여 활동 로그 기록에 사용
      */
     @RequiredRole("ADMIN")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    public ResponseEntity<ApiResponse<?>> deleteUser(@PathVariable Long id,
+                                                     HttpServletRequest request) {
+        Long adminUserId = (Long) request.getAttribute("userId");
+        userService.deleteUser(id, adminUserId);
         return ResponseEntity.ok(ApiResponse.ok("사용자가 삭제되었습니다."));
     }
 }

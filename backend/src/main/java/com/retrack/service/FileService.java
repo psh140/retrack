@@ -1,5 +1,6 @@
 package com.retrack.service;
 
+import com.retrack.annotation.LogActivity;
 import com.retrack.exception.BadRequestException;
 import com.retrack.exception.NotFoundException;
 import com.retrack.exception.UnauthorizedException;
@@ -20,9 +21,11 @@ import java.util.UUID;
 
 /**
  * 파일 관리 비즈니스 로직
- * 파일 저장소는 FileStorageStrategy 인터페이스로 추상화 — 구현체 교체 시 이 클래스 수정 불필요
+ * 파일 저장소는 FileStorageStrategy 인터페이스로 추상화 — 구현체 교체 시 이 클래스 수정 불필요.
+ * 활동 로그는 @LogActivity AOP 어드바이스가 자동 기록한다.
  *
  * @since 2026-05-02
+ * @modified 2026-05-11 활동 로그 @LogActivity AOP로 전환
  */
 @Service
 public class FileService {
@@ -55,14 +58,18 @@ public class FileService {
 
     /**
      * 파일 업로드
-     * 빈 파일, 확장자 검증 후 UUID 파일명으로 저장
-     * DB INSERT 실패 시 저장된 파일 롤백 삭제 (@Transactional은 파일시스템을 롤백하지 않으므로 수동 처리)
+     * 빈 파일, 확장자 검증 후 UUID 파일명으로 저장.
+     * DB INSERT 실패 시 저장된 파일 롤백 삭제 (@Transactional은 파일시스템을 롤백하지 않으므로 수동 처리).
+     * ActivityLogAspect가 Long 반환값을 targetId로 사용하여 FILE_UPLOAD 로그를 기록한다
+     * (userIdParam=2, targetIdFromReturn=true).
      *
      * @param projectId 대상 과제 ID
-     * @param file      업로드 파일
-     * @param userId    업로드한 사용자 ID
+     * @param file      업로드 파일 (index=1)
+     * @param userId    업로드한 사용자 ID (index=2)
      * @return 생성된 fileId
      */
+    @LogActivity(action = "FILE_UPLOAD", targetType = "FILE",
+                 userIdParam = 2, targetIdFromReturn = true)
     public Long uploadFile(Long projectId, MultipartFile file, Long userId) throws IOException {
         checkProjectExists(projectId);
 
@@ -103,14 +110,17 @@ public class FileService {
 
     /**
      * 파일 삭제
-     * ADMIN은 모든 파일 삭제 가능, RESEARCHER는 본인이 업로드한 파일만 삭제 가능
-     * DB DELETE 먼저 → 파일시스템 삭제 순서로 처리 (역순 시 파일 없는데 DB 레코드 남는 더 나쁜 상태 발생)
+     * ADMIN은 모든 파일 삭제 가능, RESEARCHER는 본인이 업로드한 파일만 삭제 가능.
+     * DB DELETE 먼저 → 파일시스템 삭제 순서로 처리.
+     * ActivityLogAspect가 FILE_DELETE 로그를 기록한다 (userIdParam=2, targetIdParam=1).
      *
-     * @param projectId       과제 ID
-     * @param fileId          삭제할 파일 ID
-     * @param requesterUserId 요청자 ID
+     * @param projectId       과제 ID (index=0)
+     * @param fileId          삭제할 파일 ID (index=1)
+     * @param requesterUserId 요청자 ID (index=2)
      * @param requesterRole   요청자 권한
      */
+    @LogActivity(action = "FILE_DELETE", targetType = "FILE",
+                 userIdParam = 2, targetIdParam = 1)
     public void deleteFile(Long projectId, Long fileId,
                            Long requesterUserId, String requesterRole) throws IOException {
         FileVO file = fileMapper.findById(projectId, fileId);

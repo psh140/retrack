@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
  * GET  /api/notifications/{id}   — 알림 상세 조회 (VIEWER 이상)
  *
  * @since 2026-05-09
+ * @modified 2026-05-11 sendNotification에 senderId 전달 (활동 로그용)
  */
 @RestController
 @RequestMapping("/api/notifications")
@@ -36,11 +37,16 @@ public class NotificationController {
                 notificationService.getMyNotifications(userId)));
     }
 
-    /** 알림 발송 — DB 저장 후 이메일 비동기 발송 */
+    /**
+     * 알림 발송 — DB 저장 후 이메일 비동기 발송
+     * senderId를 추출하여 활동 로그 기록에 사용
+     */
     @PostMapping("/send")
     @RequiredRole("MANAGER")
-    public ResponseEntity<ApiResponse<?>> sendNotification(@RequestBody NotificationRequestVO req) {
-        Long notificationId = notificationService.sendNotification(req);
+    public ResponseEntity<ApiResponse<?>> sendNotification(@RequestBody NotificationRequestVO req,
+                                                           HttpServletRequest request) {
+        Long senderId = (Long) request.getAttribute("userId");
+        Long notificationId = notificationService.sendNotification(req, senderId);
         return ResponseEntity.ok(ApiResponse.ok("알림 발송 요청이 완료됐습니다.", notificationId));
     }
 

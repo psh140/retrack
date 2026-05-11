@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+    ActivityLogMapper.xml
+    activity_logs 테이블 CRUD 쿼리
+    snake_case 컬럼 → camelCase 필드 매핑은 resultMap "ActivityLogResultMap" 사용
+-->
+<mapper namespace="com.retrack.mapper.ActivityLogMapper">
+
+    <!--
+        resultMap: activity_logs 컬럼 → ActivityLogVO 필드 매핑
+        snake_case → camelCase 변환 전략 적용
+    -->
+    <resultMap id="ActivityLogResultMap" type="com.retrack.vo.ActivityLogVO">
+        <id     property="logId"      column="log_id"/>
+        <result property="userId"     column="user_id"/>
+        <result property="action"     column="action"/>
+        <result property="targetType" column="target_type"/>
+        <result property="targetId"   column="target_id"/>
+        <result property="description" column="description"/>
+        <result property="ipAddress"  column="ip_address"/>
+        <result property="createdAt"  column="created_at"/>
+    </resultMap>
+
+    <!-- 활동 로그 INSERT — ip_address는 null 처리하여 제외, useGeneratedKeys로 logId 자동 채워짐 -->
+    <insert id="insert" parameterType="com.retrack.vo.ActivityLogVO"
+            useGeneratedKeys="true" keyProperty="logId">
+        INSERT INTO activity_logs (user_id, action, target_type, target_id, description)
+        VALUES (#{userId}, #{action}, #{targetType}, #{targetId}, #{description})
+    </insert>
+
+    <!-- 전체 활동 로그 목록 조회 — 최신 순 -->
+    <select id="findAll" resultMap="ActivityLogResultMap">
+        SELECT log_id, user_id, action, target_type, target_id, description, ip_address, created_at
+        FROM activity_logs
+        ORDER BY log_id DESC
+    </select>
+
+    <!-- 특정 사용자의 활동 로그 목록 조회 — 최신 순 -->
+    <select id="findByUserId" parameterType="long" resultMap="ActivityLogResultMap">
+        SELECT log_id, user_id, action, target_type, target_id, description, ip_address, created_at
+        FROM activity_logs
+        WHERE user_id = #{userId}
+        ORDER BY log_id DESC
+    </select>
+
+</mapper>

@@ -20,6 +20,7 @@ import java.io.IOException;
  * 예외 처리는 GlobalExceptionHandler에 위임 (try-catch 없음)
  *
  * @since 2026-04-28
+ * @modified 2026-05-11 deleteProject에 userId 파라미터 추가 (활동 로그용)
  */
 @RestController
 @RequestMapping("/api/projects")
@@ -98,11 +99,14 @@ public class ProjectController {
     /**
      * DELETE /api/projects/{id}
      * 과제 삭제 (ADMIN만)
+     * userId를 추출하여 활동 로그 기록에 사용
      */
     @RequiredRole("ADMIN")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> deleteProject(@PathVariable Long id) throws IOException {
-        projectService.deleteProject(id);
+    public ResponseEntity<ApiResponse<?>> deleteProject(@PathVariable Long id,
+                                                        HttpServletRequest request) throws IOException {
+        Long userId = (Long) request.getAttribute("userId");
+        projectService.deleteProject(id, userId);
         return ResponseEntity.ok(ApiResponse.ok("과제가 삭제되었습니다."));
     }
 

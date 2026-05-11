@@ -1,5 +1,6 @@
 package com.retrack.service;
 
+import com.retrack.annotation.LogActivity;
 import com.retrack.exception.BadRequestException;
 import com.retrack.exception.NotFoundException;
 import com.retrack.mapper.UserMapper;
@@ -16,9 +17,11 @@ import java.util.List;
  * - 연구자 인증 승인: 중복 승인 방지
  * - 사용자 삭제
  *
- * 존재하지 않는 사용자 접근 시 NotFoundException → GlobalExceptionHandler가 404 응답
+ * 존재하지 않는 사용자 접근 시 NotFoundException → GlobalExceptionHandler가 404 응답.
+ * 활동 로그는 @LogActivity AOP 어드바이스가 자동 기록한다.
  *
  * @since 2026-04-28
+ * @modified 2026-05-11 활동 로그 @LogActivity AOP로 전환
  */
 @Service
 public class UserService {
@@ -51,31 +54,53 @@ public class UserService {
 
     /**
      * 권한 변경
-     * 유효하지 않은 role 문자열 입력 시 BadRequestException 발생
+     * 유효하지 않은 role 문자열 입력 시 BadRequestException 발생.
+     * ActivityLogAspect가 USER_ROLE_CHANGE 로그를 기록한다
+     * (userIdParam=2, targetIdParam=0, descriptionParam=1 → "→ RESEARCHER" 형태).
+     *
+     * @param targetUserId 대상 사용자 ID (index=0)
+     * @param newRole      변경할 권한 (index=1)
+     * @param adminUserId  처리한 ADMIN 사용자 ID (index=2)
      */
-    public void updateRole(Long userId, String role) {
-        if (!VALID_ROLES.contains(role)) {
+    @LogActivity(action = "USER_ROLE_CHANGE", targetType = "USER",
+                 userIdParam = 2, targetIdParam = 0, descriptionParam = 1)
+    public void updateRole(Long targetUserId, String newRole, Long adminUserId) {
+        if (!VALID_ROLES.contains(newRole)) {
             throw new BadRequestException("유효하지 않은 권한입니다. (VIEWER / RESEARCHER / MANAGER / ADMIN)");
         }
-        getUser(userId); // 존재 여부 확인 — 없으면 NotFoundException
-        userMapper.updateRole(userId, role);
+        getUser(targetUserId); // 존재 여부 확인 — 없으면 NotFoundException
+        userMapper.updateRole(targetUserId, newRole);
     }
 
     /**
      * 연구자 인증 승인
-     * 이미 인증된 사용자에게 중복 호출 시 BadRequestException 발생
+     * 이미 인증된 사용자에게 중복 호출 시 BadRequestException 발생.
+     * ActivityLogAspect가 USER_VERIFY 로그를 기록한다 (userIdParam=1, targetIdParam=0).
+     *
+     * @param targetUserId 대상 사용자 ID (index=0)
+     * @param adminUserId  처리한 ADMIN 사용자 ID (index=1)
      */
-    public void verifyUser(Long userId) {
-        UserVO user = getUser(userId);
+    @LogActivity(action = "USER_VERIFY", targetType = "USER",
+                 userIdParam = 1, targetIdParam = 0)
+    public void verifyUser(Long targetUserId, Long adminUserId) {
+        UserVO user = getUser(targetUserId);
         if (user.isVerified()) {
             throw new BadRequestException("이미 인증된 사용자입니다.");
         }
-        userMapper.updateVerify(userId);
+        userMapper.updateVerify(targetUserId);
     }
 
-    /** 사용자 삭제 (존재하지 않으면 NotFoundException) */
-    public void deleteUser(Long userId) {
-        getUser(userId); // 존재 여부 확인 — 없으면 NotFoundException
-        userMapper.deleteUser(userId);
+    /**
+     * 사용자 삭제 (존재하지 않으면 NotFoundException).
+     * ActivityLogAspect가 USER_DELETE 로그를 기록한다 (userIdParam=1, targetIdParam=0).
+     *
+     * @param targetUserId 삭제할 사용자 ID (index=0)
+     * @param adminUserId  처리한 ADMIN 사용자 ID (index=1)
+     */
+    @LogActivity(action = "USER_DELETE", targetType = "USER",
+                 userIdParam = 1, targetIdParam = 0)
+    public void deleteUser(Long targetUserId, Long adminUserId) {
+        getUser(targetUserId); // 존재 여부 확인 — 없으면 NotFoundException
+        userMapper.deleteUser(targetUserId);
     }
 }
