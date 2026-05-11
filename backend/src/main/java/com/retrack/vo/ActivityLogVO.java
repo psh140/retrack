@@ -1,6 +1,8 @@
 package com.retrack.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +14,8 @@ import java.time.LocalDateTime;
  *
  * @since 2026-05-11
  */
+@Getter
+@Setter
 public class ActivityLogVO {
 
     /** 로그 PK */
@@ -38,87 +42,4 @@ public class ActivityLogVO {
     /** 로그 생성 시각 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
-
-    /** 기본 생성자 */
-    public ActivityLogVO() {}
-
-    /** logId getter */
-    public Long getLogId() {
-        return logId;
-    }
-
-    /** logId setter */
-    public void setLogId(Long logId) {
-        this.logId = logId;
-    }
-
-    /** userId getter */
-    public Long getUserId() {
-        return userId;
-    }
-
-    /** userId setter */
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    /** action getter */
-    public String getAction() {
-        return action;
-    }
-
-    /** action setter */
-    public void setAction(String action) {
-        this.action = action;
-    }
-
-    /** targetType getter */
-    public String getTargetType() {
-        return targetType;
-    }
-
-    /** targetType setter */
-    public void setTargetType(String targetType) {
-        this.targetType = targetType;
-    }
-
-    /** targetId getter */
-    public Long getTargetId() {
-        return targetId;
-    }
-
-    /** targetId setter */
-    public void setTargetId(Long targetId) {
-        this.targetId = targetId;
-    }
-
-    /** description getter */
-    public String getDescription() {
-        return description;
-    }
-
-    /** description setter */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /** ipAddress getter */
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    /** ipAddress setter */
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
-    /** createdAt getter */
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    /** createdAt setter */
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
 }

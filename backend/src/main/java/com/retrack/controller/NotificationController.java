@@ -50,11 +50,14 @@ public class NotificationController {
         return ResponseEntity.ok(ApiResponse.ok("알림 발송 요청이 완료됐습니다.", notificationId));
     }
 
-    /** 알림 단건 상세 조회 */
+    /** 알림 단건 상세 조회 — 본인 알림 또는 ADMIN만 가능 */
     @GetMapping("/{id}")
     @RequiredRole("VIEWER")
-    public ResponseEntity<ApiResponse<?>> getNotification(@PathVariable("id") Long notificationId) {
+    public ResponseEntity<ApiResponse<?>> getNotification(@PathVariable("id") Long notificationId,
+                                                          HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        String role = (String) request.getAttribute("role");
         return ResponseEntity.ok(ApiResponse.ok("알림 조회 성공",
-                notificationService.getNotification(notificationId)));
+                notificationService.getNotification(notificationId, userId, role)));
     }
 }

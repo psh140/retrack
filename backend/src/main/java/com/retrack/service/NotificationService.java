@@ -3,6 +3,7 @@ package com.retrack.service;
 import com.retrack.annotation.LogActivity;
 import com.retrack.exception.BadRequestException;
 import com.retrack.exception.NotFoundException;
+import com.retrack.exception.UnauthorizedException;
 import com.retrack.mapper.NotificationMapper;
 import com.retrack.mapper.UserMapper;
 import com.retrack.vo.NotificationRequestVO;
@@ -46,14 +47,19 @@ public class NotificationService {
 
     /**
      * 알림 단건 조회
-     * 존재하지 않으면 NotFoundException 발생
+     * 본인 알림 또는 ADMIN만 조회 가능. 타인 알림 접근 시 UnauthorizedException 발생.
      *
      * @param notificationId 조회할 알림 ID
+     * @param currentUserId  요청자 ID
+     * @param currentRole    요청자 권한
      */
-    public NotificationVO getNotification(Long notificationId) {
+    public NotificationVO getNotification(Long notificationId, Long currentUserId, String currentRole) {
         NotificationVO notification = notificationMapper.findById(notificationId);
         if (notification == null) {
             throw new NotFoundException("존재하지 않는 알림입니다.");
+        }
+        if (!"ADMIN".equals(currentRole) && !notification.getUserId().equals(currentUserId)) {
+            throw new UnauthorizedException("본인의 알림만 조회할 수 있습니다.");
         }
         return notification;
     }

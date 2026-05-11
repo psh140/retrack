@@ -1,6 +1,7 @@
 package com.retrack.service;
 
 import com.retrack.annotation.LogActivity;
+import com.retrack.event.StatusChangedEvent;
 import com.retrack.exception.BadRequestException;
 import com.retrack.exception.NotFoundException;
 import com.retrack.exception.UnauthorizedException;
@@ -12,6 +13,7 @@ import com.retrack.vo.ProjectHistoryVO;
 import com.retrack.vo.ProjectRequestVO;
 import com.retrack.vo.ProjectVO;
 import com.retrack.vo.UserVO;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,8 @@ import java.util.Map;
  * @since 2026-04-28
  * @modified 2026-05-11 상태 변경 시 HTML 템플릿 이메일 자동 발송 연결
  * @modified 2026-05-11 활동 로그 @LogActivity AOP로 전환
+ * @modified 2026-05-11 이메일 발송을 @TransactionalEventListener 패턴으로 전환
+ *                      (트랜잭션 커밋 보장 후 발송, EmailSender 직접 의존 제거)
  */
 @Service
 public class ProjectService {
@@ -64,16 +68,22 @@ public class ProjectService {
     private final FileService fileService;
     private final NotificationMapper notificationMapper;
     private final UserMapper userMapper;
-    private final EmailSender emailSender;
+
+    /**
+     * Spring의 이벤트 발행 인터페이스.
+     * ApplicationContext가 자동으로 주입한다 (별도 빈 선언 불필요).
+     * changeStatus()에서 StatusChangedEvent를 발행하는 데 사용한다.
+     */
+    private final ApplicationEventPublisher eventPublisher;
 
     public ProjectService(ProjectMapper projectMapper, FileService fileService,
                           NotificationMapper notificationMapper, UserMapper userMapper,
-                          EmailSender emailSender) {
+                          ApplicationEventPublisher eventPublisher) {
         this.projectMapper = projectMapper;
         this.fileService = fileService;
         this.notificationMapper = notificationMapper;
         this.userMapper = userMapper;
-        this.emailSender = emailSender;
+        this.eventPublisher = eventPublisher;
     }
 
     /** 전체 과제 목록 반환 */
@@ -155,13 +165,20 @@ public class ProjectService {
     /**
      * 과제 상태 변경 — 트랜잭션 처리
      *
-     * 3가지 DB 작업이 하나의 트랜잭션으로 묶임:
-     *   1. projects.status 업데이트
-     *   2. project_history 이력 INSERT
-     *   3. notifications 알림 기록 INSERT
-     * 이메일 발송은 @Async로 별도 스레드에서 비동기 처리.
-     * ActivityLogAspect가 트랜잭션 커밋 후 PROJECT_STATUS_CHANGE 로그를 기록한다
-     * (userIdParam=3, targetIdParam=0, descriptionParam=1 → "→ SUBMITTED" 형태).
+     * <p>3가지 DB 작업이 하나의 트랜잭션으로 묶임:</p>
+     * <ol>
+     *   <li>projects.status 업데이트</li>
+     *   <li>project_history 이력 INSERT</li>
+     *   <li>notifications 알림 기록 INSERT</li>
+     * </ol>
+     *
+     * <p>이메일 발송은 트랜잭션 커밋 이후에 실행된다.
+     * 메서드 끝에서 {@link StatusChangedEvent}를 발행하면, Spring이 트랜잭션 커밋을 확인한 뒤
+     * {@link com.retrack.service.EmailSender#onStatusChanged}를 별도 스레드에서 호출한다.
+     * 트랜잭션이 롤백되면 이벤트는 버려지므로 이메일이 발송되지 않는다.</p>
+     *
+     * <p>ActivityLogAspect가 트랜잭션 커밋 후 PROJECT_STATUS_CHANGE 로그를 기록한다
+     * (userIdParam=3, targetIdParam=0, descriptionParam=1 → "→ SUBMITTED" 형태).</p>
      *
      * @param projectId 상태 변경할 과제 ID (index=0)
      * @param newStatus 변경할 상태 (index=1)
@@ -205,17 +222,19 @@ public class ProjectService {
         notification.setMessage(message);
         notificationMapper.insert(notification);
 
-        // 이메일 비동기 발송 — @Async로 별도 스레드에서 실행되므로 트랜잭션에 영향 없음
+        // 이메일 발송 — 트랜잭션 커밋 후 실행되도록 이벤트로 발행
+        // EmailSender.onStatusChanged()가 @TransactionalEventListener(AFTER_COMMIT)로 수신한다.
+        // 수신자가 없거나 이메일이 없으면 이벤트를 발행하지 않는다.
         UserVO recipient = userMapper.findById(project.getUserId());
         if (recipient != null && recipient.getEmail() != null) {
-            emailSender.sendStatusChangeEmailAsync(
+            eventPublisher.publishEvent(new StatusChangedEvent(
                     notification.getNotificationId(),
                     recipient.getEmail(),
                     project.getTitle(),
                     newStatus,
                     LocalDateTime.now(),
                     comment
-            );
+            ));
         }
     }
 

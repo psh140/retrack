@@ -1,11 +1,14 @@
 package com.retrack.service;
 
+import com.retrack.event.StatusChangedEvent;
 import com.retrack.mapper.NotificationMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
@@ -15,13 +18,32 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * 비동기 이메일 발송 전담 컴포넌트
+ * 이메일 발송 전담 컴포넌트
  *
- * NotificationService에서 직접 @Async 메서드를 호출하면 Spring 프록시를 거치지 않아
- * 비동기 처리가 적용되지 않음 (self-invocation 문제). 이를 방지하기 위해 별도 빈으로 분리.
+ * <h3>역할</h3>
+ * <ul>
+ *   <li>수동 알림 발송: {@link #sendEmailAsync} — @Async 직접 호출</li>
+ *   <li>상태 변경 알림: {@link #onStatusChanged} — @TransactionalEventListener로 수신</li>
+ * </ul>
+ *
+ * <h3>self-invocation 방지</h3>
+ * <p>Spring의 @Async, @TransactionalEventListener는 프록시 기반이라 같은 빈 내부에서
+ * 직접 호출하면 적용되지 않는다. 이 클래스를 별도 빈으로 분리한 이유가 여기 있다.</p>
+ *
+ * <h3>상태 변경 이메일 흐름</h3>
+ * <pre>
+ * ProjectService.changeStatus() [@Transactional]
+ *   → DB 작업 완료 후 StatusChangedEvent 발행
+ *   → 트랜잭션 커밋
+ *
+ * EmailSender.onStatusChanged() [@TransactionalEventListener(AFTER_COMMIT) + @Async]
+ *   → 커밋 확인 후 스레드 풀에서 실행
+ *   → HTML 템플릿 이메일 발송 + notifications.status 업데이트
+ * </pre>
  *
  * @since 2026-05-09
  * @modified 2026-05-11 sendStatusChangeEmailAsync() 추가 — HTML 템플릿 기반 상태 변경 알림
+ * @modified 2026-05-11 onStatusChanged() 추가 — @TransactionalEventListener 패턴으로 전환
  */
 @Slf4j
 @Component
@@ -66,21 +88,53 @@ public class EmailSender {
     }
 
     /**
-     * 과제 상태 변경 이메일 비동기 발송 (HTML 템플릿 기반)
-     * resources/templates/notification.html 을 로드하여 플레이스홀더를 치환 후 발송
-     * 성공 시 SENT, 실패 시 FAILED로 상태 업데이트
+     * 과제 상태 변경 이벤트 리스너 — 트랜잭션 커밋 후 이메일 비동기 발송
+     *
+     * <p>{@code @TransactionalEventListener(phase = AFTER_COMMIT)}: 트랜잭션이 성공적으로
+     * 커밋된 후에만 이 메서드가 호출된다. 트랜잭션이 롤백되면 이벤트는 버려진다.</p>
+     *
+     * <p>{@code @Async}: 이벤트 발행 스레드(HTTP 요청 처리 스레드)를 블록하지 않도록
+     * 별도 스레드 풀에서 실행한다. 사용자 응답은 커밋 즉시 반환되고 이메일 발송은
+     * 백그라운드에서 진행된다.</p>
+     *
+     * <p>두 어노테이션이 함께 동작하는 순서:</p>
+     * <ol>
+     *   <li>트랜잭션 커밋 완료</li>
+     *   <li>Spring이 AFTER_COMMIT 단계 리스너를 탐색, 이 메서드를 스레드 풀에 제출</li>
+     *   <li>HTTP 응답 반환 (사용자 대기 종료)</li>
+     *   <li>스레드 풀에서 이 메서드 실행 → SMTP 발송 → notifications.status 업데이트</li>
+     * </ol>
+     *
+     * @param event ProjectService.changeStatus()가 발행한 상태 변경 이벤트
+     */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Async
+    public void onStatusChanged(StatusChangedEvent event) {
+        sendStatusChangeEmail(
+                event.getNotificationId(),
+                event.getRecipientEmail(),
+                event.getProjectTitle(),
+                event.getStatus(),
+                event.getChangedAt(),
+                event.getComment()
+        );
+    }
+
+    /**
+     * 과제 상태 변경 이메일 발송 내부 구현
+     * resources/templates/notification.html 을 로드하여 플레이스홀더를 치환 후 발송.
+     * 성공 시 SENT, 실패 시 FAILED로 notifications.status 업데이트.
      *
      * @param notificationId 상태를 업데이트할 알림 ID
      * @param recipientEmail 수신자 이메일
      * @param projectTitle   과제명
-     * @param status         변경된 상태 (SUBMITTED / REVIEWING / APPROVED / REJECTED / IN_PROGRESS / COMPLETED)
+     * @param status         변경된 상태
      * @param changedAt      변경 일시
-     * @param comment        변경 사유 (null 허용 — null이면 메일에서 생략)
+     * @param comment        변경 사유 (null 허용)
      */
-    @Async
-    public void sendStatusChangeEmailAsync(Long notificationId, String recipientEmail,
-                                           String projectTitle, String status,
-                                           LocalDateTime changedAt, String comment) {
+    private void sendStatusChangeEmail(Long notificationId, String recipientEmail,
+                                       String projectTitle, String status,
+                                       LocalDateTime changedAt, String comment) {
         try {
             String html = loadTemplate(projectTitle, status, changedAt, comment);
 
@@ -101,6 +155,7 @@ public class EmailSender {
             notificationMapper.updateStatus(notificationId, "FAILED", LocalDateTime.now());
         }
     }
+
 
     /**
      * notification.html 템플릿 로드 후 플레이스홀더 치환

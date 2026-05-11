@@ -419,8 +419,11 @@ DB 작업이 모두 성공한 후 API 호출하는 방식으로 구현하세요.
 
 **완료된 구현 (2026-05-11 추가)**
 - [x] `src/main/resources/templates/notification.html` — 단일 HTML 템플릿 (과제 상태 변경 알림용, 플레이스홀더 String.replace() 치환 방식)
-- [x] `EmailSender.sendStatusChangeEmailAsync()` — 템플릿 로드 + 플레이스홀더 치환 후 HTML 이메일 발송 (상태별 한글 텍스트 분기 포함)
-- [x] `ProjectService.changeStatus()` — 트랜잭션 완료 후 신청자에게 자동 이메일 발송 연결 (`NotificationMapper`, `UserMapper`, `EmailSender` 의존성 추가)
+- [x] `EmailSender.sendStatusChangeEmail()` — 템플릿 로드 + 플레이스홀더 치환 후 HTML 이메일 발송 (상태별 한글 텍스트 분기 포함)
+- [x] `ProjectService.changeStatus()` — 트랜잭션 완료 후 신청자에게 자동 이메일 발송 연결 (`NotificationMapper`, `UserMapper` 의존성 추가)
+- [x] `StatusChangedEvent` (`com.retrack.event`) — 상태 변경 도메인 이벤트 객체 (불변 클래스)
+- [x] `EmailSender.onStatusChanged()` — `@TransactionalEventListener(AFTER_COMMIT)` + `@Async` 리스너. 트랜잭션 커밋 확인 후 별도 스레드에서 SMTP 발송. `ProjectService`에서 `EmailSender` 직접 의존 제거
+- [x] `ProjectService` — `EmailSender` 의존성 제거, `ApplicationEventPublisher` 주입으로 교체
 
 **보류**
 - 회원가입 환영 이메일 — 핵심 기능 완성 후 추가 예정
@@ -444,6 +447,11 @@ Spring AOP + 커스텀 어노테이션 방식으로 구현. 각 Service는 @LogA
 - [x] `NotificationService` — sendNotification에 @LogActivity 추가, ActivityLogMapper 의존성 제거
 - [x] `UserService` — updateRole/verifyUser/deleteUser에 @LogActivity 추가, ActivityLogMapper 의존성 제거
 - [x] 로그 삽입은 Aspect 내 try-catch로 감싸 실패해도 핵심 비즈니스 로직에 영향 없음
+
+#### 보안 패치 및 리팩토링 (2026-05-11)
+- [x] `NotificationController.getNotification` — 알림 소유권 검증 추가. 기존에는 알림 ID만 알면 타인 알림 조회 가능했던 보안 버그 수정. 본인 알림 또는 ADMIN만 조회 가능 (UnauthorizedException 401)
+- [x] `ActivityLogVO` — 수동 getter/setter 제거, Lombok `@Getter @Setter`로 교체 (125줄 → 42줄, 다른 VO와 일관성 통일)
+- [x] `FileVO.filePath` — `@JsonIgnore` 주석 추가 (서버 내부 경로 노출 방지 및 저장소 교체 결합도 설명)
 
 #### 10단계 — 통계 API
 - [ ] `StatsMapper` + `StatsMapper.xml` — 과제 상태별 현황, 연구비 카테고리별 집계, 연구비 소진율, 월별 알림 발송 건수
