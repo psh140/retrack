@@ -479,10 +479,21 @@ Spring AOP + 커스텀 어노테이션 방식으로 구현. 각 Service는 @LogA
 - [x] `DashboardService` — role 분기 (ADMIN/MANAGER/RESEARCHER/VIEWER), toStatusMap() 헬퍼
 - [x] `DashboardController` — GET /api/dashboard (ALL, @RequiredRole 없음 — JwtInterceptor 인증 의존)
 
-#### 11.5단계 — DB 인덱스 추가
-전체 기능 구현 완료 후 실제 쿼리 패턴을 기반으로 필요한 컬럼에 인덱스 추가
-- `schema.sql` 업데이트
-- 대상 컬럼은 11단계 완료 시점에 결정
+#### 11.5단계 — DB 인덱스 추가 (2026-05-12)
+- [x] `schema.sql` — 11개 인덱스 추가 (projects 4종, project_history/budget/files/activity_logs/notifications×2/users 각 1종)
+- [x] FK 컬럼 및 빈번한 WHERE·ORDER BY 컬럼 대상, `IF NOT EXISTS` 사용
+
+#### 11.6단계 — SQL 파일 분리 (2026-05-12)
+- [x] `sql/seed.sql` 신규 생성 — 개발용 테스트 데이터 (사용자 5명, 과제 4건, 연구비 5건, 이력 6건, 알림 4건, 활동로그 6건)
+- [x] `schema.sql`에서 seed 블록 제거 — 스키마 파일은 테이블 + 인덱스만 유지
+- [x] `docker-compose.yml` — `01_schema.sql` / `02_seed.sql` 숫자 prefix로 실행 순서 보장, 운영 시 `02_seed.sql` 줄만 제거
+
+#### 12단계 — JUnit 5 + Mockito 단위 테스트
+- 대상: `AuthService`, `FileService`, `ProjectService` (비즈니스 로직 검증 우선)
+- [ ] `pom.xml` — JUnit 5, Mockito 의존성 추가
+- [ ] `AuthServiceTest` — 이메일 중복 400, 비밀번호 불일치 401, BCrypt 암호화 여부
+- [ ] `FileServiceTest` — 확장자 화이트리스트 검증, RESEARCHER 본인 파일만 삭제
+- [ ] `ProjectServiceTest` — 상태 전이 유효성, RESEARCHER 본인 과제 수정 권한, changeStatus() 흐름
 
 ---
 

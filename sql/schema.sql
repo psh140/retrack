@@ -87,3 +87,34 @@ CREATE TABLE IF NOT EXISTS NOTIFICATIONS (
     status          VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     sent_at         TIMESTAMP
 );
+
+-- =============================================
+-- Indexes
+-- PostgreSQL은 FK 컬럼에 자동 인덱스를 생성하지 않으므로
+-- WHERE 조건·JOIN·ORDER BY에 자주 쓰이는 컬럼에 명시적으로 추가
+-- =============================================
+
+-- PROJECTS
+CREATE INDEX IF NOT EXISTS idx_projects_status     ON projects(status);
+CREATE INDEX IF NOT EXISTS idx_projects_user_id    ON projects(user_id);
+CREATE INDEX IF NOT EXISTS idx_projects_manager_id ON projects(manager_id);
+CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at DESC);
+
+-- PROJECT_HISTORY
+CREATE INDEX IF NOT EXISTS idx_project_history_project_id ON project_history(project_id);
+
+-- BUDGET
+CREATE INDEX IF NOT EXISTS idx_budget_project_id ON budget(project_id);
+
+-- FILES
+CREATE INDEX IF NOT EXISTS idx_files_project_id ON files(project_id);
+
+-- ACTIVITY_LOGS
+CREATE INDEX IF NOT EXISTS idx_activity_logs_user_id ON activity_logs(user_id);
+
+-- NOTIFICATIONS
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_status  ON notifications(status);
+
+-- USERS
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
