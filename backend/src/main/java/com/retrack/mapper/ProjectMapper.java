@@ -6,18 +6,24 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 과제 관리 관련 DB 쿼리 인터페이스
  * SQL은 resources/mapper/ProjectMapper.xml 에 정의
  *
  * @since 2026-04-28
+ * @modified 2026-05-12 검색 파라미터 추가
+ * @modified 2026-05-12 페이지네이션용 countAll 추가
  */
 @Mapper
 public interface ProjectMapper {
 
-    /** 전체 과제 목록 조회 (최신 등록순) */
-    List<ProjectVO> findAll();
+    /** 검색 조건으로 과제 목록 조회. 파라미터 없으면 전체 목록 반환 */
+    List<ProjectVO> findAll(Map<String, Object> params);
+
+    /** 검색 조건에 맞는 과제 총 건수 반환 (페이지네이션용) */
+    long countAll(Map<String, Object> params);
 
     /** 과제 ID로 단건 조회 */
     ProjectVO findById(Long projectId);

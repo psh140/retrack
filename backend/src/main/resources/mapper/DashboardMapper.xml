@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 최초 생성일: 2026-05-12 -->
+<!--
+    DashboardMapper.xml
+    대시보드 요약 데이터 쿼리 정의
+    역할별(ADMIN/MANAGER/RESEARCHER) 분기에 필요한 집계·조회 쿼리를 제공한다.
+-->
+<mapper namespace="com.retrack.mapper.DashboardMapper">
+
+    <!-- notifications 컬럼(snake_case) → NotificationVO 필드(camelCase) 매핑 -->
+    <resultMap id="notificationResultMap" type="com.retrack.vo.NotificationVO">
+        <id     property="notificationId" column="notification_id"/>
+        <result property="userId"         column="user_id"/>
+        <result property="projectId"      column="project_id"/>
+        <result property="message"        column="message"/>
+        <result property="status"         column="status"/>
+        <result property="sentAt"         column="sent_at"/>
+    </resultMap>
+
+    <!-- 전체 과제 상태별 건수 (ADMIN용) -->
+    <select id="getProjectStatusStats" resultType="map">
+        SELECT status,
+               COUNT(*) AS count
+        FROM projects
+        GROUP BY status
+        ORDER BY status
+    </select>
+
+    <!-- 본인이 등록한 과제 상태별 건수 (RESEARCHER용) -->
+    <select id="getProjectStatusStatsByUserId" parameterType="long" resultType="map">
+        SELECT status,
+               COUNT(*) AS count
+        FROM projects
+        WHERE user_id = #{userId}
+        GROUP BY status
+        ORDER BY status
+    </select>
+
+    <!-- 본인이 담당하는 과제 상태별 건수 (MANAGER용) -->
+    <select id="getProjectStatusStatsByManagerId" parameterType="long" resultType="map">
+        SELECT status,
+               COUNT(*) AS count
+        FROM projects
+        WHERE manager_id = #{managerId}
+        GROUP BY status
+        ORDER BY status
+    </select>
+
+    <!-- 전체 연구비 합계 (ADMIN용) — 데이터 없을 때 0 반환 -->
+    <select id="getTotalBudget" resultType="long">
+        SELECT COALESCE(SUM(amount), 0)
+        FROM budget
+    </select>
+
+    <!-- 본인이 등록한 과제의 연구비 합계 (RESEARCHER용) — 데이터 없을 때 0 반환 -->
+    <select id="getBudgetByUserId" parameterType="long" resultType="long">
+        SELECT COALESCE(SUM(b.amount), 0)
+        FROM budget b
+        JOIN projects p ON b.project_id = p.project_id
+        WHERE p.user_id = #{userId}
+    </select>
+
+    <!-- 본인이 담당하는 과제의 연구비 합계 (MANAGER용) — 데이터 없을 때 0 반환 -->
+    <select id="getBudgetByManagerId" parameterType="long" resultType="long">
+        SELECT COALESCE(SUM(b.amount), 0)
+        FROM budget b
+        JOIN projects p ON b.project_id = p.project_id
+        WHERE p.manager_id = #{managerId}
+    </select>
+
+    <!-- 전체 사용자 수 (ADMIN용) -->
+    <select id="getTotalUserCount" resultType="long">
+        SELECT COUNT(*)
+        FROM users
+    </select>
+
+    <!-- 특정 사용자의 최근 알림 5건 (sent_at 내림차순, NULL 마지막) -->
+    <select id="getRecentNotifications" parameterType="long" resultMap="notificationResultMap">
+        SELECT notification_id, user_id, project_id, message, status, sent_at
+        FROM notifications
+        WHERE user_id = #{userId}
+        ORDER BY sent_at DESC NULLS LAST
+        LIMIT 5
+    </select>
+
+</mapper>

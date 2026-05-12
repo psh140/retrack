@@ -9,6 +9,7 @@ import com.retrack.mapper.NotificationMapper;
 import com.retrack.mapper.ProjectMapper;
 import com.retrack.mapper.UserMapper;
 import com.retrack.vo.NotificationVO;
+import com.retrack.vo.PageResponse;
 import com.retrack.vo.ProjectHistoryVO;
 import com.retrack.vo.ProjectRequestVO;
 import com.retrack.vo.ProjectVO;
@@ -39,6 +40,8 @@ import java.util.Map;
  * @modified 2026-05-11 활동 로그 @LogActivity AOP로 전환
  * @modified 2026-05-11 이메일 발송을 @TransactionalEventListener 패턴으로 전환
  *                      (트랜잭션 커밋 보장 후 발송, EmailSender 직접 의존 제거)
+ * @modified 2026-05-12 검색 파라미터 추가
+ * @modified 2026-05-12 페이지네이션 적용
  */
 @Service
 public class ProjectService {
@@ -64,6 +67,9 @@ public class ProjectService {
         VALID_TRANSITIONS.put("COMPLETED",   Arrays.asList());
     }
 
+    /** 허용되는 페이지 크기 */
+    private static final List<Integer> VALID_PAGE_SIZES = Arrays.asList(10, 20, 50);
+
     private final ProjectMapper projectMapper;
     private final FileService fileService;
     private final NotificationMapper notificationMapper;
@@ -86,9 +92,24 @@ public class ProjectService {
         this.eventPublisher = eventPublisher;
     }
 
-    /** 전체 과제 목록 반환 */
-    public List<ProjectVO> getProjectList() {
-        return projectMapper.findAll();
+    /**
+     * 검색 조건 + 페이지네이션으로 과제 목록 반환
+     * size는 10, 20, 50만 허용 — 그 외 값은 BadRequestException
+     *
+     * @param params 검색 조건 Map (keyword, status, userId, managerId, startDateFrom/To, endDateFrom/To)
+     * @param page   페이지 번호 (1부터 시작)
+     * @param size   페이지당 항목 수 (10, 20, 50)
+     */
+    public PageResponse<ProjectVO> getProjectList(Map<String, Object> params, int page, int size) {
+        if (!VALID_PAGE_SIZES.contains(size)) {
+            throw new BadRequestException("페이지 크기는 10, 20, 50만 허용됩니다.");
+        }
+        params.put("size", size);
+        params.put("offset", (page - 1) * size);
+
+        List<ProjectVO> items = projectMapper.findAll(params);
+        long totalCount = projectMapper.countAll(params);
+        return new PageResponse<>(items, totalCount, page, size);
     }
 
     /**

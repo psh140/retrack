@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 최초 생성일: 2026-05-12 -->
+<mapper namespace="com.retrack.mapper.StatsMapper">
+
+    <!-- 과제 상태별 건수 집계 (status, count) -->
+    <select id="countByStatus" resultType="map">
+        SELECT status,
+               COUNT(*) AS count
+        FROM projects
+        GROUP BY status
+        ORDER BY status
+    </select>
+
+    <!-- 연구비 카테고리별 합계 (category, total) -->
+    <select id="sumByCategory" resultType="map">
+        SELECT category,
+               SUM(amount) AS total
+        FROM budget
+        GROUP BY category
+        ORDER BY category
+    </select>
+
+    <!-- 과제별 연구비 소진 현황 (project_id, title, budget_total, budget_used) -->
+    <select id="burnrate" resultType="map">
+        SELECT p.project_id,
+               p.title,
+               p.budget_total,
+               COALESCE(SUM(b.amount), 0) AS budget_used
+        FROM projects p
+        LEFT JOIN budget b ON p.project_id = b.project_id
+        GROUP BY p.project_id, p.title, p.budget_total
+        ORDER BY p.project_id
+    </select>
+
+    <!-- 월별 알림 발송 건수 — status='SENT' 기준, 최근 12개월 (month, count) -->
+    <select id="countByMonth" resultType="map">
+        SELECT TO_CHAR(sent_at, 'YYYY-MM') AS month,
+               COUNT(*) AS count
+        FROM notifications
+        WHERE status = 'SENT'
+          AND sent_at IS NOT NULL
+        GROUP BY TO_CHAR(sent_at, 'YYYY-MM')
+        ORDER BY month DESC
+        LIMIT 12
+    </select>
+
+</mapper>

@@ -453,14 +453,31 @@ Spring AOP + 커스텀 어노테이션 방식으로 구현. 각 Service는 @LogA
 - [x] `ActivityLogVO` — 수동 getter/setter 제거, Lombok `@Getter @Setter`로 교체 (125줄 → 42줄, 다른 VO와 일관성 통일)
 - [x] `FileVO.filePath` — `@JsonIgnore` 주석 추가 (서버 내부 경로 노출 방지 및 저장소 교체 결합도 설명)
 
-#### 10단계 — 통계 API
-- [ ] `StatsMapper` + `StatsMapper.xml` — 과제 상태별 현황, 연구비 카테고리별 집계, 연구비 소진율, 월별 알림 발송 건수
-- [ ] `StatsService` — 통계 데이터 가공
-- [ ] `StatsController` — GET /api/stats/projects/status, /api/stats/budget/category, /api/stats/budget/burnrate, /api/stats/notifications/monthly
+#### 10단계 — 통계 API (2026-05-12)
+- [x] `StatsMapper` + `StatsMapper.xml` — 과제 상태별 현황(countByStatus), 연구비 카테고리별 집계(sumByCategory), 연구비 소진율(burnrate), 월별 알림 발송 건수(countByMonth)
+- [x] `StatsService` — Map 형태로 가공. burnrate는 snake_case → camelCase 변환 + burnRate 필드(소수점 1자리) 추가
+- [x] `StatsController` — GET /api/stats/projects/status, /api/stats/budget/category, /api/stats/budget/burnrate, /api/stats/notifications/monthly (모두 ADMIN 전용)
 
-#### 11단계 — 대시보드 API
-- [ ] `DashboardService` — 역할별 요약 데이터 집계 (진행 중 과제 수, 총 연구비, 최근 알림 등)
-- [ ] `DashboardController` — GET /api/dashboard
+#### 10.5단계 — 검색 기능 (2026-05-12)
+- [x] `ProjectMapper.java` — `findAll()` → `findAll(Map<String, Object> params)` 시그니처 변경
+- [x] `ProjectMapper.xml` — `findAll`에 `<where><if>` dynamic SQL 추가 (keyword ILIKE, status, userId, managerId, startDateFrom/To, endDateFrom/To)
+- [x] `ProjectService.java` — `getProjectList(Map<String, Object> params)` 파라미터 전달
+- [x] `ProjectController.java` — `@RequestParam(required=false)` 8개 추가, Map 조립 후 서비스 전달
+- [x] `UserMapper.java` + `UserMapper.xml` — `findAll(Map<String, Object> params)` 변경, dynamic SQL (keyword: username/email ILIKE, role, isVerified)
+- [x] `UserService.java` — `getUserList(Map<String, Object> params)` 파라미터 전달
+- [x] `UserController.java` — `@RequestParam` 3개 추가, `@RequiredRole("ADMIN")` → `"MANAGER"` 완화 (목록 조회만)
+
+#### 10.6단계 — 페이지네이션 (2026-05-12)
+- [x] `PageResponse.java` — 신규 VO (items, totalCount, page, size, totalPages)
+- [x] `ProjectMapper.java` / `UserMapper.java` — `countAll(Map<String, Object> params)` 추가
+- [x] `ProjectMapper.xml` / `UserMapper.xml` — `<sql>` 공통 조건 추출, `findAll`에 `LIMIT/OFFSET` 추가, `countAll` 쿼리 추가
+- [x] `ProjectService.java` / `UserService.java` — `PageResponse` 반환, size 허용값 검증 (10/20/50)
+- [x] `ProjectController.java` / `UserController.java` — `page`(기본 1), `size`(기본 10) `@RequestParam` 추가
+
+#### 11단계 — 대시보드 API (2026-05-12)
+- [x] `DashboardMapper` + `DashboardMapper.xml` — 8개 집계 쿼리 (상태별 건수 3종, 연구비 합계 3종, 사용자 수, 최근 알림 5건)
+- [x] `DashboardService` — role 분기 (ADMIN/MANAGER/RESEARCHER/VIEWER), toStatusMap() 헬퍼
+- [x] `DashboardController` — GET /api/dashboard (ALL, @RequiredRole 없음 — JwtInterceptor 인증 의존)
 
 #### 11.5단계 — DB 인덱스 추가
 전체 기능 구현 완료 후 실제 쿼리 패턴을 기반으로 필요한 컬럼에 인덱스 추가

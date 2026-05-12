@@ -4,11 +4,13 @@ import com.retrack.annotation.LogActivity;
 import com.retrack.exception.BadRequestException;
 import com.retrack.exception.NotFoundException;
 import com.retrack.mapper.UserMapper;
+import com.retrack.vo.PageResponse;
 import com.retrack.vo.UserVO;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 사용자 관리 비즈니스 로직
@@ -22,6 +24,8 @@ import java.util.List;
  *
  * @since 2026-04-28
  * @modified 2026-05-11 활동 로그 @LogActivity AOP로 전환
+ * @modified 2026-05-12 검색 파라미터 추가
+ * @modified 2026-05-12 페이지네이션 적용
  */
 @Service
 public class UserService {
@@ -29,15 +33,33 @@ public class UserService {
     /** 허용되는 권한 값 목록 (계층 순서: VIEWER < RESEARCHER < MANAGER < ADMIN) */
     private static final List<String> VALID_ROLES = Arrays.asList("VIEWER", "RESEARCHER", "MANAGER", "ADMIN");
 
+    /** 허용되는 페이지 크기 */
+    private static final List<Integer> VALID_PAGE_SIZES = Arrays.asList(10, 20, 50);
+
     private final UserMapper userMapper;
 
     public UserService(UserMapper userMapper) {
         this.userMapper = userMapper;
     }
 
-    /** 전체 사용자 목록 반환 */
-    public List<UserVO> getUserList() {
-        return userMapper.findAll();
+    /**
+     * 검색 조건 + 페이지네이션으로 사용자 목록 반환
+     * size는 10, 20, 50만 허용 — 그 외 값은 BadRequestException
+     *
+     * @param params 검색 조건 Map (keyword, role, isVerified)
+     * @param page   페이지 번호 (1부터 시작)
+     * @param size   페이지당 항목 수 (10, 20, 50)
+     */
+    public PageResponse<UserVO> getUserList(Map<String, Object> params, int page, int size) {
+        if (!VALID_PAGE_SIZES.contains(size)) {
+            throw new BadRequestException("페이지 크기는 10, 20, 50만 허용됩니다.");
+        }
+        params.put("size", size);
+        params.put("offset", (page - 1) * size);
+
+        List<UserVO> items = userMapper.findAll(params);
+        long totalCount = userMapper.countAll(params);
+        return new PageResponse<>(items, totalCount, page, size);
     }
 
     /**

@@ -5,11 +5,15 @@ import com.retrack.service.ProjectService;
 import com.retrack.vo.ApiResponse;
 import com.retrack.vo.ProjectRequestVO;
 import com.retrack.vo.StatusChangeRequestVO;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 과제 관리 API
@@ -21,6 +25,8 @@ import java.io.IOException;
  *
  * @since 2026-04-28
  * @modified 2026-05-11 deleteProject에 userId 파라미터 추가 (활동 로그용)
+ * @modified 2026-05-12 과제 검색 파라미터 추가
+ * @modified 2026-05-12 페이지네이션 파라미터 추가
  */
 @RestController
 @RequestMapping("/api/projects")
@@ -34,11 +40,43 @@ public class ProjectController {
 
     /**
      * GET /api/projects
-     * 전체 과제 목록 조회
+     * 과제 목록 조회 — 모든 파라미터 선택 사항, 미입력 시 전체 목록 반환
+     *
+     * @param keyword       과제명 부분 일치 (ILIKE)
+     * @param status        승인 상태 (DRAFT/SUBMITTED/REVIEWING/APPROVED/REJECTED/IN_PROGRESS/COMPLETED)
+     * @param userId        과제 신청자 ID
+     * @param managerId     과제 담당자 ID
+     * @param startDateFrom 시작일 범위 시작 (yyyy-MM-dd)
+     * @param startDateTo   시작일 범위 끝 (yyyy-MM-dd)
+     * @param endDateFrom   종료일 범위 시작 (yyyy-MM-dd)
+     * @param endDateTo     종료일 범위 끝 (yyyy-MM-dd)
+     * @param page          페이지 번호 (기본값 1)
+     * @param size          페이지당 항목 수 (기본값 10, 허용값: 10/20/50)
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getProjectList() {
-        return ResponseEntity.ok(ApiResponse.ok("과제 목록 조회 성공", projectService.getProjectList()));
+    public ResponseEntity<ApiResponse<?>> getProjectList(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) Long managerId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDateTo,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDateTo,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Map<String, Object> params = new HashMap<>();
+        if (keyword != null && !keyword.isEmpty()) params.put("keyword", keyword);
+        if (status != null && !status.isEmpty()) params.put("status", status);
+        if (userId != null) params.put("userId", userId);
+        if (managerId != null) params.put("managerId", managerId);
+        if (startDateFrom != null) params.put("startDateFrom", startDateFrom);
+        if (startDateTo != null) params.put("startDateTo", startDateTo);
+        if (endDateFrom != null) params.put("endDateFrom", endDateFrom);
+        if (endDateTo != null) params.put("endDateTo", endDateTo);
+
+        return ResponseEntity.ok(ApiResponse.ok("과제 목록 조회 성공", projectService.getProjectList(params, page, size)));
     }
 
     /**
