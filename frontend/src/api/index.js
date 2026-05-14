@@ -37,4 +37,17 @@ api.interceptors.response.use(
   }
 );
 
+// ===================== 인증 API =====================
+
+/** 로그인 — 성공 시 { token, userId, username, role } 반환 */
+export const login = (email, password) =>
+  api.post('/auth/login', { email, password });
+
+/**
+ * 회원가입
+ * phone은 선택값 (빈 문자열로 전달 가능)
+ */
+export const register = (username, email, password, phone = '') =>
+  api.post('/auth/register', { username, email, password, phone });
+
 export default api;

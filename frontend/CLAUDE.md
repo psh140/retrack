@@ -103,9 +103,10 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 - [x] `components/Header.jsx` — 앱명, 사용자 역할, 로그아웃 버튼, 모바일 햄버거 버튼
 - [x] `components/Sidebar.jsx` — 메뉴 항목 (ADMIN 메뉴 권한 분기)
 
-#### 3단계 — 인증
-- [ ] `pages/LoginPage.jsx`
-- [ ] `pages/RegisterPage.jsx`
+#### 3단계 — 인증 (2026-05-14)
+- [x] `pages/LoginPage.jsx` — 이메일/비밀번호 폼, 로그인 성공 시 authStore 저장 후 /dashboard 이동
+- [x] `pages/RegisterPage.jsx` — 이름/이메일/비밀번호/연락처 폼, 가입 성공 시 /login 이동
+- [x] `api/index.js` — login(), register() 함수 추가
 
 #### 4단계 — 대시보드
 - [ ] `pages/DashboardPage.jsx`
@@ -134,3 +135,5 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 | 파일 | 내용 |
 |---|---|
 | `docs/troubleshooting-프론트엔드-초기설정.md` | ESLint unused-vars, prop-types 규칙, 빌드 ≠ 린트 |
+| `docs/troubleshooting-프론트엔드-3단계-인증.md` | 로그인 403 (CORS), Vite proxy Origin 헤더 덮어쓰기로 해결 |
+| `docs/nginx-배포설정.md` | 배포 시 Nginx 리버스 프록시 설정 (CORS 우회, React Router 폴백) |

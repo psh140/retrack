@@ -14,6 +14,8 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
+        // 백엔드 CORS가 localhost:3000만 허용하므로 Origin 헤더를 덮어써서 통과
+        headers: { Origin: 'http://localhost:3000' },
       },
     },
   },
