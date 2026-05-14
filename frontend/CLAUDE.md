@@ -48,6 +48,7 @@
 ### 완료된 작업
 
 #### 초기 세팅
+- [x] `.vscode/settings.json` 생성 (formatOnSave, ESLint 자동 수정)
 - [ ] Vite 프로젝트 생성
 - [ ] 패키지 설치 (react-router-dom, axios, zustand, dayjs, antd, @ant-design/icons, recharts)
 - [ ] ESLint + Prettier 설정
