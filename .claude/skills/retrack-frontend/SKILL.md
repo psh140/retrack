@@ -11,13 +11,32 @@ description: >
 
 **실행 모드:** 에이전트 팀 (frontend-leader 리더, ui-builder + api-connector 병렬)
 
+## 확정된 기술 스택
+
+| 항목 | 결정 | 비고 |
+|---|---|---|
+| 언어 | JavaScript | TypeScript 미채택 |
+| 빌드 도구 | Vite | |
+| 상태관리 | Zustand | auth 전역 상태 전용 (`src/store/authStore.js`) |
+| HTTP 클라이언트 | axios | interceptor로 토큰 자동 주입 + 401 자동 로그아웃 |
+| 라우팅 | React Router v6 | |
+| UI 라이브러리 | Ant Design v5 | CSS-in-JS 방식, 별도 CSS 파일 최소화 |
+| 날짜 처리 | dayjs | LocalDateTime 파싱용 |
+| 토큰 저장 | localStorage | 키: `token`, `userId`, `userRole` |
+| CORS 처리 | Vite proxy | 개발 서버(5173) → 백엔드(8080) `vite.config.js`에 설정 |
+| 아이콘 | @ant-design/icons | Ant Design 세트 |
+| 차트 | recharts | 통계 페이지용 |
+| 코드 품질 | ESLint + Prettier | |
+
 ## Phase 0: 컨텍스트 확인
 
 1. `frontend/src/` 구조를 확인하여 기존 구현 현황 파악
 2. `frontend/src/api/index.js` 존재 여부 확인:
    - 없으면 api-connector가 먼저 axios 인스턴스 + 전체 API 함수 뼈대 생성
    - 있으면 필요한 함수만 추가
-3. 요청된 페이지가 App.js에 라우팅 등록되어 있는지 확인
+3. `frontend/src/store/authStore.js` 존재 여부 확인:
+   - 없으면 ui-builder가 먼저 생성
+4. 요청된 페이지가 App.js에 라우팅 등록되어 있는지 확인
 
 ## Phase 1: 작업 분석
 
@@ -25,7 +44,7 @@ frontend-leader 에이전트가 수행:
 
 1. 구현 대상 페이지 식별
 2. 필요한 공통 컴포넌트 확인 (Header, Sidebar가 없으면 먼저 구현)
-3. 필요한 API 함수 목록 도출 (CLAUDE.md의 API 목록 참조)
+3. 필요한 API 함수 목록 도출 (docs/api-spec.md 참조)
 4. 권한 체크 필요 여부 판단
 
 ## Phase 2: 병렬 구현
@@ -41,6 +60,8 @@ ui-builder와 api-connector에게 **동시에** 작업 배분:
 권한 분기:
 - {역할}만 볼 수 있는 요소: {요소}
 사용할 API 함수명: (api-connector가 구현 예정)
+Ant Design v5 컴포넌트 사용 (Table, Form, Button, Modal, Select 등)
+날짜는 dayjs로 파싱
 ```
 
 **api-connector에게 전달:**
@@ -48,6 +69,7 @@ ui-builder와 api-connector에게 **동시에** 작업 배분:
 추가/확인할 API 함수:
 - {함수명}: {메서드} {엔드포인트}
 - {함수명}: {메서드} {엔드포인트}
+axios 인스턴스(src/api/index.js)에 함수 추가
 ```
 
 ## Phase 3: App.js 라우팅 등록
@@ -72,10 +94,13 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 `frontend/package.json`에 필요한 패키지가 있는지 확인:
 - `react-router-dom` — 라우팅
 - `axios` — HTTP 클라이언트
+- `zustand` — 상태관리
+- `dayjs` — 날짜 처리
+- `antd` — UI 라이브러리
 
 없으면 설치 명령어를 사용자에게 안내:
 ```bash
-cd frontend && npm install react-router-dom axios
+cd frontend && npm install react-router-dom axios zustand dayjs antd @ant-design/icons recharts
 ```
 
 ## 데이터 전달 프로토콜
@@ -98,33 +123,41 @@ frontend/src/
   pages/        ← 페이지 컴포넌트
   components/   ← 공통 컴포넌트 (Header, Sidebar, PrivateRoute, RoleRoute)
   api/
-    index.js    ← axios 인스턴스 + API 함수 전체
+    index.js    ← axios 인스턴스 + interceptor + API 함수 전체
+  store/
+    authStore.js ← Zustand auth 상태 (token, userId, userRole, setAuth, logout)
   App.js        ← 라우팅 설정
 ```
 
 ## 백엔드 연동 기준
 
-- 백엔드: `http://localhost:8080`
-- 인증: `Authorization: Bearer {JWT}` 헤더
-- 응답 형식: `{ success: true, message: "", data: {...} }` → data 추출 후 사용
-- 권한: localStorage의 `userRole` 값 (`VIEWER/RESEARCHER/MANAGER/ADMIN`)
+- API 기본 경로: `/api` (Vite proxy가 8080으로 전달)
+- 인증: `Authorization: Bearer {JWT}` 헤더 (interceptor 자동 주입)
+- 응답 형식: `{ success: true, message: "", data: {...} }` → `response.data.data` 추출 후 사용
+- 토큰: `localStorage.getItem('token')`
+- 권한: `localStorage.getItem('userRole')` (`VIEWER/RESEARCHER/MANAGER/ADMIN`)
+- 401 응답 시: localStorage 클리어 + `/login` 리다이렉트 (interceptor 자동 처리)
 
 ## 구현 순서 권장
 
-1. `api/index.js` (axios + 전체 API 함수 뼈대)
-2. `components/Header.js`, `components/Sidebar.js`, `components/PrivateRoute.js`, `components/RoleRoute.js`
-3. `pages/LoginPage.js`, `pages/RegisterPage.js`
-4. `pages/DashboardPage.js`
-5. `pages/ProjectListPage.js` → `ProjectDetailPage.js` → `ProjectFormPage.js`
-6. `pages/BudgetPage.js`, `pages/FilePage.js`
-7. `pages/NotificationPage.js`
-8. `pages/UserManagePage.js`, `pages/StatsPage.js`
+1. `api/index.js` (axios 인스턴스 + interceptor + 전체 API 함수 뼈대)
+2. `store/authStore.js` (Zustand auth store)
+3. `components/PrivateRoute.js`, `components/RoleRoute.js`
+4. `components/Header.js`, `components/Sidebar.js`
+5. `pages/LoginPage.js`, `pages/RegisterPage.js`
+6. `pages/DashboardPage.js`
+7. `pages/ProjectListPage.js` → `ProjectDetailPage.js` → `ProjectFormPage.js`
+8. `pages/BudgetPage.js`, `pages/FilePage.js`
+9. `pages/NotificationPage.js`
+10. `pages/UserManagePage.js`, `pages/StatsPage.js`, `pages/ActivityLogPage.js`
 
 ## 테스트 시나리오
 
 **정상 흐름:** "로그인 페이지 만들어줘"
-→ Phase 0에서 api/index.js 없음 확인 → api-connector가 먼저 생성
-→ ui-builder가 LoginPage.js 구현 → App.js 라우팅 등록
+→ Phase 0에서 api/index.js, authStore.js 없음 확인
+→ api-connector가 axios 인스턴스 + interceptor 생성
+→ ui-builder가 authStore.js + LoginPage.js 구현
+→ App.js 라우팅 등록
 
 **에러 흐름:** CORS 에러 발생
-→ 백엔드 spring-mvc.xml CORS 설정 확인 안내 (이미 localhost:3000 허용됨)
+→ vite.config.js의 proxy 설정 확인 (`/api` → `http://localhost:8080`)
