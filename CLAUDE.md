@@ -542,4 +542,5 @@ Claude Code는 서브디렉토리 CLAUDE.md를 자동 인식하므로, 백엔드
 | `docs/troubleshooting-5단계-과제관리API-테스트.md` | GlobalExceptionHandler 로그 미출력, Git Bash 인코딩 문제, 트랜잭션 확인 |
 | `docs/transaction-컨텍스트-분리-이슈.md` | 트랜잭션 매니저 서블릿 컨텍스트 분리 이슈 |
 | `docs/troubleshooting-7단계-파일관리API.md` | Maven 커맨드라인 빌드 시 Lombok 미처리, Maven Java 버전 충돌 |
+| `docs/troubleshooting-12단계-단위테스트.md` | JUnit 5 미실행 (surefire 3.x 필요), BCryptPasswordEncoder Mock 불가 |
 
