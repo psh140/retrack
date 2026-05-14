@@ -26,6 +26,7 @@ import java.util.UUID;
  *
  * @since 2026-05-02
  * @modified 2026-05-11 활동 로그 @LogActivity AOP로 전환
+ * @modified 2026-05-14 getOriginalFilename() null 반환 시 NPE 방지 검증 추가
  */
 @Service
 public class FileService {
@@ -77,8 +78,13 @@ public class FileService {
             throw new BadRequestException("파일이 비어있습니다.");
         }
 
+        String rawName = file.getOriginalFilename();
+        if (rawName == null || rawName.isEmpty()) {
+            throw new BadRequestException("파일명이 없습니다.");
+        }
+
         // 원본 파일명에서 경로 구분자 제거 후 확장자 추출
-        String originalName = new File(file.getOriginalFilename()).getName();
+        String originalName = new File(rawName).getName();
         String extension = extractExtension(originalName);
 
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
@@ -128,7 +134,9 @@ public class FileService {
             throw new NotFoundException("존재하지 않는 파일입니다.");
         }
 
-        if (!"ADMIN".equals(requesterRole) && !file.getUploadedBy().equals(requesterUserId)) {
+        // uploadedBy가 null이면 업로더가 탈퇴한 경우 — ADMIN만 삭제 가능
+        if (!"ADMIN".equals(requesterRole) &&
+                (file.getUploadedBy() == null || !file.getUploadedBy().equals(requesterUserId))) {
             throw new UnauthorizedException("본인이 업로드한 파일만 삭제할 수 있습니다.");
         }
 

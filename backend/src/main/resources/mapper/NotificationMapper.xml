@@ -5,6 +5,7 @@
 <!--
     NotificationMapper.xml
     notifications 테이블 쿼리 정의
+    @modified 2026-05-14 created_at 컬럼 추가 반영
 -->
 <mapper namespace="com.retrack.mapper.NotificationMapper">
 
@@ -16,19 +17,20 @@
         <result property="message"     column="message"/>
         <result property="status"      column="status"/>
         <result property="sentAt"      column="sent_at"/>
+        <result property="createdAt"   column="created_at"/>
     </resultMap>
 
     <!-- 특정 사용자의 알림 목록 조회 (최신순) -->
     <select id="findByUserId" parameterType="long" resultMap="notificationResultMap">
-        SELECT notification_id, user_id, project_id, message, status, sent_at
+        SELECT notification_id, user_id, project_id, message, status, sent_at, created_at
         FROM notifications
         WHERE user_id = #{userId}
-        ORDER BY notification_id DESC
+        ORDER BY created_at DESC
     </select>
 
     <!-- 알림 단건 조회 -->
     <select id="findById" parameterType="long" resultMap="notificationResultMap">
-        SELECT notification_id, user_id, project_id, message, status, sent_at
+        SELECT notification_id, user_id, project_id, message, status, sent_at, created_at
         FROM notifications
         WHERE notification_id = #{notificationId}
     </select>

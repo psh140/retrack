@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS PROJECTS (
 CREATE TABLE IF NOT EXISTS PROJECT_HISTORY (
     history_id  BIGSERIAL PRIMARY KEY,
     project_id  BIGINT NOT NULL REFERENCES PROJECTS(project_id) ON DELETE CASCADE,
-    changed_by  BIGINT NOT NULL REFERENCES USERS(user_id) ON DELETE CASCADE,
+    changed_by  BIGINT REFERENCES USERS(user_id) ON DELETE SET NULL,
     prev_status VARCHAR(30),
     new_status  VARCHAR(30) NOT NULL,
     comment     TEXT,
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS BUDGET (
     category    VARCHAR(30) NOT NULL,
     description TEXT,
     amount      BIGINT NOT NULL DEFAULT 0,
-    used_by     BIGINT NOT NULL REFERENCES USERS(user_id) ON DELETE CASCADE,
+    used_by     BIGINT REFERENCES USERS(user_id) ON DELETE SET NULL,
     used_at     TIMESTAMP NOT NULL,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS FILES (
     file_name   VARCHAR(255) NOT NULL,
     file_path   VARCHAR(500) NOT NULL,
     file_type   VARCHAR(100) NOT NULL,
-    uploaded_by BIGINT NOT NULL REFERENCES USERS(user_id) ON DELETE CASCADE,
+    uploaded_by BIGINT REFERENCES USERS(user_id) ON DELETE SET NULL,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
@@ -85,7 +85,8 @@ CREATE TABLE IF NOT EXISTS NOTIFICATIONS (
     project_id      BIGINT REFERENCES PROJECTS(project_id) ON DELETE SET NULL,
     message         TEXT NOT NULL,
     status          VARCHAR(20) NOT NULL DEFAULT 'PENDING',
-    sent_at         TIMESTAMP
+    sent_at         TIMESTAMP,
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 -- =============================================

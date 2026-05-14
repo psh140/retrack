@@ -26,6 +26,7 @@ import java.util.Map;
  * @modified 2026-05-11 활동 로그 @LogActivity AOP로 전환
  * @modified 2026-05-12 검색 파라미터 추가
  * @modified 2026-05-12 페이지네이션 적용
+ * @modified 2026-05-14 페이지 번호 0 이하 입력 시 음수 offset 방지 검증 추가
  */
 @Service
 public class UserService {
@@ -51,6 +52,9 @@ public class UserService {
      * @param size   페이지당 항목 수 (10, 20, 50)
      */
     public PageResponse<UserVO> getUserList(Map<String, Object> params, int page, int size) {
+        if (page < 1) {
+            throw new BadRequestException("페이지 번호는 1 이상이어야 합니다.");
+        }
         if (!VALID_PAGE_SIZES.contains(size)) {
             throw new BadRequestException("페이지 크기는 10, 20, 50만 허용됩니다.");
         }

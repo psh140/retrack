@@ -38,6 +38,23 @@ class FileServiceTest {
     @InjectMocks
     private FileService fileService;
 
+    /** getOriginalFilename()이 null을 반환하는 파일 업로드 시 BadRequestException 발생 */
+    @Test
+    void uploadFile_파일명없음_BadRequestException() throws Exception {
+        ProjectVO project = new ProjectVO();
+        project.setProjectId(1L);
+        when(projectMapper.findById(1L)).thenReturn(project);
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file", null, "application/pdf", "data".getBytes()
+        );
+
+        assertThrows(com.retrack.exception.BadRequestException.class,
+                () -> fileService.uploadFile(1L, file, 1L));
+
+        verify(fileStorageStrategy, never()).store(any(), any());
+    }
+
     /** 허용되지 않는 확장자(.exe) 업로드 시 BadRequestException 발생 — 보안 화이트리스트 검증 */
     @Test
     void uploadFile_불허확장자_BadRequestException() throws Exception {
