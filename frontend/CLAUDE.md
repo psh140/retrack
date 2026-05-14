@@ -49,12 +49,12 @@
 
 #### 초기 세팅
 - [x] `.vscode/settings.json` 생성 (formatOnSave, ESLint 자동 수정)
-- [ ] Vite 프로젝트 생성
-- [ ] 패키지 설치 (react-router-dom, axios, zustand, dayjs, antd, @ant-design/icons, recharts)
-- [ ] ESLint + Prettier 설정
-- [ ] vite.config.js proxy 설정 (`/api` → `http://localhost:8080`)
-- [ ] .env 파일 (`VITE_API_URL=/api`)
-- [ ] 폴더 구조 생성 (pages/, components/, api/, store/)
+- [x] Vite 프로젝트 생성 (CRA → Vite 전환, React 18, JavaScript)
+- [x] 패키지 설치 (react-router-dom, axios, zustand, dayjs, antd, @ant-design/icons, recharts)
+- [x] ESLint + Prettier 설정 (.eslintrc.cjs, .prettierrc)
+- [x] vite.config.js proxy 설정 (`/api` → `http://localhost:8080`)
+- [x] .env 파일 (`VITE_API_URL=/api`)
+- [x] 폴더 구조 생성 (pages/, components/, api/, store/)
 
 #### 1단계 — 기반 설정
 - [ ] `api/index.js` — axios 인스턴스 + request/response interceptor
