@@ -13,7 +13,7 @@ description: >
 
 ## Phase 0: 컨텍스트 확인
 
-1. `CLAUDE.md`의 "개발 현황" 섹션을 읽어 완료/미완료 단계를 파악한다
+1. `backend/CLAUDE.md`의 "개발 현황" 섹션을 읽어 완료/미완료 단계를 파악한다
 2. 사용자 요청이 어느 단계에 해당하는지 매핑한다
 3. `_workspace/` 디렉토리 존재 여부 확인:
    - 존재하고 부분 수정 요청 → **부분 재실행** (해당 레이어만 재호출)
@@ -70,10 +70,10 @@ java-implementer와 mybatis-specialist 완료 후, quality-guardian에게 검증
 
 quality-guardian이 위반 발견 시 직접 수정 후 backend-leader에게 보고.
 
-## Phase 4: CLAUDE.md 업데이트
+## Phase 4: backend/CLAUDE.md 업데이트
 
 구현 완료 후:
-1. CLAUDE.md의 "완료된 작업" 섹션에 해당 단계 체크박스(`- [x]`) 표시
+1. `backend/CLAUDE.md`의 "완료된 작업" 섹션에 해당 단계 체크박스(`- [x]`) 표시
 2. 구현된 내용을 간략히 기록 (기존 스타일 유지)
 3. "다음 작업" 섹션에서 완료된 항목 제거
 
@@ -117,8 +117,8 @@ sql/schema.sql  ← DB 스키마 (FK, 컬럼 타입 확인 시 참조)
 ## 테스트 시나리오
 
 **정상 흐름:** "9단계 활동 로그 API 구현해줘"
-→ Phase 0에서 CLAUDE.md 확인 → Phase 1에서 ActivityLogVO/Mapper/Service/Controller + XML 목록 도출
-→ Phase 2에서 병렬 구현 → Phase 3에서 주석 검증 → Phase 4에서 CLAUDE.md 업데이트
+→ Phase 0에서 backend/CLAUDE.md 확인 → Phase 1에서 ActivityLogVO/Mapper/Service/Controller + XML 목록 도출
+→ Phase 2에서 병렬 구현 → Phase 3에서 주석 검증 → Phase 4에서 backend/CLAUDE.md 업데이트
 
 **에러 흐름:** mybatis-specialist가 컬럼명을 모를 때
 → sql/schema.sql을 읽어 확인 → 재구현 → 검증 계속
