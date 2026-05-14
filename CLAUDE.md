@@ -489,11 +489,11 @@ Spring AOP + 커스텀 어노테이션 방식으로 구현. 각 Service는 @LogA
 - [x] `docker-compose.yml` — `01_schema.sql` / `02_seed.sql` 숫자 prefix로 실행 순서 보장, 운영 시 `02_seed.sql` 줄만 제거
 
 #### 12단계 — JUnit 5 + Mockito 단위 테스트
-- 대상: `AuthService`, `FileService`, `ProjectService` (복잡도 높은 케이스 8개 선별)
+- 대상: `AuthService`, `FileService`, `ProjectService` (복잡도·중요도 기준 선별 10케이스)
 - [x] `pom.xml` — `junit-jupiter 5.10.3`, `mockito-core/junit-jupiter 5.12.0`, `spring-test 5.3.39` (test scope), `maven-surefire-plugin 3.3.1` 추가
-- [x] `AuthServiceTest` — 비밀번호 불일치 401 (실제 BCrypt 해시), 로그인 성공 Map 구조 검증
-- [x] `FileServiceTest` — DB 실패 시 파일시스템 롤백 verify, RESEARCHER 소유권 검증, ADMIN 역할 분기
-- [x] `ProjectServiceTest` — 불허 상태 전이 BadRequestException + updateStatus never verify, 허용 전이 3가지 작업 모두 호출 verify, RESEARCHER 타인 과제 수정 권한 검증
+- [x] `AuthServiceTest` (3케이스) — 이메일 없음 401, 비밀번호 불일치 401 (실제 BCrypt 해시), 로그인 성공 Map 구조 검증
+- [x] `FileServiceTest` (4케이스) — 불허 확장자 보안 검증(store never 호출 verify), DB 실패 시 파일시스템 롤백, RESEARCHER 소유권 검증, ADMIN 역할 분기
+- [x] `ProjectServiceTest` (3케이스) — 불허 상태 전이 BadRequestException + updateStatus never verify, 허용 전이 3가지 작업 모두 호출 verify, RESEARCHER 타인 과제 수정 권한 검증
 
 ---
 
