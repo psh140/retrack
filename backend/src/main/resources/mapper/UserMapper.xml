@@ -29,6 +29,8 @@
     <sql id="userSearchConditions">
         <where>
             <if test="keyword != null and keyword != ''">
+                <!-- ILIKE '%keyword%'는 앞 와일드카드로 B-tree 인덱스 불가 → full table scan 발생
+                     개선안: pg_bigm 확장 + GIN 인덱스로 한국어 부분 일치 검색 최적화 가능 -->
                 (username ILIKE '%' || #{keyword} || '%' OR email ILIKE '%' || #{keyword} || '%')
             </if>
             <if test="role != null and role != ''">
