@@ -57,36 +57,44 @@
 - [x] 폴더 구조 생성 (pages/, components/, api/, store/)
 
 #### 1단계 — 기반 설정
-- [ ] `api/index.js` — axios 인스턴스 + request/response interceptor
-- [ ] `store/authStore.js` — Zustand auth store (token, userId, userRole, setAuth, logout)
-- [ ] `components/PrivateRoute.js` — 로그인 여부 확인
-- [ ] `components/RoleRoute.js` — 권한 확인
-- [ ] `App.js` — 라우팅 전체 구조
+- [x] `api/index.js` — axios 인스턴스 + request/response interceptor
+- [x] `store/authStore.js` — Zustand auth store (token, userId, userRole, setAuth, logout)
+- [x] `components/PrivateRoute.jsx` — 로그인 여부 확인
+- [x] `components/RoleRoute.jsx` — 권한 확인 (ROLE_ORDER 배열로 계층 비교)
+- [x] `App.jsx` — 라우팅 전체 구조 (페이지 추가 시 주석 해제)
 
 #### 2단계 — 레이아웃
-- [ ] `components/Header.js`
-- [ ] `components/Sidebar.js`
+- [ ] `components/Header.jsx`
+- [ ] `components/Sidebar.jsx`
 
 #### 3단계 — 인증
-- [ ] `pages/LoginPage.js`
-- [ ] `pages/RegisterPage.js`
+- [ ] `pages/LoginPage.jsx`
+- [ ] `pages/RegisterPage.jsx`
 
 #### 4단계 — 대시보드
-- [ ] `pages/DashboardPage.js`
+- [ ] `pages/DashboardPage.jsx`
 
 #### 5단계 — 과제 관리
-- [ ] `pages/ProjectListPage.js`
-- [ ] `pages/ProjectDetailPage.js` (기본정보 탭: 과제정보 + 이력 + 첨부파일 / 연구비 탭: 목록 + 집계 차트)
-- [ ] `pages/ProjectFormPage.js` (등록/수정 공용)
+- [ ] `pages/ProjectListPage.jsx`
+- [ ] `pages/ProjectDetailPage.jsx` (기본정보 탭: 과제정보 + 이력 + 첨부파일 / 연구비 탭: 목록 + 집계 차트)
+- [ ] `pages/ProjectFormPage.jsx` (등록/수정 공용)
 
 #### 6단계 — 알림
-- [ ] `pages/NotificationPage.js`
+- [ ] `pages/NotificationPage.jsx`
 
 #### 7단계 — 관리자
-- [ ] `pages/UserManagePage.js`
-- [ ] `pages/StatsPage.js` (recharts 차트)
-- [ ] `pages/ActivityLogPage.js`
+- [ ] `pages/UserManagePage.jsx`
+- [ ] `pages/StatsPage.jsx` (recharts 차트)
+- [ ] `pages/ActivityLogPage.jsx`
 
 ### 다음 작업
 
-초기 세팅부터 시작
+2단계 — 레이아웃 (Header.jsx, Sidebar.jsx)
+
+---
+
+## 트러블슈팅
+
+| 파일 | 내용 |
+|---|---|
+| `docs/troubleshooting-프론트엔드-초기설정.md` | ESLint unused-vars, prop-types 규칙, 빌드 ≠ 린트 |

@@ -1,3 +1,9 @@
+/**
+ * Vite 설정
+ * proxy: 개발 서버(5173)의 /api 요청을 백엔드(8080)로 전달하여 CORS 우회
+ *
+ * @since 2026-05-14
+ */
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 

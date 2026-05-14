@@ -13,6 +13,7 @@ target/
 
 # Node
 node_modules/
+dist/
 
 # Claude Code (settings.local은 개인 설정이지만 하네스 포함을 위해 전체 추적)
 # .claude/
