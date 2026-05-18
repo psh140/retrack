@@ -50,4 +50,9 @@ export const login = (email, password) =>
 export const register = (username, email, password, phone = '') =>
   api.post('/auth/register', { username, email, password, phone });
 
+// ===================== 대시보드 API =====================
+
+/** 대시보드 요약 — 역할별 과제 현황·연구비·알림 반환 */
+export const getDashboard = () => api.get('/dashboard');
+
 export default api;

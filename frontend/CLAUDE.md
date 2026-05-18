@@ -13,6 +13,36 @@
 - 상세 토큰·컴포넌트 패턴: `.claude/skills/retrack-design/` 참고
 - 임의 디자인(색상 자의적 선택, 그라데이션, 이모지 등) 금지
 
+### 검색 기능
+
+백엔드 10.5단계에서 과제·사용자 검색이 구현되어 있음. 프론트엔드는 쿼리 파라미터로 전달한다.
+
+**과제 목록 (`GET /api/projects`)**
+
+| 파라미터 | 타입 | 설명 |
+|---|---|---|
+| `keyword` | string | 과제명 부분 일치 (ILIKE) |
+| `status` | string | 상태 필터 (`DRAFT` / `SUBMITTED` / `REVIEWING` / `APPROVED` / `IN_PROGRESS` / `COMPLETED` / `REJECTED`) |
+| `page` | number | 페이지 번호 (기본값 1) |
+| `size` | number | 페이지당 건수 (10 / 20 / 50) |
+
+**사용자 관리 (`GET /api/users`)**
+
+| 파라미터 | 타입 | 설명 |
+|---|---|---|
+| `keyword` | string | 사용자명 또는 이메일 부분 일치 |
+| `role` | string | 역할 필터 (`VIEWER` / `RESEARCHER` / `MANAGER` / `ADMIN`) |
+| `isVerified` | boolean | 연구자 인증 여부 필터 |
+| `page` | number | 페이지 번호 (기본값 1) |
+| `size` | number | 페이지당 건수 (10 / 20 / 50) |
+
+**UI 패턴**
+- `Input.Search` (keyword) + `Select` (status 또는 role) 조합
+- 검색 버튼 클릭 또는 Enter 시 API 호출
+- 파라미터 변경 시 page를 1로 초기화
+
+---
+
 ### 주석 규칙
 
 모든 JSX/JS 파일에 반드시 주석을 작성한다.
@@ -75,6 +105,7 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 
 | 경로 | 페이지 | 권한 |
 |---|---|---|
+| `/` | 메인(랜딩) | 공개 |
 | `/login` | 로그인 | 공개 |
 | `/register` | 회원가입 | 공개 |
 | `/dashboard` | 대시보드 | 로그인 |
@@ -119,11 +150,14 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 - [x] `pages/RegisterPage.jsx` — 이름/이메일/비밀번호/연락처 폼, 가입 성공 시 /login 이동
 - [x] `api/index.js` — login(), register() 함수 추가
 
-#### 4단계 — 대시보드
-- [ ] `pages/DashboardPage.jsx`
+#### 4단계 — 대시보드 (2026-05-18)
+- [x] `pages/DashboardPage.jsx` — 통계 카드 4개 + 상태별 바 차트 + 연구비 합계 + 최근 알림 (역할별 분기)
+- [x] `api/index.js` — getDashboard() 추가
+- [x] `pages/LandingPage.jsx` — 메인 랜딩 페이지 (Hero + 기능 소개 카드 4개, 공개)
+- [x] `App.jsx` — `/` 경로 LandingPage로 변경, 검색 기능 파라미터 문서화
 
 #### 5단계 — 과제 관리
-- [ ] `pages/ProjectListPage.jsx`
+- [ ] `pages/ProjectListPage.jsx` — 검색(keyword + status 필터) 인라인 구현 포함
 - [ ] `pages/ProjectDetailPage.jsx` (기본정보 탭: 과제정보 + 이력 + 첨부파일 / 연구비 탭: 목록 + 집계 차트)
 - [ ] `pages/ProjectFormPage.jsx` (등록/수정 공용)
 
@@ -131,13 +165,13 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 - [ ] `pages/NotificationPage.jsx`
 
 #### 7단계 — 관리자
-- [ ] `pages/UserManagePage.jsx`
+- [ ] `pages/UserManagePage.jsx` — 검색(keyword + role + isVerified 필터) 인라인 구현 포함
 - [ ] `pages/StatsPage.jsx` (recharts 차트)
 - [ ] `pages/ActivityLogPage.jsx`
 
 ### 다음 작업
 
-4단계 — 대시보드 (DashboardPage.jsx)
+5단계 — 과제 관리 (ProjectListPage.jsx, ProjectDetailPage.jsx, ProjectFormPage.jsx)
 
 ---
 
