@@ -13,4 +13,4 @@ COPY . .
 
 # 개발 서버 실행
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev", "--", "--host", "--port", "3000"]

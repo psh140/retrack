@@ -8,7 +8,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: '/api',
 });
 
 /** 요청 인터셉터 — Authorization 헤더에 Bearer 토큰 자동 추가 */

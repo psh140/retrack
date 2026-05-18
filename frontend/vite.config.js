@@ -12,7 +12,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        // Docker 환경에서는 BACKEND_HOST=http://retrack-backend:8080, 로컬에서는 기본값 사용
+        target: process.env.BACKEND_HOST || 'http://localhost:8080',
         changeOrigin: true,
         // 백엔드 CORS가 localhost:3000만 허용하므로 Origin 헤더를 덮어써서 통과
         headers: { Origin: 'http://localhost:3000' },

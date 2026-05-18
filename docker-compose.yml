@@ -40,6 +40,8 @@ services:
       - "3000:3000"
     depends_on:
       - backend                 # backend 컨테이너가 먼저 실행된 후 시작
+    environment:
+      BACKEND_HOST: http://retrack-backend:8080  # Vite proxy가 컨테이너 이름으로 백엔드를 찾도록
 
 volumes:
   postgres-data:                # 위에서 사용한 볼륨 선언
