@@ -24,6 +24,7 @@ import static org.mockito.Mockito.*;
  * 상태 머신 전이 규칙, 소유권 검증, changeStatus 원자적 3단계 호출을 검증한다.
  *
  * @since 2026-05-14
+ * @modified 2026-05-18 changeStatus 시그니처에 userRole 파라미터 추가 반영
  */
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
@@ -57,8 +58,9 @@ class ProjectServiceTest {
 
         when(projectMapper.findById(1L)).thenReturn(project);
 
+        // RESEARCHER 역할로 호출 — 전이 규칙 적용됨
         assertThrows(BadRequestException.class,
-                () -> projectService.changeStatus(1L, "DRAFT", null, 1L));
+                () -> projectService.changeStatus(1L, "DRAFT", null, 1L, "RESEARCHER"));
 
         // 전이 불가 시 DB 수정 작업이 실행되어선 안 된다
         verify(projectMapper, never()).updateStatus(anyLong(), anyString());
@@ -85,7 +87,7 @@ class ProjectServiceTest {
         when(projectMapper.findById(1L)).thenReturn(project);
         when(userMapper.findById(10L)).thenReturn(recipient);
 
-        projectService.changeStatus(1L, "SUBMITTED", null, 1L);
+        projectService.changeStatus(1L, "SUBMITTED", null, 1L, "MANAGER");
 
         verify(projectMapper, times(1)).updateStatus(eq(1L), eq("SUBMITTED"));
         verify(projectMapper, times(1)).insertHistory(any());

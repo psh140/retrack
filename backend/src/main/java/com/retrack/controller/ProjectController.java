@@ -130,7 +130,8 @@ public class ProjectController {
                                                        @RequestBody StatusChangeRequestVO req,
                                                        HttpServletRequest request) {
         Long changedBy = (Long) request.getAttribute("userId");
-        projectService.changeStatus(id, req.getStatus(), req.getComment(), changedBy);
+        String role = (String) request.getAttribute("role");
+        projectService.changeStatus(id, req.getStatus(), req.getComment(), changedBy, role);
         return ResponseEntity.ok(ApiResponse.ok("과제 상태가 변경되었습니다."));
     }
 

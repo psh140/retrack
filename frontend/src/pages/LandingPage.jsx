@@ -2,8 +2,10 @@
  * 메인(랜딩) 페이지
  * 공개 페이지 — 로그인 불필요
  * 구성: Hero(로고·소개·CTA) + 주요 기능 카드 4개
+ * 이미 로그인된 경우 CTA를 "대시보드로 이동"으로 전환
  *
  * @since 2026-05-18
+ * @modified 2026-05-18 로그인 상태 감지 후 CTA 분기
  */
 import { Button, Card, Grid } from 'antd';
 import {
@@ -13,6 +15,7 @@ import {
   TeamOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';  // response.sendRedirect() 역할
+import useAuthStore from '../store/authStore';    // session.getAttribute() 역할
 
 const { useBreakpoint } = Grid;
 
@@ -43,7 +46,9 @@ const FEATURES = [
 function LandingPage() {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
-  const navigate  = useNavigate();  // response.sendRedirect() 역할
+  const navigate  = useNavigate();        // response.sendRedirect() 역할
+  const { token } = useAuthStore();       // 로그인 여부 판단 — session.getAttribute("token") 역할
+  const isLoggedIn = Boolean(token);
 
   // 반응형: lg+ 4열, md 2열, 모바일 1열
   const featureCols = screens.lg ? 'repeat(4, 1fr)'
@@ -107,23 +112,36 @@ function LandingPage() {
           연구 행정 업무를 한 곳에서 처리합니다.
         </div>
 
-        {/* CTA 버튼 */}
+        {/* CTA 버튼 — 로그인 여부에 따라 분기 (JSP의 <c:choose> 역할) */}
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-          <Button
-            type="primary"
-            size="large"
-            style={{ minWidth: 120 }}
-            onClick={() => navigate('/login')}
-          >
-            로그인
-          </Button>
-          <Button
-            size="large"
-            style={{ minWidth: 120 }}
-            onClick={() => navigate('/register')}
-          >
-            회원가입
-          </Button>
+          {isLoggedIn ? (
+            <Button
+              type="primary"
+              size="large"
+              style={{ minWidth: 160 }}
+              onClick={() => navigate('/dashboard')}
+            >
+              대시보드로 이동
+            </Button>
+          ) : (
+            <>
+              <Button
+                type="primary"
+                size="large"
+                style={{ minWidth: 120 }}
+                onClick={() => navigate('/login')}
+              >
+                로그인
+              </Button>
+              <Button
+                size="large"
+                style={{ minWidth: 120 }}
+                onClick={() => navigate('/register')}
+              >
+                회원가입
+              </Button>
+            </>
+          )}
         </div>
       </div>
 

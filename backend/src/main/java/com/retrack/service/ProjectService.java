@@ -212,18 +212,22 @@ public class ProjectService {
     @LogActivity(action = "PROJECT_STATUS_CHANGE", targetType = "PROJECT",
                  userIdParam = 3, targetIdParam = 0, descriptionParam = 1)
     @Transactional
-    public void changeStatus(Long projectId, String newStatus, String comment, Long changedBy) {
+    public void changeStatus(Long projectId, String newStatus, String comment, Long changedBy, String userRole) {
         ProjectVO project = getProject(projectId);
 
         if (!VALID_STATUSES.contains(newStatus)) {
             throw new BadRequestException("유효하지 않은 상태값입니다.");
         }
 
-        List<String> allowedNext = VALID_TRANSITIONS.get(project.getStatus());
-        if (allowedNext == null || !allowedNext.contains(newStatus)) {
-            throw new BadRequestException(
-                    project.getStatus() + " → " + newStatus + " 전이는 허용되지 않습니다."
-            );
+        // MANAGER 이상은 전이 규칙 없이 모든 상태로 변경 가능
+        boolean isManagerOrAbove = "MANAGER".equals(userRole) || "ADMIN".equals(userRole);
+        if (!isManagerOrAbove) {
+            List<String> allowedNext = VALID_TRANSITIONS.get(project.getStatus());
+            if (allowedNext == null || !allowedNext.contains(newStatus)) {
+                throw new BadRequestException(
+                        project.getStatus() + " → " + newStatus + " 전이는 허용되지 않습니다."
+                );
+            }
         }
 
         // 1. 상태 업데이트

@@ -13,6 +13,7 @@
 |------|----------|------|------|
 | 2026-05-10 | 초기 구성 (백엔드 팀) | backend-leader, java-implementer, mybatis-specialist, quality-guardian | 반복 구현 패턴 자동화 |
 | 2026-05-10 | 프론트엔드 팀 추가 | frontend-leader, ui-builder, api-connector | 페이지 단위 React 구현 자동화 |
+| 2026-05-18 | 프론트엔드 QA 강화 | frontend-qa 추가, api-connector 반환 타입 검증 프로토콜, frontend/CLAUDE.md 업데이트 Phase 추가 | 백엔드보다 사용자 수동 검토 비중이 높아 자동화 필요 |
 
 ---
 

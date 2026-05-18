@@ -6,7 +6,7 @@
  * @since 2026-05-14
  * @modified 2026-05-18 로고 마크 추가, authStore에 userName 저장
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, Input, Button, Card, Typography, message } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../api/index';          // POST /api/auth/login
@@ -21,8 +21,13 @@ function LoginPage() {
   // loading: API 호출 중 버튼 비활성화 상태
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();              // 페이지 이동 (response.sendRedirect 역할)
-  const { setAuth } = useAuthStore();          // 로그인 성공 시 전역 상태 저장 함수
+  const navigate = useNavigate();                    // 페이지 이동 (response.sendRedirect 역할)
+  const { setAuth, token } = useAuthStore();         // 로그인 성공 시 전역 상태 저장 함수
+
+  // 이미 로그인된 상태로 /login 진입 시 대시보드로 리다이렉트
+  useEffect(() => {
+    if (token) navigate('/dashboard', { replace: true });
+  }, [token, navigate]);
 
   /**
    * 폼 제출 핸들러

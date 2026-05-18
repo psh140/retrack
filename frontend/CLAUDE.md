@@ -156,10 +156,11 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 - [x] `pages/LandingPage.jsx` — 메인 랜딩 페이지 (Hero + 기능 소개 카드 4개, 공개)
 - [x] `App.jsx` — `/` 경로 LandingPage로 변경, 검색 기능 파라미터 문서화
 
-#### 5단계 — 과제 관리
-- [ ] `pages/ProjectListPage.jsx` — 검색(keyword + status 필터) 인라인 구현 포함
-- [ ] `pages/ProjectDetailPage.jsx` (기본정보 탭: 과제정보 + 이력 + 첨부파일 / 연구비 탭: 목록 + 집계 차트)
-- [ ] `pages/ProjectFormPage.jsx` (등록/수정 공용)
+#### 5단계 — 과제 관리 (2026-05-18)
+- [x] `pages/ProjectListPage.jsx` — 목록 테이블 + keyword/status 검색 + 페이지네이션 + RESEARCHER 이상 등록 버튼
+- [x] `pages/ProjectDetailPage.jsx` — 기본정보 탭(과제정보 + 상태 변경 + 이력 + 첨부파일) / 연구비 탭(집계 차트 + 집행 내역)
+- [x] `pages/ProjectFormPage.jsx` — 등록/수정 공용 폼 (/projects/new → 등록, /projects/:id/edit → 수정)
+- [x] `api/index.js` — getProjects, getProject, createProject, updateProject, changeProjectStatus, deleteProject, getProjectHistory, getBudgets, createBudget, updateBudget, deleteBudget, getBudgetSummary, getFiles, uploadFile, deleteFile 추가
 
 #### 6단계 — 알림
 - [ ] `pages/NotificationPage.jsx`
@@ -171,7 +172,7 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 
 ### 다음 작업
 
-5단계 — 과제 관리 (ProjectListPage.jsx, ProjectDetailPage.jsx, ProjectFormPage.jsx)
+6단계 — 알림 (NotificationPage.jsx)
 
 ---
 
@@ -181,4 +182,5 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 |---|---|
 | `docs/troubleshooting-프론트엔드-초기설정.md` | ESLint unused-vars, prop-types 규칙, 빌드 ≠ 린트 |
 | `docs/troubleshooting-프론트엔드-3단계-인증.md` | 로그인 403 (CORS), Vite proxy Origin 헤더 덮어쓰기로 해결 |
+| `docs/troubleshooting-5단계-과제관리-프론트엔드.md` | seed.sql IN_REVIEW vs 백엔드 REVIEWING 불일치 — DB 재시딩으로 해결 |
 | `docs/nginx-배포설정.md` | 배포 시 Nginx 리버스 프록시 설정 (CORS 우회, React Router 폴백) |

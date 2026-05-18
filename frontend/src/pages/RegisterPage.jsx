@@ -7,10 +7,11 @@
  * @since 2026-05-14
  * @modified 2026-05-18 로고 마크 추가
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, Input, Button, Card, Typography, message } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import { register } from '../api/index'; // POST /api/auth/register
+import { register } from '../api/index';          // POST /api/auth/register
+import useAuthStore from '../store/authStore';    // session.getAttribute() 역할
 
 const { Text } = Typography;
 
@@ -18,6 +19,12 @@ function RegisterPage() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { token } = useAuthStore();
+
+  // 이미 로그인된 상태로 /register 진입 시 대시보드로 리다이렉트
+  useEffect(() => {
+    if (token) navigate('/dashboard', { replace: true });
+  }, [token, navigate]);
 
   const handleSubmit = async (values) => {
     setLoading(true);
