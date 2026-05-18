@@ -117,4 +117,16 @@ export const uploadFile = (projectId, formData) =>
 export const deleteFile = (projectId, fileId) =>
   api.delete(`/projects/${projectId}/files/${fileId}`);
 
+// ===================== 알림 API =====================
+
+/** 내 알림 목록 조회 — 성공 시 data: NotificationVO[] */
+export const getNotifications = () => api.get('/notifications');
+
+/**
+ * 알림 발송 (MANAGER 이상)
+ * @param {{ userId: number, projectId: number|null, message: string }} data
+ * 성공 시 data: notificationId (Long)
+ */
+export const sendNotification = (data) => api.post('/notifications/send', data);
+
 export default api;

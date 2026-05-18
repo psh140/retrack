@@ -162,8 +162,10 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 - [x] `pages/ProjectFormPage.jsx` — 등록/수정 공용 폼 (/projects/new → 등록, /projects/:id/edit → 수정)
 - [x] `api/index.js` — getProjects, getProject, createProject, updateProject, changeProjectStatus, deleteProject, getProjectHistory, getBudgets, createBudget, updateBudget, deleteBudget, getBudgetSummary, getFiles, uploadFile, deleteFile 추가
 
-#### 6단계 — 알림
-- [ ] `pages/NotificationPage.jsx`
+#### 6단계 — 알림 (2026-05-18)
+- [x] `pages/NotificationPage.jsx` — 알림 목록 테이블 + MANAGER 이상 발송 Modal (수신자 ID / 관련 과제 ID / 메시지)
+- [x] `api/index.js` — getNotifications(), sendNotification() 추가
+- [x] `App.jsx` — `/notifications` 라우트 등록
 
 #### 7단계 — 관리자
 - [ ] `pages/UserManagePage.jsx` — 검색(keyword + role + isVerified 필터) 인라인 구현 포함
@@ -172,7 +174,7 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 
 ### 다음 작업
 
-6단계 — 알림 (NotificationPage.jsx)
+7단계 — 관리자 페이지 (UserManagePage.jsx, StatsPage.jsx, ActivityLogPage.jsx)
 
 ---
 

@@ -103,10 +103,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 <Route path="/login" element={<LoginPage />} />
 ```
 
-## Phase 4: QA 검증 (frontend-qa)
+## Phase 4: QA 검증 (frontend-qa) ← 생략 불가. 반드시 실행할 것.
 
-ui-builder + api-connector + 라우팅 등록 완료 후, frontend-qa에게 검증 요청.
-위반 발견 시 직접 수정 후 frontend-leader에게 보고한다.
+ui-builder + api-connector + 라우팅 등록 완료 후, **사용자에게 보고하기 전에** frontend-qa 에이전트를 실행한다.
+QA를 건너뛰고 사용자에게 완료 보고하는 것은 금지다.
+위반 발견 시 직접 수정 후 frontend-leader에게 보고한다. 수정 완료 후 사용자에게 최종 보고한다.
 
 **검증 항목 체크리스트:**
 
