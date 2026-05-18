@@ -2,17 +2,6 @@
 
 ## 개발 규칙
 
-### 디자인 시스템
-
-모든 UI 시각적 결정은 **`retrack-design` 스킬**을 따른다.
-
-- 색상: `#1677ff` (primary), `#f5f5f5` (페이지 배경), `#fff` (카드), `#f0f0f0` (구분선)
-- 로고: `public/logo-mark.svg`, `public/logo.svg`, `public/logo-mono.svg`
-- 레이아웃: 220px 사이더 + 64px 헤더, 콘텐츠 패딩 24px
-- 아이콘: `@ant-design/icons` 아웃라인 세트
-- 상세 토큰·컴포넌트 패턴: `.claude/skills/retrack-design/` 참고
-- 임의 디자인(색상 자의적 선택, 그라데이션, 이모지 등) 금지
-
 ### 주석 규칙
 
 모든 JSX/JS 파일에 반드시 주석을 작성한다.
@@ -137,7 +126,7 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 
 ### 다음 작업
 
-4단계 — 대시보드 (DashboardPage.jsx)
+3단계 — 인증 (LoginPage.jsx, RegisterPage.jsx)
 
 ---
 

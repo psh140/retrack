@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 18px 20px; background: #fff; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .ex { font-size: 13px; color: rgba(0,0,0,0.88); }
+  .lbl { font-size: 11px; font-family: var(--rt-font-mono); color: var(--rt-fg-tertiary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .quoted { background: #fafafa; border-left: 3px solid #1677ff; padding: 8px 12px; border-radius: 0 4px 4px 0; }
+</style></head>
+<body>
+  <div>
+    <div class="lbl">Form prompt</div>
+    <div class="ex quoted">이메일을 입력하세요</div>
+  </div>
+  <div>
+    <div class="lbl">Validation error</div>
+    <div class="ex quoted" style="border-color:#ff4d4f; color:#cf1322;">올바른 이메일 형식이 아닙니다.</div>
+  </div>
+  <div>
+    <div class="lbl">Success toast</div>
+    <div class="ex quoted" style="border-color:#52c41a;">회원가입이 완료됐습니다. 로그인해 주세요.</div>
+  </div>
+  <div>
+    <div class="lbl">Inline link</div>
+    <div class="ex">계정이 없으신가요? <a href="#">회원가입</a></div>
+  </div>
+  <div>
+    <div class="lbl">Primary CTA</div>
+    <div class="ex">「로그인」 · 「가입하기」 · 「저장」 · 「삭제」</div>
+  </div>
+  <div>
+    <div class="lbl">Status key + label</div>
+    <div class="ex">상태: <code style="font-family:var(--rt-font-mono); background:#fafafa; padding:1px 4px; border-radius:2px;">IN_PROGRESS</code> · 진행 중</div>
+  </div>
+</body></html>

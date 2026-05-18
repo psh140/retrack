@@ -1,34 +1,30 @@
 /**
  * Zustand 인증 전역 상태 스토어
- * token, userId, userName, userRole을 localStorage와 동기화하여 관리
+ * token, userId, userRole을 localStorage와 동기화하여 관리
  *
  * @since 2026-05-14
- * @modified 2026-05-18 userName 필드 추가 (헤더 사용자명 표시용)
  */
 import { create } from 'zustand';
 
 const useAuthStore = create((set) => ({
   token: localStorage.getItem('token') || null,
   userId: localStorage.getItem('userId') || null,
-  userName: localStorage.getItem('userName') || null,
   userRole: localStorage.getItem('userRole') || null,
 
   /** 로그인 성공 시 토큰·사용자 정보 저장 */
-  setAuth: (token, userId, userName, userRole) => {
+  setAuth: (token, userId, userRole) => {
     localStorage.setItem('token', token);
     localStorage.setItem('userId', String(userId));
-    localStorage.setItem('userName', userName || '');
     localStorage.setItem('userRole', userRole);
-    set({ token, userId: String(userId), userName: userName || null, userRole });
+    set({ token, userId: String(userId), userRole });
   },
 
   /** 로그아웃 — localStorage 및 스토어 초기화 */
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
-    localStorage.removeItem('userName');
     localStorage.removeItem('userRole');
-    set({ token: null, userId: null, userName: null, userRole: null });
+    set({ token: null, userId: null, userRole: null });
   },
 }));
 

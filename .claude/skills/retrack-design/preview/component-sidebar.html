@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 0; background: #fff; }
+  .sider { width: 220px; height: 280px; background: #fff; border-right: 1px solid #f0f0f0; padding: 12px 0; }
+  .item { display: flex; align-items: center; gap: 10px; padding: 0 16px; height: 40px; color: rgba(0,0,0,0.88); font-size: 14px; cursor: pointer; margin: 4px 8px; border-radius: 6px; }
+  .item:hover { background: rgba(0,0,0,0.04); }
+  .item.active { background: #e6f4ff; color: #1677ff; font-weight: 500; }
+  .item img { width: 16px; height: 16px; opacity: 0.65; }
+  .item.active img { filter: invert(38%) sepia(99%) saturate(2150%) hue-rotate(204deg) brightness(101%) contrast(101%); opacity: 1; }
+  .group { padding: 12px 16px 4px; font-size: 12px; color: rgba(0,0,0,0.45); }
+</style></head>
+<body>
+  <div class="sider">
+    <div class="item"><img src="../assets/icons/dashboard.svg"/>대시보드</div>
+    <div class="item active"><img src="../assets/icons/project.svg"/>과제 목록</div>
+    <div class="item"><img src="../assets/icons/bell.svg"/>알림</div>
+    <div class="group">관리자</div>
+    <div class="item"><img src="../assets/icons/user.svg"/>사용자 관리</div>
+    <div class="item"><img src="../assets/icons/bar-chart.svg"/>통계</div>
+  </div>
+</body></html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 20px; background: #fff; display: flex; flex-direction: column; gap: 10px; }
+  .alert { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 6px; border: 1px solid; font-size: 13px; }
+  .dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; color: #fff; font-size: 10px; font-weight: 700; }
+</style></head>
+<body>
+  <div class="alert" style="background: #f6ffed; border-color: #b7eb8f; color: rgba(0,0,0,0.88);">
+    <span class="dot" style="background: #52c41a;">✓</span> 회원가입이 완료됐습니다. 로그인해 주세요.
+  </div>
+  <div class="alert" style="background: #fffbe6; border-color: #ffe58f; color: rgba(0,0,0,0.88);">
+    <span class="dot" style="background: #faad14;">!</span> 첨부파일 용량은 10MB를 초과할 수 없습니다.
+  </div>
+  <div class="alert" style="background: #fff2f0; border-color: #ffccc7; color: rgba(0,0,0,0.88);">
+    <span class="dot" style="background: #ff4d4f;">×</span> 로그인에 실패했습니다.
+  </div>
+  <div class="alert" style="background: #e6f4ff; border-color: #91caff; color: rgba(0,0,0,0.88);">
+    <span class="dot" style="background: #1677ff;">i</span> 권한 변경은 관리자에게 문의하세요.
+  </div>
+</body></html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 20px; background: #fff; display: flex; flex-direction: column; gap: 12px; }
+  .row { display: flex; gap: 12px; align-items: center; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 15px; border-radius: 6px; font-size: 14px; font-family: var(--rt-font-sans); cursor: pointer; border: 1px solid transparent; transition: all 200ms cubic-bezier(0.645, 0.045, 0.355, 1); }
+  .btn-primary { background: #1677ff; color: #fff; }
+  .btn-primary:hover { background: #4096ff; }
+  .btn-primary.active { background: #0958d9; }
+  .btn-primary.disabled { background: rgba(0,0,0,0.04); color: rgba(0,0,0,0.25); border-color: #d9d9d9; cursor: not-allowed; }
+  .btn-default { background: #fff; color: rgba(0,0,0,0.88); border-color: #d9d9d9; }
+  .btn-default:hover { color: #4096ff; border-color: #4096ff; }
+  .btn-danger { background: #fff; color: #ff4d4f; border-color: #ff4d4f; }
+  .btn-danger:hover { color: #ff7875; border-color: #ff7875; }
+  .btn-text { background: transparent; color: rgba(0,0,0,0.88); }
+  .btn-text:hover { background: rgba(0,0,0,0.06); }
+  .btn-link { background: transparent; color: #1677ff; padding: 0 4px; }
+  .label { font-size: 11px; font-family: var(--rt-font-mono); color: var(--rt-fg-tertiary); width: 90px; }
+</style></head>
+<body>
+  <div class="row"><span class="label">primary</span>
+    <button class="btn btn-primary">로그인</button>
+    <button class="btn btn-primary" style="background:#4096ff;">hover</button>
+    <button class="btn btn-primary active">press</button>
+    <button class="btn btn-primary disabled">disabled</button>
+  </div>
+  <div class="row"><span class="label">default</span>
+    <button class="btn btn-default">취소</button>
+    <button class="btn btn-default" style="color:#4096ff; border-color:#4096ff;">hover</button>
+    <button class="btn btn-danger">삭제</button>
+    <button class="btn btn-text">로그아웃</button>
+    <button class="btn btn-link">상세보기</button>
+  </div>
+</body></html>

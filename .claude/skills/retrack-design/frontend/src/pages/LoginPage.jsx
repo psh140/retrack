@@ -4,7 +4,6 @@
  * 로그인 성공 시 authStore에 토큰·사용자 정보 저장 후 /dashboard 이동
  *
  * @since 2026-05-14
- * @modified 2026-05-18 로고 마크 추가, authStore에 userName 저장
  */
 import { useState } from 'react';
 import { Form, Input, Button, Card, Typography, message } from 'antd';
@@ -12,7 +11,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../api/index';          // POST /api/auth/login
 import useAuthStore from '../store/authStore'; // 전역 로그인 상태 (HttpSession 역할)
 
-const { Text } = Typography;
+const { Title, Text } = Typography;
 
 function LoginPage() {
   // Form 인스턴스: Ant Design 폼 제어 객체 (Java의 @ModelAttribute 바인딩과 유사)
@@ -34,8 +33,8 @@ function LoginPage() {
     try {
       const res = await login(values.email, values.password);
       // 백엔드 응답 구조: { success: true, data: { token, userId, username, role } }
-      const { token, userId, username, role } = res.data.data;
-      setAuth(token, userId, username, role);  // localStorage + 전역 스토어 저장
+      const { token, userId, role } = res.data.data;
+      setAuth(token, userId, role);  // localStorage + 전역 스토어 저장
       navigate('/dashboard');
     } catch (err) {
       // err.response.data.message: 백엔드 ApiResponse의 message 필드
@@ -56,26 +55,10 @@ function LoginPage() {
         background: '#f5f5f5',
       }}
     >
-      <Card
-        style={{
-          width: 'min(400px, calc(100% - 32px))',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
-          borderRadius: 6,
-        }}
-      >
-        {/* 로고 + 앱명 */}
+      <Card style={{ width: 400, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <img
-            src="/logo-mark.svg"
-            width={48}
-            height={48}
-            alt="Retrack"
-            style={{ display: 'block', margin: '0 auto 12px' }}
-          />
-          <div style={{ fontSize: 24, fontWeight: 600, color: 'rgba(0,0,0,0.88)', lineHeight: 1.33 }}>
-            Retrack
-          </div>
-          <Text type="secondary" style={{ fontSize: 14 }}>연구과제 관리 시스템</Text>
+          <Title level={3} style={{ margin: 0 }}>Retrack</Title>
+          <Text type="secondary">연구과제 관리 시스템</Text>
         </div>
 
         {/* layout="vertical": 라벨이 입력 필드 위에 표시 */}
@@ -105,7 +88,7 @@ function LoginPage() {
           </Button>
         </Form>
 
-        <div style={{ textAlign: 'center', marginTop: 16, fontSize: 14 }}>
+        <div style={{ textAlign: 'center', marginTop: 16 }}>
           <Text type="secondary">계정이 없으신가요? </Text>
           <Link to="/register">회원가입</Link>
         </div>

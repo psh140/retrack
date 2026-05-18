@@ -5,6 +5,7 @@
 **트리거:**
 - 백엔드 (Java/MyBatis/Spring) 작업 → `retrack-backend` 스킬
 - 프론트엔드 (React/axios/컴포넌트) 작업 → `retrack-frontend` 스킬
+- 프론트엔드 UI 디자인 작업 → `retrack-design` 스킬 (색상·로고·레이아웃·컴포넌트 스타일 등 모든 시각적 결정은 이 스킬의 가이드라인을 따른다. 임의 디자인 금지)
 - 단순 질문이나 파일 조회는 직접 응답 가능
 
 **변경 이력:**

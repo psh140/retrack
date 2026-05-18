@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 32px 20px; background: #f5f5f5; display: flex; gap: 28px; align-items: center; justify-content: space-around; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .box { width: 120px; height: 64px; background: #fff; border-radius: 6px; }
+  .label { font-size: 11px; font-family: var(--rt-font-mono); color: var(--rt-fg-tertiary); text-align: center; }
+  .name { color: var(--rt-fg); font-weight: 500; font-size: 12px; }
+  .tertiary { box-shadow: 0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02); border: 1px solid #f0f0f0; }
+  .card { box-shadow: 0 2px 8px rgba(0,0,0,0.10); }
+  .secondary { box-shadow: 0 6px 16px 0 rgba(0,0,0,0.08), 0 3px 6px -4px rgba(0,0,0,0.12), 0 9px 28px 8px rgba(0,0,0,0.05); }
+</style></head>
+<body>
+  <div class="item"><div class="box tertiary"></div><div class="label"><div class="name">tertiary</div><div>cards, default</div></div></div>
+  <div class="item"><div class="box card"></div><div class="label"><div class="name">card lift</div><div>login card</div></div></div>
+  <div class="item"><div class="box secondary"></div><div class="label"><div class="name">secondary</div><div>dropdown, modal</div></div></div>
+</body></html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 20px; background: #fff; display: flex; flex-direction: column; gap: 10px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .tag { display: inline-flex; align-items: center; padding: 1px 8px; border-radius: 2px; border: 1px solid; font-size: 12px; line-height: 20px; font-family: var(--rt-font-mono); }
+  .arrow { color: var(--rt-fg-tertiary); }
+  .note { font-size: 11px; color: var(--rt-fg-tertiary); }
+</style></head>
+<body>
+  <div class="row">
+    <span class="tag" style="background: #fafafa; border-color: #d9d9d9; color: rgba(0,0,0,0.88);">DRAFT</span>
+    <span class="arrow">→</span>
+    <span class="tag" style="background: #e6f4ff; border-color: #91caff; color: #0958d9;">SUBMITTED</span>
+    <span class="arrow">→</span>
+    <span class="tag" style="background: #e6fffb; border-color: #87e8de; color: #08979c;">REVIEWING</span>
+    <span class="arrow">→</span>
+    <span class="tag" style="background: #f6ffed; border-color: #b7eb8f; color: #389e0d;">APPROVED</span>
+  </div>
+  <div class="row">
+    <span class="arrow">↳</span>
+    <span class="tag" style="background: #f0f5ff; border-color: #adc6ff; color: #1d39c4;">IN_PROGRESS</span>
+    <span class="arrow">→</span>
+    <span class="tag" style="background: #f9f0ff; border-color: #d3adf7; color: #531dab;">COMPLETED</span>
+    <span class="arrow" style="margin-left: 16px;">↘</span>
+    <span class="tag" style="background: #fff1f0; border-color: #ffa39e; color: #cf1322;">REJECTED</span>
+  </div>
+  <div class="note">PROJECT_STATUS 워크플로 — docs/erd.md 기준</div>
+</body></html>

@@ -4,21 +4,18 @@
  *
  * @since 2026-05-14
  * @modified 2026-05-14 3단계: 로그인·회원가입 라우트 등록
- * @modified 2026-05-18 4단계: 대시보드 플레이스홀더 라우트 등록
  */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import PrivateRoute from './components/PrivateRoute';
-import MainLayout from './components/MainLayout';
+// 페이지 구현 시 주석 해제
+// import PrivateRoute from './components/PrivateRoute';
 // import RoleRoute from './components/RoleRoute';
 
 // 3단계 — 인증
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 
-// 4단계 — 대시보드 (임시 플레이스홀더)
-import DashboardPage from './pages/DashboardPage';
-
 // 이후 단계 구현 예정
+// import DashboardPage from './pages/DashboardPage';
 // import ProjectListPage from './pages/ProjectListPage';
 // import ProjectDetailPage from './pages/ProjectDetailPage';
 // import ProjectFormPage from './pages/ProjectFormPage';
@@ -37,8 +34,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
-        {/* 로그인 필요 */}
-        <Route path="/dashboard" element={<PrivateRoute><MainLayout><DashboardPage /></MainLayout></PrivateRoute>} />
+        {/* 로그인 필요 (4단계 이후 주석 해제) */}
+        {/* <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} /> */}
         {/* <Route path="/projects" element={<PrivateRoute><ProjectListPage /></PrivateRoute>} /> */}
         {/* <Route path="/projects/new" element={<PrivateRoute><ProjectFormPage /></PrivateRoute>} /> */}
         {/* <Route path="/projects/:id" element={<PrivateRoute><ProjectDetailPage /></PrivateRoute>} /> */}

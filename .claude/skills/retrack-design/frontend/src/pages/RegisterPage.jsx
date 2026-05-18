@@ -5,14 +5,13 @@
  * 기본 권한은 VIEWER로 설정됨 (백엔드 DB 기본값)
  *
  * @since 2026-05-14
- * @modified 2026-05-18 로고 마크 추가
  */
 import { useState } from 'react';
 import { Form, Input, Button, Card, Typography, message } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { register } from '../api/index'; // POST /api/auth/register
 
-const { Text } = Typography;
+const { Title, Text } = Typography;
 
 function RegisterPage() {
   const [form] = Form.useForm();
@@ -42,26 +41,10 @@ function RegisterPage() {
         background: '#f5f5f5',
       }}
     >
-      <Card
-        style={{
-          width: 'min(400px, calc(100% - 32px))',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
-          borderRadius: 6,
-        }}
-      >
-        {/* 로고 + 앱명 */}
+      <Card style={{ width: 400, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <img
-            src="/logo-mark.svg"
-            width={48}
-            height={48}
-            alt="Retrack"
-            style={{ display: 'block', margin: '0 auto 12px' }}
-          />
-          <div style={{ fontSize: 24, fontWeight: 600, color: 'rgba(0,0,0,0.88)', lineHeight: 1.33 }}>
-            Retrack
-          </div>
-          <Text type="secondary" style={{ fontSize: 14 }}>회원가입</Text>
+          <Title level={3} style={{ margin: 0 }}>Retrack</Title>
+          <Text type="secondary">회원가입</Text>
         </div>
 
         <Form form={form} onFinish={handleSubmit} layout="vertical">
@@ -102,7 +85,7 @@ function RegisterPage() {
           </Button>
         </Form>
 
-        <div style={{ textAlign: 'center', marginTop: 16, fontSize: 14 }}>
+        <div style={{ textAlign: 'center', marginTop: 16 }}>
           <Text type="secondary">이미 계정이 있으신가요? </Text>
           <Link to="/login">로그인</Link>
         </div>

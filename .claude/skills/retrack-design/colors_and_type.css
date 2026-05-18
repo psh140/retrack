@@ -1,0 +1,225 @@
+/* =============================================================
+ * Retrack Design System — Colors & Type
+ * Source: Ant Design v5 default theme tokens, as used by Retrack.
+ * Tokens reference: https://ant.design/docs/react/customize-theme
+ * ============================================================= */
+
+/* Korean web font fallback.
+ * Live product uses system fonts (Apple SD Gothic Neo / Malgun Gothic).
+ * We import Noto Sans KR from Google Fonts as a consistent design-time fallback
+ * so previews render the same on every OS. The Korean glyph set is huge
+ * (~11k chars) so we rely on Google's split-subset CSS rather than self-hosting. */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ---------- Brand ---------- */
+  --rt-brand: #1677ff;                /* AntD blue-6 — primary */
+  --rt-brand-hover: #4096ff;          /* blue-5 */
+  --rt-brand-active: #0958d9;         /* blue-7 */
+  --rt-brand-bg: #e6f4ff;             /* blue-1 — selected menu, light fills */
+  --rt-brand-border: #91caff;         /* blue-3 */
+
+  /* ---------- Neutral surfaces ---------- */
+  --rt-bg-page: #f5f5f5;              /* page background */
+  --rt-bg-container: #ffffff;         /* cards, header, sider */
+  --rt-bg-elevated: #ffffff;          /* modals, popovers */
+  --rt-bg-mask: rgba(0, 0, 0, 0.45);  /* modal scrim */
+  --rt-fill-quaternary: rgba(0, 0, 0, 0.02);
+  --rt-fill-tertiary: rgba(0, 0, 0, 0.04);
+  --rt-fill-secondary: rgba(0, 0, 0, 0.06);
+  --rt-fill-primary: rgba(0, 0, 0, 0.15);
+
+  /* ---------- Text ---------- */
+  --rt-fg: rgba(0, 0, 0, 0.88);             /* primary */
+  --rt-fg-secondary: rgba(0, 0, 0, 0.65);   /* Typography.Text type="secondary" */
+  --rt-fg-tertiary: rgba(0, 0, 0, 0.45);    /* placeholder, disabled label */
+  --rt-fg-quaternary: rgba(0, 0, 0, 0.25);  /* disabled control text */
+  --rt-fg-on-brand: #ffffff;                /* text on primary button */
+
+  /* ---------- Borders ---------- */
+  --rt-border: #d9d9d9;               /* default control border */
+  --rt-border-secondary: #f0f0f0;     /* hairline divider */
+
+  /* ---------- Role tag colors (AntD presets) ---------- */
+  --rt-role-admin: #f5222d;           /* red-6 */
+  --rt-role-admin-bg: #fff1f0;        /* red-1 */
+  --rt-role-admin-border: #ffa39e;    /* red-3 */
+  --rt-role-manager: #fa8c16;         /* orange-6 */
+  --rt-role-manager-bg: #fff7e6;
+  --rt-role-manager-border: #ffd591;
+  --rt-role-researcher: #1677ff;
+  --rt-role-researcher-bg: #e6f4ff;
+  --rt-role-researcher-border: #91caff;
+  --rt-role-viewer: #595959;          /* grey-7 */
+  --rt-role-viewer-bg: #fafafa;
+  --rt-role-viewer-border: #d9d9d9;
+
+  /* ---------- Status colors (project workflow) ---------- */
+  --rt-status-draft: #595959;
+  --rt-status-draft-bg: #fafafa;
+  --rt-status-submitted: #1677ff;
+  --rt-status-submitted-bg: #e6f4ff;
+  --rt-status-reviewing: #13c2c2;     /* cyan-6 */
+  --rt-status-reviewing-bg: #e6fffb;
+  --rt-status-approved: #52c41a;      /* green-6 */
+  --rt-status-approved-bg: #f6ffed;
+  --rt-status-in-progress: #2f54eb;   /* geekblue-6 */
+  --rt-status-in-progress-bg: #f0f5ff;
+  --rt-status-completed: #722ed1;     /* purple-6 */
+  --rt-status-completed-bg: #f9f0ff;
+  --rt-status-rejected: #f5222d;
+  --rt-status-rejected-bg: #fff1f0;
+
+  /* ---------- Semantic feedback ---------- */
+  --rt-success: #52c41a;
+  --rt-success-bg: #f6ffed;
+  --rt-warning: #faad14;              /* gold-6 */
+  --rt-warning-bg: #fffbe6;
+  --rt-error: #ff4d4f;                /* red-5 */
+  --rt-error-bg: #fff2f0;
+  --rt-info: #1677ff;
+  --rt-info-bg: #e6f4ff;
+
+  /* ---------- Budget categories ---------- */
+  --rt-budget-personnel: #1677ff;
+  --rt-budget-travel: #13c2c2;
+  --rt-budget-research-activity: #52c41a;
+  --rt-budget-etc: #8c8c8c;
+
+  /* ---------- Radii ---------- */
+  --rt-radius-sm: 4px;
+  --rt-radius: 6px;                   /* default — buttons, inputs, cards */
+  --rt-radius-lg: 8px;
+  --rt-radius-xs: 2px;                /* tags */
+
+  /* ---------- Shadows ---------- */
+  --rt-shadow-tertiary:
+    0 1px 2px 0 rgba(0, 0, 0, 0.03),
+    0 1px 6px -1px rgba(0, 0, 0, 0.02),
+    0 2px 4px 0 rgba(0, 0, 0, 0.02);
+  --rt-shadow-secondary:
+    0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  --rt-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.10); /* Retrack login card lift */
+
+  /* ---------- Spacing (4px base) ---------- */
+  --rt-space-xxs: 4px;
+  --rt-space-xs:  8px;
+  --rt-space-sm:  12px;
+  --rt-space-md:  16px;
+  --rt-space-lg:  24px;
+  --rt-space-xl:  32px;
+  --rt-space-xxl: 48px;
+
+  /* ---------- Layout sizing ---------- */
+  --rt-control-height-sm: 24px;
+  --rt-control-height: 32px;          /* default */
+  --rt-control-height-lg: 40px;
+  --rt-header-height: 64px;
+  --rt-sider-width: 220px;            /* Retrack-specific (AntD default = 200) */
+  --rt-content-padding: 24px;
+  --rt-card-padding: 24px;
+
+  /* ---------- Motion ---------- */
+  --rt-motion-fast: 100ms;
+  --rt-motion: 200ms;
+  --rt-motion-slow: 300ms;
+  --rt-easing: cubic-bezier(0.645, 0.045, 0.355, 1);
+
+  /* ---------- Type ---------- */
+  --rt-font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic',
+    'Helvetica Neue', Arial, sans-serif;
+  --rt-font-mono:
+    'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+
+  --rt-font-size: 14px;               /* base body */
+  --rt-font-size-sm: 12px;
+  --rt-font-size-lg: 16px;
+  --rt-font-size-heading-1: 38px;
+  --rt-font-size-heading-2: 30px;
+  --rt-font-size-heading-3: 24px;
+  --rt-font-size-heading-4: 20px;
+  --rt-font-size-heading-5: 16px;
+
+  --rt-line-height: 1.5715;
+  --rt-line-height-heading-1: 1.21;
+  --rt-line-height-heading-2: 1.27;
+  --rt-line-height-heading-3: 1.33;
+  --rt-line-height-heading-4: 1.4;
+  --rt-line-height-heading-5: 1.5;
+
+  --rt-weight-regular: 400;
+  --rt-weight-medium: 500;
+  --rt-weight-semibold: 600;
+  --rt-weight-bold: 700;
+}
+
+/* ============== Semantic element styles ============== */
+
+html, body {
+  font-family: var(--rt-font-sans);
+  font-size: var(--rt-font-size);
+  line-height: var(--rt-line-height);
+  color: var(--rt-fg);
+  background: var(--rt-bg-page);
+}
+
+h1, .rt-h1 {
+  font-size: var(--rt-font-size-heading-1);
+  line-height: var(--rt-line-height-heading-1);
+  font-weight: var(--rt-weight-semibold);
+  margin: 0 0 0.5em;
+  color: var(--rt-fg);
+}
+h2, .rt-h2 {
+  font-size: var(--rt-font-size-heading-2);
+  line-height: var(--rt-line-height-heading-2);
+  font-weight: var(--rt-weight-semibold);
+  margin: 0 0 0.5em;
+}
+h3, .rt-h3 {
+  font-size: var(--rt-font-size-heading-3);
+  line-height: var(--rt-line-height-heading-3);
+  font-weight: var(--rt-weight-semibold);
+  margin: 0 0 0.5em;
+}
+h4, .rt-h4 {
+  font-size: var(--rt-font-size-heading-4);
+  line-height: var(--rt-line-height-heading-4);
+  font-weight: var(--rt-weight-semibold);
+  margin: 0 0 0.5em;
+}
+h5, .rt-h5 {
+  font-size: var(--rt-font-size-heading-5);
+  line-height: var(--rt-line-height-heading-5);
+  font-weight: var(--rt-weight-semibold);
+  margin: 0 0 0.5em;
+}
+
+p, .rt-body {
+  font-size: var(--rt-font-size);
+  line-height: var(--rt-line-height);
+  margin: 0 0 1em;
+}
+.rt-secondary { color: var(--rt-fg-secondary); }
+.rt-tertiary  { color: var(--rt-fg-tertiary); }
+.rt-small     { font-size: var(--rt-font-size-sm); }
+
+a, .rt-link {
+  color: var(--rt-brand);
+  text-decoration: none;
+  transition: color var(--rt-motion) var(--rt-easing);
+}
+a:hover, .rt-link:hover { color: var(--rt-brand-hover); }
+a:active, .rt-link:active { color: var(--rt-brand-active); }
+
+code, kbd, samp, pre, .rt-code {
+  font-family: var(--rt-font-mono);
+  font-size: 0.92em;
+  background: var(--rt-fill-tertiary);
+  border-radius: var(--rt-radius-sm);
+  padding: 1px 4px;
+}

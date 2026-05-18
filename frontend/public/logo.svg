@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 32" width="168" height="32">
+
+  <rect width="32" height="32" rx="6" fill="#1677ff"></rect>
+  <path fill="#fff" fill-rule="evenodd" d="&#xA;    M9 7 H18.2&#xA;    C21.4 7 23.6 9 23.6 12&#xA;    C23.6 14.3 22.2 16 20 16.6&#xA;    L24 24&#xA;    H19.2&#xA;    L15.6 17&#xA;    H13.5&#xA;    V24&#xA;    H9&#xA;    Z&#xA;    M13.5 10.6&#xA;    V13.6&#xA;    H17.6&#xA;    C18.6 13.6 19.2 13 19.2 12.1&#xA;    C19.2 11.2 18.6 10.6 17.6 10.6&#xA;    Z&#xA;  "></path>
+  <rect x="9" y="25.4" width="14.6" height="1.4" rx="0.7" fill="#fff" fill-opacity="0.7"></rect>
+
+  <text x="42" y="22.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="22" font-weight="600" fill="#1677ff" letter-spacing="-0.4">Retrack</text>
+</svg>

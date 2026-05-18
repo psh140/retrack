@@ -1,0 +1,56 @@
+/* Retrack design tokens — global window.RT */
+window.RT = {
+  brand: '#1677ff',
+  brandHover: '#4096ff',
+  brandActive: '#0958d9',
+  brandBg: '#e6f4ff',
+  brandBorder: '#91caff',
+  bgPage: '#f5f5f5',
+  bgContainer: '#ffffff',
+  fillTertiary: 'rgba(0,0,0,0.04)',
+  fillSecondary: 'rgba(0,0,0,0.06)',
+  fg: 'rgba(0,0,0,0.88)',
+  fgSecondary: 'rgba(0,0,0,0.65)',
+  fgTertiary: 'rgba(0,0,0,0.45)',
+  fgQuaternary: 'rgba(0,0,0,0.25)',
+  border: '#d9d9d9',
+  borderSecondary: '#f0f0f0',
+  radius: 6,
+  radiusXs: 2,
+  shadowTertiary: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)',
+  shadowSecondary: '0 6px 16px 0 rgba(0,0,0,0.08), 0 3px 6px -4px rgba(0,0,0,0.12), 0 9px 28px 8px rgba(0,0,0,0.05)',
+  shadowCard: '0 2px 8px rgba(0,0,0,0.10)',
+  headerH: 64,
+  siderW: 220,
+  controlH: 32,
+  // role tag colors (matches Header.jsx ROLE_COLOR mapping)
+  roleColor: {
+    ADMIN:      { bg: '#fff1f0', border: '#ffa39e', fg: '#cf1322' },
+    MANAGER:    { bg: '#fff7e6', border: '#ffd591', fg: '#d46b08' },
+    RESEARCHER: { bg: '#e6f4ff', border: '#91caff', fg: '#0958d9' },
+    VIEWER:     { bg: '#fafafa', border: '#d9d9d9', fg: 'rgba(0,0,0,0.88)' },
+  },
+  // project status palette
+  statusColor: {
+    DRAFT:       { bg: '#fafafa', border: '#d9d9d9', fg: 'rgba(0,0,0,0.88)', label: '작성중' },
+    SUBMITTED:   { bg: '#e6f4ff', border: '#91caff', fg: '#0958d9', label: '제출' },
+    REVIEWING:   { bg: '#e6fffb', border: '#87e8de', fg: '#08979c', label: '검토중' },
+    APPROVED:    { bg: '#f6ffed', border: '#b7eb8f', fg: '#389e0d', label: '승인' },
+    IN_PROGRESS: { bg: '#f0f5ff', border: '#adc6ff', fg: '#1d39c4', label: '진행중' },
+    COMPLETED:   { bg: '#f9f0ff', border: '#d3adf7', fg: '#531dab', label: '완료' },
+    REJECTED:    { bg: '#fff1f0', border: '#ffa39e', fg: '#cf1322', label: '반려' },
+  },
+  // budget category palette
+  budgetColor: {
+    PERSONNEL: '#1677ff',
+    TRAVEL: '#13c2c2',
+    RESEARCH_ACTIVITY: '#52c41a',
+    ETC: '#8c8c8c',
+  },
+  budgetLabel: {
+    PERSONNEL: '인건비',
+    TRAVEL: '여비',
+    RESEARCH_ACTIVITY: '연구활동비',
+    ETC: '기타',
+  },
+};

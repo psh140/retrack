@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 20px; background: #fff; }
+  .stack { display: flex; gap: 8px; }
+  .item { flex: 1; }
+  .swatch { height: 64px; border-radius: 6px; border: 1px solid var(--rt-border-secondary); }
+  .name { font-size: 11px; margin-top: 8px; color: var(--rt-fg); font-weight: 500; }
+  .hex { font-size: 10px; font-family: var(--rt-font-mono); color: var(--rt-fg-tertiary); }
+</style></head>
+<body>
+  <div class="stack">
+    <div class="item"><div class="swatch" style="background: #ffffff;"></div><div class="name">container</div><div class="hex">#ffffff</div></div>
+    <div class="item"><div class="swatch" style="background: #fafafa;"></div><div class="name">fill alt</div><div class="hex">#fafafa</div></div>
+    <div class="item"><div class="swatch" style="background: #f5f5f5;"></div><div class="name">page bg</div><div class="hex">#f5f5f5</div></div>
+    <div class="item"><div class="swatch" style="background: #f0f0f0;"></div><div class="name">divider</div><div class="hex">#f0f0f0</div></div>
+    <div class="item"><div class="swatch" style="background: #d9d9d9;"></div><div class="name">border</div><div class="hex">#d9d9d9</div></div>
+    <div class="item"><div class="swatch" style="background: rgba(0,0,0,0.45);"></div><div class="name">text 45%</div><div class="hex">.45 black</div></div>
+    <div class="item"><div class="swatch" style="background: rgba(0,0,0,0.65);"></div><div class="name">text 65%</div><div class="hex">.65 black</div></div>
+    <div class="item"><div class="swatch" style="background: rgba(0,0,0,0.88);"></div><div class="name">text 88%</div><div class="hex">.88 black</div></div>
+  </div>
+</body></html>

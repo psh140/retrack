@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 20px; background: #fff; display: flex; align-items: center; justify-content: space-around; gap: 16px; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .pad { padding: 8px; border-radius: 6px; }
+  .lbl { font-size: 11px; font-family: var(--rt-font-mono); color: var(--rt-fg-tertiary); text-align: center; }
+  .px { color: var(--rt-fg-secondary); }
+  .check { display: grid; grid-template-columns: repeat(2, 1fr); border: 1px solid var(--rt-border-secondary); border-radius: 4px; overflow: hidden; }
+  .check img { display: block; }
+</style></head>
+<body>
+  <div class="item">
+    <img src="../assets/favicon-16.png" width="16" height="16"/>
+    <div class="lbl"><div>favicon</div><div class="px">16</div></div>
+  </div>
+  <div class="item">
+    <img src="../assets/favicon-32.png" width="32" height="32"/>
+    <div class="lbl"><div>favicon</div><div class="px">32</div></div>
+  </div>
+  <div class="item">
+    <img src="../assets/favicon-48.png" width="48" height="48"/>
+    <div class="lbl"><div>favicon</div><div class="px">48</div></div>
+  </div>
+  <div class="item">
+    <img src="../assets/favicon-180.png" width="64" height="64"/>
+    <div class="lbl"><div>apple-touch</div><div class="px">180</div></div>
+  </div>
+  <div class="item">
+    <img src="../assets/logo-mark.svg" width="80" height="80"/>
+    <div class="lbl"><div>SVG mark</div><div class="px">scalable</div></div>
+  </div>
+</body></html>

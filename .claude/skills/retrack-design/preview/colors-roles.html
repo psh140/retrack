@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 20px; background: #fff; display: flex; flex-direction: column; gap: 12px; }
+  .row { display: flex; gap: 10px; align-items: center; }
+  .tag { display: inline-flex; align-items: center; padding: 1px 8px; border-radius: 2px; border: 1px solid; font-size: 12px; line-height: 20px; }
+  .note { font-size: 12px; color: var(--rt-fg-tertiary); margin-left: 8px; font-family: var(--rt-font-mono); }
+</style></head>
+<body>
+  <div class="row">
+    <span class="tag" style="background: #fff1f0; border-color: #ffa39e; color: #cf1322;">ADMIN</span>
+    <span class="tag" style="background: #fff7e6; border-color: #ffd591; color: #d46b08;">MANAGER</span>
+    <span class="tag" style="background: #e6f4ff; border-color: #91caff; color: #0958d9;">RESEARCHER</span>
+    <span class="tag" style="background: #fafafa; border-color: #d9d9d9; color: rgba(0,0,0,0.88);">VIEWER</span>
+    <span class="note">권한 4단계 — Header에 표시</span>
+  </div>
+  <div style="font-size: 12px; color: var(--rt-fg-secondary); font-family: var(--rt-font-mono);">
+    ROLE_COLOR = { ADMIN: 'red', MANAGER: 'orange', RESEARCHER: 'blue', VIEWER: 'default' }
+  </div>
+</body></html>

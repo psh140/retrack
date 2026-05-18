@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin: 0; padding: 20px; background: #fff; }
+  .card { display: flex; align-items: baseline; gap: 24px; flex-wrap: wrap; }
+  .row { display: flex; align-items: baseline; gap: 16px; padding: 6px 0; border-bottom: 1px solid var(--rt-border-secondary); }
+  .row:last-child { border-bottom: none; }
+  .row .size { width: 64px; color: var(--rt-fg-tertiary); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .row .sample { flex: 1; color: var(--rt-fg); }
+  .meta { color: var(--rt-fg-tertiary); font-size: 11px; font-family: var(--rt-font-mono); }
+</style></head>
+<body>
+  <div class="card">
+    <div style="flex: 1; min-width: 0;">
+      <div class="row"><span class="size">38 / 600</span><span class="sample" style="font-size: 38px; line-height: 1.21; font-weight: 600;">대시보드 H1</span></div>
+      <div class="row"><span class="size">30 / 600</span><span class="sample" style="font-size: 30px; line-height: 1.27; font-weight: 600;">과제 관리 H2</span></div>
+      <div class="row"><span class="size">24 / 600</span><span class="sample" style="font-size: 24px; line-height: 1.33; font-weight: 600;">Retrack H3</span></div>
+      <div class="row"><span class="size">20 / 600</span><span class="sample" style="font-size: 20px; line-height: 1.4; font-weight: 600;">연구비 집계 H4</span></div>
+      <div class="row"><span class="size">16 / 600</span><span class="sample" style="font-size: 16px; line-height: 1.5; font-weight: 600;">카드 헤더 H5</span></div>
+    </div>
+  </div>
+</body></html>
