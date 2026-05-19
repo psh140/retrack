@@ -8,11 +8,12 @@
  * @modified 2026-05-18 메인(랜딩) 페이지 추가, "/" 진입점 변경
  * @modified 2026-05-18 5단계: 과제 목록·상세·등록/수정 라우트 등록
  * @modified 2026-05-18 6단계: 알림 라우트 등록
+ * @modified 2026-05-19 7단계: 관리자 페이지 (사용자 관리·통계·활동 로그) 라우트 등록
  */
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import PrivateRoute from './components/PrivateRoute';
 import MainLayout from './components/MainLayout';
-// import RoleRoute from './components/RoleRoute';
+import RoleRoute from './components/RoleRoute';
 
 // 메인(랜딩) 페이지
 import LandingPage from './pages/LandingPage';
@@ -32,10 +33,10 @@ import ProjectFormPage from './pages/ProjectFormPage';
 // 6단계 — 알림
 import NotificationPage from './pages/NotificationPage';
 
-// 이후 단계 구현 예정
-// import UserManagePage from './pages/UserManagePage';
-// import StatsPage from './pages/StatsPage';
-// import ActivityLogPage from './pages/ActivityLogPage';
+// 7단계 — 관리자
+import UserManagePage from './pages/UserManagePage';
+import StatsPage from './pages/StatsPage';
+import ActivityLogPage from './pages/ActivityLogPage';
 
 function App() {
   return (
@@ -54,10 +55,10 @@ function App() {
         <Route path="/projects/:id/edit" element={<PrivateRoute><MainLayout><ProjectFormPage /></MainLayout></PrivateRoute>} />
         <Route path="/notifications"     element={<PrivateRoute><MainLayout><NotificationPage /></MainLayout></PrivateRoute>} />
 
-        {/* ADMIN 전용 (7단계 이후 주석 해제) */}
-        {/* <Route path="/admin/users" element={<RoleRoute role="ADMIN"><UserManagePage /></RoleRoute>} /> */}
-        {/* <Route path="/admin/stats" element={<RoleRoute role="ADMIN"><StatsPage /></RoleRoute>} /> */}
-        {/* <Route path="/admin/logs" element={<RoleRoute role="ADMIN"><ActivityLogPage /></RoleRoute>} /> */}
+        {/* ADMIN 전용 — 7단계 */}
+        <Route path="/admin/users" element={<RoleRoute role="ADMIN"><MainLayout><UserManagePage /></MainLayout></RoleRoute>} />
+        <Route path="/admin/stats" element={<RoleRoute role="ADMIN"><MainLayout><StatsPage /></MainLayout></RoleRoute>} />
+        <Route path="/admin/logs"  element={<RoleRoute role="ADMIN"><MainLayout><ActivityLogPage /></MainLayout></RoleRoute>} />
       </Routes>
     </BrowserRouter>
   );

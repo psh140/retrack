@@ -4,6 +4,7 @@
  * - response: 401 응답 시 localStorage 초기화 후 /login 리다이렉트
  *
  * @since 2026-05-14
+ * @modified 2026-05-19 7단계: 사용자 관리·통계·활동 로그 API 함수 추가
  */
 import axios from 'axios';
 
@@ -128,5 +129,77 @@ export const getNotifications = () => api.get('/notifications');
  * 성공 시 data: notificationId (Long)
  */
 export const sendNotification = (data) => api.post('/notifications/send', data);
+
+// ===================== 사용자 관리 API =====================
+
+/**
+ * 사용자 목록 조회 (ADMIN 전용)
+ * @param {Object} params - { keyword, role, isVerified, page, size }
+ * @returns {Promise} res.data.data = PageResponse { items: UserVO[], totalCount, page, size, totalPages }
+ */
+export const getUsers = (params) => api.get('/users', { params });
+
+/**
+ * 사용자 역할 변경 (ADMIN 전용)
+ * @param {number} id - 대상 사용자 ID
+ * @param {string} role - 변경할 역할 (VIEWER / RESEARCHER / MANAGER / ADMIN)
+ * @returns {Promise} res.data.data = null (메시지만 반환)
+ */
+export const updateUserRole = (id, role) => api.patch(`/users/${id}/role`, { role });
+
+/**
+ * 사용자 연구자 인증 처리 (ADMIN 전용)
+ * @param {number} id - 대상 사용자 ID
+ * @returns {Promise} res.data.data = null (메시지만 반환)
+ */
+export const verifyUser = (id) => api.patch(`/users/${id}/verify`);
+
+/**
+ * 사용자 삭제 (ADMIN 전용)
+ * @param {number} id - 삭제할 사용자 ID
+ * @returns {Promise} res.data.data = null (메시지만 반환)
+ */
+export const deleteUser = (id) => api.delete(`/users/${id}`);
+
+// ===================== 통계 API =====================
+
+/**
+ * 과제 상태별 건수 조회 (ADMIN 전용)
+ * @returns {Promise} res.data.data = Map { "DRAFT": N, "SUBMITTED": N, ... }
+ */
+export const getProjectStatusStats = () => api.get('/stats/projects/status');
+
+/**
+ * 연구비 카테고리별 집계 조회 (ADMIN 전용)
+ * @returns {Promise} res.data.data = Map { "PERSONNEL": N, "TRAVEL": N, "RESEARCH_ACTIVITY": N, "ETC": N, "total": N }
+ */
+export const getBudgetCategoryStats = () => api.get('/stats/budget/category');
+
+/**
+ * 과제별 연구비 소진율 목록 조회 (ADMIN 전용)
+ * @returns {Promise} res.data.data = List [{ projectId, title, budgetTotal, budgetUsed, burnRate }]
+ */
+export const getBudgetBurnRate = () => api.get('/stats/budget/burnrate');
+
+/**
+ * 월별 알림 발송 건수 조회 (ADMIN 전용)
+ * @returns {Promise} res.data.data = List [{ month: "2026-04", count: 12 }]
+ */
+export const getMonthlyNotificationStats = () => api.get('/stats/notifications/monthly');
+
+// ===================== 활동 로그 API =====================
+
+/**
+ * 전체 활동 로그 목록 조회 (ADMIN 전용)
+ * @returns {Promise} res.data.data = List<ActivityLogVO> [{ logId, userId, action, targetType, targetId, description, ipAddress, createdAt }]
+ */
+export const getActivityLogs = () => api.get('/logs');
+
+/**
+ * 특정 사용자의 활동 로그 목록 조회 (ADMIN 전용)
+ * @param {number} id - 조회할 사용자 ID
+ * @returns {Promise} res.data.data = List<ActivityLogVO>
+ */
+export const getUserActivityLogs = (id) => api.get(`/logs/users/${id}`);
 
 export default api;
