@@ -2,16 +2,17 @@
  * 알림 목록 페이지
  * - 로그인 사용자의 알림 목록 테이블 (메시지, 상태, 생성일시)
  * - 과제 연결 알림: 행 클릭 시 /projects/:id 이동
- * - MANAGER 이상: "알림 발송" 버튼 (수신자·과제·메시지 입력 Modal)
+ * - MANAGER 이상: "알림 발송" 버튼 (수신자 Select·과제 Select·메시지 입력 Modal)
  *
  * @since 2026-05-18
+ * @modified 2026-05-19 수신자·과제 ID 직접 입력 → Select 드롭다운으로 개선
  */
 import { useEffect, useState, useCallback } from 'react';
-import { Table, Tag, Button, Typography, message, Modal, Form, Input, InputNumber, Grid } from 'antd';
+import { Table, Tag, Button, Typography, message, Modal, Form, Input, Select, Grid } from 'antd';
 import { BellOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom'; // response.sendRedirect() 역할
 import dayjs from 'dayjs';
-import { getNotifications, sendNotification } from '../api/index';
+import { getNotifications, sendNotification, getUsers, getProjects } from '../api/index';
 import useAuthStore from '../store/authStore';   // session.getAttribute() 역할
 
 const { Title } = Typography;
@@ -44,6 +45,12 @@ function NotificationPage() {
   const [sendForm]                        = Form.useForm();  // BindingResult 역할
   const [sendLoading, setSendLoading]     = useState(false); // private boolean sendLoading = false;
 
+  // Modal용 사용자·과제 목록 (Select 옵션)
+  const [userOptions, setUserOptions]     = useState([]); // List<UserVO> — 수신자 선택용 (전체 캐시)
+  const [projectOptions, setProjectOptions] = useState([]); // List<ProjectVO> — 과제 선택용
+  const [optionsLoading, setOptionsLoading] = useState(false);
+  const [userSearch, setUserSearch]       = useState(''); // 수신자 검색어 — 검색어 있을 때만 옵션 표시
+
   /** 내 알림 목록 조회 */
   const fetchNotifications = useCallback(async () => {
     setLoading(true);
@@ -62,6 +69,24 @@ function NotificationPage() {
     fetchNotifications();
   }, [fetchNotifications]);
 
+  /** Modal 열릴 때 사용자·과제 목록 로드 */
+  const handleOpenSendModal = async () => {
+    setSendModal(true);
+    setOptionsLoading(true);
+    try {
+      const [usersRes, projectsRes] = await Promise.all([
+        getUsers({ size: 50 }),
+        getProjects({ size: 50 }),
+      ]);
+      setUserOptions(usersRes.data.data.items || []);
+      setProjectOptions(projectsRes.data.data.items || []);
+    } catch {
+      message.error('목록을 불러오지 못했습니다.');
+    } finally {
+      setOptionsLoading(false);
+    }
+  };
+
   /** 알림 발송 처리 (MANAGER 이상) */
   const handleSend = async (values) => {
     setSendLoading(true);
@@ -74,6 +99,7 @@ function NotificationPage() {
       message.success('알림 발송 요청이 완료됐습니다.');
       setSendModal(false);
       sendForm.resetFields();
+      setUserSearch('');
       fetchNotifications();
     } catch (err) {
       message.error(err.response?.data?.message || '알림 발송에 실패했습니다.');
@@ -139,7 +165,7 @@ function NotificationPage() {
           <Button
             type="primary"
             icon={<BellOutlined />}
-            onClick={() => setSendModal(true)}
+            onClick={handleOpenSendModal}
           >
             알림 발송
           </Button>
@@ -171,21 +197,53 @@ function NotificationPage() {
       <Modal
         title="알림 발송"
         open={sendModal}
-        onCancel={() => { setSendModal(false); sendForm.resetFields(); }}
+        onCancel={() => { setSendModal(false); sendForm.resetFields(); setUserSearch(''); }}
         footer={null}
         destroyOnClose
       >
         <Form form={sendForm} layout="vertical" onFinish={handleSend}>
           <Form.Item
             name="userId"
-            label="수신자 ID"
-            rules={[{ required: true, message: '수신자 ID를 입력해 주세요.' }]}
+            label="수신자"
+            rules={[{ required: true, message: '수신자를 선택해 주세요.' }]}
           >
-            <InputNumber style={{ width: '100%' }} min={1} placeholder="수신자 사용자 ID" />
+            {/* 사용자 이름+이메일로 검색·선택 — JSP의 <select> 역할 */}
+            {/* 검색어가 있을 때만 옵션 표시 (초기 빈 드롭다운 방지) */}
+            <Select
+              showSearch
+              placeholder="이름 또는 이메일로 검색"
+              loading={optionsLoading}
+              filterOption={false}
+              onSearch={(val) => setUserSearch(val)}
+              notFoundContent={userSearch ? '검색 결과 없음' : null}
+              options={userSearch
+                ? userOptions
+                    .filter((u) =>
+                      `${u.username} ${u.email}`
+                        .toLowerCase()
+                        .includes(userSearch.toLowerCase())
+                    )
+                    .map((u) => ({ value: u.userId, label: `${u.username} (${u.email})` }))
+                : []
+              }
+            />
           </Form.Item>
 
-          <Form.Item name="projectId" label="관련 과제 ID (선택)">
-            <InputNumber style={{ width: '100%' }} min={1} placeholder="과제 ID (없으면 비워두세요)" />
+          <Form.Item name="projectId" label="관련 과제 (선택)">
+            {/* 과제명으로 검색·선택 */}
+            <Select
+              showSearch
+              allowClear
+              placeholder="과제명으로 검색 (선택사항)"
+              loading={optionsLoading}
+              filterOption={(input, option) =>
+                option.label.toLowerCase().includes(input.toLowerCase())
+              }
+              options={projectOptions.map((p) => ({
+                value: p.projectId,
+                label: p.title,
+              }))}
+            />
           </Form.Item>
 
           <Form.Item
