@@ -37,11 +37,9 @@ services:
     build: ./frontend           # ./frontend 폴더의 Dockerfile로 이미지 빌드
     container_name: retrack-frontend
     ports:
-      - "3000:3000"
+      - "3000:80"
     depends_on:
       - backend                 # backend 컨테이너가 먼저 실행된 후 시작
-    environment:
-      BACKEND_HOST: http://retrack-backend:8080  # Vite proxy가 컨테이너 이름으로 백엔드를 찾도록
 
 volumes:
   postgres-data:                # 위에서 사용한 볼륨 선언

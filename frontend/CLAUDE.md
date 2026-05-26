@@ -173,9 +173,14 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 - [x] `pages/ActivityLogPage.jsx` — 사용자 ID 필터, 전체/특정 사용자 로그 조회, createdAt 내림차순 정렬
 - [x] `App.jsx` — `/admin/users`, `/admin/stats`, `/admin/logs` RoleRoute("ADMIN") + MainLayout 등록
 
+#### 배포 준비 (2026-05-26)
+- [x] `Dockerfile` — 멀티 스테이지 빌드로 교체 (node:18-alpine 빌드 → nginx:alpine 서빙)
+- [x] `nginx.conf` — 신규 생성 (포트 80, React Router 폴백, `/api` → backend:8080 프록시)
+- [x] `docker-compose.yml` — frontend 포트 `3000:3000` → `3000:80`, `BACKEND_HOST` 환경변수 제거
+
 ### 다음 작업
 
-배포 준비 (AWS EC2 + Docker Compose + Nginx)
+EC2 인스턴스 생성 및 서버 배포
 
 ---
 
