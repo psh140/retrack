@@ -6,6 +6,7 @@
  * - createdAt 내림차순 정렬 (최신 순)
  *
  * @since 2026-05-19
+ * @modified 2026-05-26 ACTION_COLOR 실제 DB action 값으로 수정, 액션 컬럼 width 조정
  */
 import { useEffect, useState } from 'react';
 import {
@@ -14,7 +15,6 @@ import {
   InputNumber,
   Button,
   Tag,
-  Space,
   Row,
   Col,
   Typography,
@@ -31,13 +31,14 @@ const { Title } = Typography;
  * action 값에 따라 Tag 색상을 구분하여 시각적 가독성 향상
  */
 const ACTION_COLOR = {
-  CREATE: 'green',
-  UPDATE: 'blue',
-  DELETE: 'red',
   LOGIN: 'purple',
-  LOGOUT: 'default',
-  VERIFY: 'cyan',
-  ROLE_CHANGE: 'orange',
+  CREATE_PROJECT: 'green',
+  FILE_UPLOAD: 'blue',
+  CHANGE_STATUS: 'blue',
+  PROJECT_STATUS_CHANGE: 'blue',
+  NOTIFICATION_SEND: 'cyan',
+  USER_ROLE_CHANGE: 'orange',
+  USER_VERIFY: 'cyan',
 };
 
 function ActivityLogPage() {
@@ -113,7 +114,7 @@ function ActivityLogPage() {
       title: '액션',
       dataIndex: 'action',
       key: 'action',
-      width: 110,
+      width: 210,
       render: (action) => (
         <Tag color={ACTION_COLOR[action] || 'default'}>{action}</Tag>
       ),
@@ -122,7 +123,7 @@ function ActivityLogPage() {
       title: '대상 타입',
       dataIndex: 'targetType',
       key: 'targetType',
-      width: 110,
+      width: 120,
     },
     {
       title: '대상 ID',
@@ -193,7 +194,7 @@ function ActivityLogPage() {
           loading={loading}
           pagination={{ pageSize: 20, showSizeChanger: false }}
           size="small"
-          scroll={{ x: 800 }}
+          scroll={{ x: 1000 }}
         />
       </Card>
     </div>
