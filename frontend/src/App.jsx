@@ -9,38 +9,49 @@
  * @modified 2026-05-18 5단계: 과제 목록·상세·등록/수정 라우트 등록
  * @modified 2026-05-18 6단계: 알림 라우트 등록
  * @modified 2026-05-19 7단계: 관리자 페이지 (사용자 관리·통계·활동 로그) 라우트 등록
+ * @modified 2026-06-07 code-splitting: 모든 페이지 lazy() 전환 (초기 번들 분리)
  */
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Spin } from 'antd';
 import PrivateRoute from './components/PrivateRoute';
 import MainLayout from './components/MainLayout';
 import RoleRoute from './components/RoleRoute';
 
 // 메인(랜딩) 페이지
-import LandingPage from './pages/LandingPage';
+const LandingPage = lazy(() => import('./pages/LandingPage'));
 
 // 3단계 — 인증
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+const LoginPage    = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 
 // 4단계 — 대시보드
-import DashboardPage from './pages/DashboardPage';
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 
 // 5단계 — 과제 관리
-import ProjectListPage from './pages/ProjectListPage';
-import ProjectDetailPage from './pages/ProjectDetailPage';
-import ProjectFormPage from './pages/ProjectFormPage';
+const ProjectListPage   = lazy(() => import('./pages/ProjectListPage'));
+const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'));
+const ProjectFormPage   = lazy(() => import('./pages/ProjectFormPage'));
 
 // 6단계 — 알림
-import NotificationPage from './pages/NotificationPage';
+const NotificationPage = lazy(() => import('./pages/NotificationPage'));
 
 // 7단계 — 관리자
-import UserManagePage from './pages/UserManagePage';
-import StatsPage from './pages/StatsPage';
-import ActivityLogPage from './pages/ActivityLogPage';
+const UserManagePage  = lazy(() => import('./pages/UserManagePage'));
+const StatsPage       = lazy(() => import('./pages/StatsPage'));
+const ActivityLogPage = lazy(() => import('./pages/ActivityLogPage'));
+
+/** 페이지 로딩 중 전체 화면 스피너 — JSP forward 대기 화면과 동일한 역할 */
+const PageLoader = (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+    <Spin size="large" />
+  </div>
+);
 
 function App() {
   return (
     <BrowserRouter>
+      <Suspense fallback={PageLoader}>
       <Routes>
         {/* 공개 — MainLayout 없이 단독 표시 */}
         <Route path="/" element={<LandingPage />} />
@@ -60,6 +71,7 @@ function App() {
         <Route path="/admin/stats" element={<RoleRoute role="ADMIN"><MainLayout><StatsPage /></MainLayout></RoleRoute>} />
         <Route path="/admin/logs"  element={<RoleRoute role="ADMIN"><MainLayout><ActivityLogPage /></MainLayout></RoleRoute>} />
       </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }
