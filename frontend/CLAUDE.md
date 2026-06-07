@@ -177,13 +177,16 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 - [x] `Dockerfile` — 멀티 스테이지 빌드로 교체 (node:18-alpine 빌드 → nginx:alpine 서빙)
 - [x] `nginx.conf` — 신규 생성 (포트 80, React Router 폴백, `/api` → backend:8080 프록시)
 - [x] `docker-compose.yml` — frontend 포트 `3000:3000` → `3000:80`, `BACKEND_HOST` 환경변수 제거
-- [ ] `.dockerignore` 추가 — `node_modules/`, `.env`, `dist/` 제외
-- [ ] `nginx.conf` — `server_name _;` 추가
-- [ ] `docs/nginx-배포설정.md` — 멀티 스테이지 빌드 방식 기준으로 내용 업데이트
+- [x] `.dockerignore` 추가 — `node_modules/`, `.env`, `dist/` 제외
+- [x] `nginx.conf` — `server_name _;` 추가
+- [x] `docs/nginx-배포설정.md` — 멀티 스테이지 빌드 방식 기준으로 내용 업데이트
+
+#### 성능 개선 (2026-06-07)
+- [x] `App.jsx` — 모든 페이지 `lazy()` 전환 (code-splitting), `Suspense` 폴백 스피너 추가 (초기 번들 1,709KB → 공통 코어 589KB 분리)
 
 ### 다음 작업
 
-배포 준비 마무리 후 EC2 인스턴스 생성 및 서버 배포
+EC2 인스턴스 생성 및 서버 배포
 
 ---
 
