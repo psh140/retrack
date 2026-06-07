@@ -186,7 +186,18 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 
 ### 다음 작업
 
-EC2 인스턴스 생성 및 서버 배포
+#### 8단계 — AWS 배포
+
+- [ ] Route 53 도메인 구매 (도메인명 미정)
+- [ ] EC2 인스턴스 생성 (Ubuntu, t2.micro 또는 t2.small) + Elastic IP 발급
+- [ ] 보안 그룹 설정 — 인바운드 22(SSH), 80(HTTP), 443(HTTPS) 오픈
+- [ ] EC2 서버 세팅 — Docker, Docker Compose 설치
+- [ ] GitHub 코드 clone 및 `.env` 파일 작성 (MAIL_USERNAME, MAIL_PASSWORD)
+- [ ] 백엔드 WAR 빌드 (Maven package) 후 서버 업로드
+- [ ] Route 53 DNS A 레코드 → EC2 Elastic IP 연결
+- [ ] `docker-compose up -d` 실행 및 서비스 정상 동작 확인
+- [ ] Let's Encrypt SSL 인증서 발급 (Certbot) + nginx HTTPS 설정
+- [ ] HTTP → HTTPS 리다이렉트 설정
 
 ---
 
