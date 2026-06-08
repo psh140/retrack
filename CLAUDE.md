@@ -39,6 +39,7 @@
 | Frontend | React | 18.x |
 | Build Tool | Maven | 3.x |
 | Container | Docker / Docker Compose | - |
+| Web Server | Nginx | alpine (프론트엔드 서빙 + /api 리버스 프록시) |
 | Deploy | AWS EC2 | - |
 | VCS | Git / GitHub | - |
 | External API | Gmail SMTP (Spring JavaMailSender) | - |
@@ -69,6 +70,7 @@ retrack/
     src/
     public/
     Dockerfile
+    nginx.conf          # Nginx 설정 (SPA 폴백, /api 리버스 프록시)
   docker-compose.yml
   CLAUDE.md
   backend/CLAUDE.md
@@ -103,9 +105,18 @@ docker logs retrack-backend
 # docker-compose.yml의 volumes에서 자동 마운트됨
 ```
 
+### Nginx 구성
+
+프론트엔드 컨테이너는 Nginx(alpine)로 동작한다. `frontend/nginx.conf` 참고.
+
+- 포트: 컨테이너 내부 80 → 호스트 3000 (`docker-compose.yml` ports: `3000:80`)
+- React SPA 폴백: `try_files $uri /index.html` — 새로고침 시 404 방지
+- `/api` 리버스 프록시: `proxy_pass http://backend:8080` — 프론트에서 별도 CORS 처리 불필요
+- 상세 배포 설정: [`docs/nginx-배포설정.md`](docs/nginx-배포설정.md) 참고
+
 ### 접속 정보
 
-- 프론트엔드: http://localhost:3000
+- 프론트엔드: http://localhost:3000 (Nginx가 React 빌드 서빙)
 - 백엔드: http://localhost:8080
 - PostgreSQL: localhost:5432
 
