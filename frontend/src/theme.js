@@ -19,6 +19,7 @@ export const COLORS = {
 
   bgPage: '#f5f5f5', // 페이지 배경
   bgContainer: '#ffffff', // 카드·헤더·사이더 배경
+  bgLabel: '#fafafa', // 테이블 헤더·설명표 레이블 칸 배경
 
   fg: 'rgba(0, 0, 0, 0.88)', // 본문 텍스트
   fgSecondary: 'rgba(0, 0, 0, 0.65)', // 보조 텍스트
@@ -121,7 +122,7 @@ const theme = {
       itemSelectedColor: COLORS.brand,
     },
     Table: {
-      headerBg: '#fafafa',
+      headerBg: COLORS.bgLabel,
       cellPaddingBlockSM: 8,
     },
     Tag: {

@@ -209,7 +209,7 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 - [x] **2단계 — 레이아웃 컨테이너 규칙 통일** (2026-07-24): MainLayout Content가 padding(데스크탑 24 / 모바일 16)·minHeight·본문 최대폭(1440px, 가운데 정렬)을 단일 관리. 배경색은 theme의 `Layout.bodyBg`/`siderBg`/`headerBg`에 위임. StatsPage·UserManagePage·ActivityLogPage의 `padding:24 / background / minHeight:100vh` 래퍼와 Card의 불필요한 `background:'#fff'` 제거, StatsPage 로딩 화면을 다른 페이지와 동일한 형태로 통일
 - [x] **3단계 — 공통 컴포넌트 생성** (2026-07-24, `src/components/common/`): PageHeader(제목+설명+우측 액션), FilterToolbar(Card 기반 검색/필터 래퍼), StatCard(숫자 카드, `valueSize` default/small), StatusTag(`STATUS_MAP` 조회 흡수, `variant` preset/soft), EmptyState(빈 상태), PageLoading(로딩 스피너 — 계획 외 추가, Dashboard·Stats 중복 해소), `index.js` 배럴. 생성만 하고 페이지 적용은 4단계
 - [x] **4단계 — 공통 컴포넌트 적용** (2026-07-24): DashboardPage·ProjectListPage·NotificationPage·UserManagePage·ActivityLogPage·StatsPage 6개 페이지에 3단계 컴포넌트 적용(-282/+199줄). 목록 테이블은 **Card로 감싸지 않는 방식으로 통일**(UserManagePage·ActivityLogPage의 Card 래핑 제거) — StatsPage 번레이트만 카드 제목이 정보 전달에 필요해 예외. 알림 상태(PENDING/SENT/FAILED)·활동 로그 액션 태그는 과제 상태와 별개 도메인이라 각 페이지 지역 상수 유지
-- [ ] **5단계 — ProjectDetailPage 재구성**: 상단 요약 헤더(제목·StatusTag·기간·총예산·담당자) + 수정/삭제/상태변경을 우측 액션 그룹으로 정리, 본문을 개요/연구비/파일/이력 섹션으로 구조화(기존 탭 유지 가능)
+- [x] **5단계 — ProjectDetailPage 재구성** (2026-07-24): `components/project/ProjectSummaryHeader.jsx` 신설 — 목록으로·제목·StatusTag·우측 액션 그룹(상태변경/수정/삭제)·메타 행(기간·총 연구비·등록일). **액션 버튼을 기본정보 탭 안 카드에서 헤더로 이동**해 연구비 탭에서도 접근 가능하도록 수정(기존 버그성 제약 해소). 기본정보 Descriptions는 헤더와 중복되는 과제명·상태·총 연구비를 빼고 '과제 개요' 카드로 재편. StatusTag·EmptyState·PageLoading 적용, `#fafafa`를 `COLORS.bgLabel` 토큰으로 단일화(theme.js `Table.headerBg`도 동일 토큰 참조). 탭 2개 구조는 유지. **담당자는 표시하지 않음** — ProjectVO가 managerId(숫자)만 내려주고 이름 조인이 없어 백엔드 변경 없이는 불가(사용자 결정)
 
 ---
 

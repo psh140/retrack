@@ -5,12 +5,14 @@
  *
  * @since 2026-05-18
  * @modified 2026-07-24 UI 일관성 1단계: 상태·카테고리·권한·포맷 상수를 공통 모듈로 이동
+ * @modified 2026-07-24 UI 일관성 5단계: 상단 요약 헤더 도입(액션 버튼을 탭 밖으로 이동),
+ *                                        공통 컴포넌트 적용 및 색상 토큰화
  */
 import { useEffect, useState, useCallback } from 'react';
 import {
-  Tabs, Descriptions, Tag, Button, Table, Typography, message,
+  Tabs, Descriptions, Button, Table, message,
   Modal, Form, Input, InputNumber, Select, DatePicker, Upload,
-  Spin, Space, Card, Grid, Popconfirm,
+  Space, Card, Grid, Popconfirm,
 } from 'antd';
 import {
   EditOutlined, DeleteOutlined, PlusOutlined, UploadOutlined, DownloadOutlined,
@@ -32,9 +34,10 @@ import {
 } from '../constants/project';
 import { hasRole } from '../constants/role';
 import { won, formatDate, formatDateTime } from '../utils/format';
-import { COLORS } from '../theme';
+import { COLORS, SPACING } from '../theme';
+import { StatusTag, EmptyState, PageLoading } from '../components/common';
+import ProjectSummaryHeader from '../components/project/ProjectSummaryHeader';
 
-const { Title } = Typography;
 const { TextArea } = Input;
 const { useBreakpoint } = Grid;
 
@@ -249,16 +252,11 @@ function ProjectDetailPage() {
 
   // 로딩 중 — JSP의 <c:if test="${loading}"> 역할
   if (loading) {
-    return (
-      <div style={{ textAlign: 'center', padding: 80 }}>
-        <Spin size="large" />
-      </div>
-    );
+    return <PageLoading />;
   }
 
   if (!project) return null;
 
-  const currentStatus = STATUS_MAP[project.status];
   // MANAGER 이상: 현재 상태 제외한 전체 상태 선택 가능 / 그 미만: 정해진 전이만 허용
   const nextStatuses = hasRole(userRole, 'MANAGER')
     ? PROJECT_STATUSES.map((s) => s.value).filter((v) => v !== project.status)
@@ -273,53 +271,22 @@ function ProjectDetailPage() {
 
   /* ─────────────── 탭 1: 기본정보 ─────────────── */
   const infoTab = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: SPACING.lg }}>
 
-      {/* 과제 기본 정보 카드 */}
-      <Card>
+      {/* 과제 개요 — 과제명·상태·총 연구비는 상단 요약 헤더에 있으므로 여기서는 제외한다 */}
+      <Card title="과제 개요">
         <Descriptions
           bordered
           size="small"
           column={isMobile ? 1 : 2}
-          labelStyle={{ background: '#fafafa', whiteSpace: 'nowrap' }}
+          labelStyle={{ background: COLORS.bgLabel, whiteSpace: 'nowrap' }}
         >
-          <Descriptions.Item label="과제명" span={isMobile ? 1 : 2}>{project.title}</Descriptions.Item>
-          <Descriptions.Item label="설명"   span={isMobile ? 1 : 2}>{project.description || '-'}</Descriptions.Item>
-          <Descriptions.Item label="상태">
-            {currentStatus
-              ? <Tag color={currentStatus.color}>{currentStatus.label}</Tag>
-              : <Tag>{project.status}</Tag>}
-          </Descriptions.Item>
-          <Descriptions.Item label="총 연구비">{won(project.budgetTotal)}</Descriptions.Item>
+          <Descriptions.Item label="설명" span={isMobile ? 1 : 2}>{project.description || '-'}</Descriptions.Item>
           <Descriptions.Item label="시작일">{formatDate(project.startDate)}</Descriptions.Item>
           <Descriptions.Item label="종료일">{formatDate(project.endDate)}</Descriptions.Item>
           <Descriptions.Item label="등록일">{formatDate(project.createdAt)}</Descriptions.Item>
           <Descriptions.Item label="수정일">{formatDate(project.updatedAt)}</Descriptions.Item>
         </Descriptions>
-
-        {/* 액션 버튼 — JSP의 <c:if> 역할로 권한별 표시 */}
-        <div style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {hasRole(userRole, 'MANAGER') && nextStatuses.length > 0 && (
-            <Button type="primary" onClick={() => setStatusModal(true)}>상태 변경</Button>
-          )}
-          {hasRole(userRole, 'RESEARCHER') && (
-            <Button icon={<EditOutlined />} onClick={() => navigate(`/projects/${id}/edit`)}>
-              수정
-            </Button>
-          )}
-          {hasRole(userRole, 'ADMIN') && (
-            <Popconfirm
-              title="과제를 삭제하시겠습니까?"
-              description="삭제된 과제는 복구할 수 없습니다."
-              onConfirm={handleDelete}
-              okText="삭제"
-              cancelText="취소"
-              okButtonProps={{ danger: true }}
-            >
-              <Button danger icon={<DeleteOutlined />}>삭제</Button>
-            </Popconfirm>
-          )}
-        </div>
       </Card>
 
       {/* 상태 변경 이력 */}
@@ -329,26 +296,20 @@ function ProjectDetailPage() {
           dataSource={history}
           size="small"
           pagination={false}
-          locale={{ emptyText: '이력이 없습니다.' }}
+          locale={{ emptyText: <EmptyState description="상태 변경 이력이 없습니다." /> }}
           columns={[
             {
               title: '이전 상태',
               dataIndex: 'prevStatus',
               key: 'prevStatus',
-              render: (v) => {
-                if (!v) return '-';
-                const s = STATUS_MAP[v];
-                return s ? <Tag color={s.color}>{s.label}</Tag> : <Tag>{v}</Tag>;
-              },
+              // 최초 등록 시점은 이전 상태가 없다
+              render: (v) => (v ? <StatusTag status={v} /> : '-'),
             },
             {
               title: '변경 상태',
               dataIndex: 'newStatus',
               key: 'newStatus',
-              render: (v) => {
-                const s = STATUS_MAP[v];
-                return s ? <Tag color={s.color}>{s.label}</Tag> : <Tag>{v}</Tag>;
-              },
+              render: (v) => <StatusTag status={v} />,
             },
             {
               title: '코멘트',
@@ -385,7 +346,7 @@ function ProjectDetailPage() {
           dataSource={files}
           size="small"
           pagination={false}
-          locale={{ emptyText: '첨부파일이 없습니다.' }}
+          locale={{ emptyText: <EmptyState description="첨부파일이 없습니다." /> }}
           columns={[
             {
               title: '파일명',
@@ -441,23 +402,23 @@ function ProjectDetailPage() {
 
   /* ─────────────── 탭 2: 연구비 ─────────────── */
   const budgetTab = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: SPACING.lg }}>
 
       {/* 카테고리별 집계 */}
       <Card title="카테고리별 연구비">
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
+        <div style={{ display: 'flex', gap: SPACING.sm, flexWrap: 'wrap', marginBottom: SPACING.lg }}>
           {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
             <div
               key={key}
               style={{
                 flex: '1 1 110px',
-                padding: '12px 16px',
+                padding: `${SPACING.sm}px ${SPACING.md}px`,
                 border: `1px solid ${COLORS.borderSecondary}`,
                 borderRadius: 6,
-                background: '#fafafa',
+                background: COLORS.bgLabel,
               }}
             >
-              <div style={{ color: COLORS.fgTertiary, fontSize: 12, marginBottom: 4 }}>{label}</div>
+              <div style={{ color: COLORS.fgTertiary, fontSize: 12, marginBottom: SPACING.xxs }}>{label}</div>
               <div style={{ fontSize: 15, fontWeight: 600, color: CATEGORY_COLORS[key] }}>
                 {won(summary[key] || 0)}
               </div>
@@ -466,7 +427,7 @@ function ProjectDetailPage() {
         </div>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={chartData} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.borderSecondary} />
             <XAxis dataKey="name" tick={{ fontSize: 12 }} />
             <YAxis
               tick={{ fontSize: 12 }}
@@ -480,7 +441,7 @@ function ProjectDetailPage() {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-        <div style={{ marginTop: 8, textAlign: 'right', fontWeight: 600 }}>
+        <div style={{ marginTop: SPACING.xs, textAlign: 'right', fontWeight: 600 }}>
           합계: {won(summary.total || 0)}
         </div>
       </Card>
@@ -501,7 +462,7 @@ function ProjectDetailPage() {
           dataSource={budgets}
           size="small"
           pagination={{ pageSize: 10, showSizeChanger: false, showTotal: (t) => `총 ${t}건` }}
-          locale={{ emptyText: '연구비 내역이 없습니다.' }}
+          locale={{ emptyText: <EmptyState description="연구비 집행 내역이 없습니다." /> }}
           scroll={isMobile ? { x: true } : undefined}
           columns={[
             {
@@ -567,18 +528,39 @@ function ProjectDetailPage() {
 
   return (
     <div>
-      {/* 페이지 헤더 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
-        <Button
-          type="text"
-          onClick={() => navigate('/projects')}
-          style={{ padding: 0, height: 'auto', color: COLORS.fgTertiary }}
-        >
-          ← 목록으로
-        </Button>
-        <Title level={4} style={{ margin: 0 }}>{project.title}</Title>
-        {currentStatus && <Tag color={currentStatus.color}>{currentStatus.label}</Tag>}
-      </div>
+      {/*
+        상단 요약 헤더 — 제목·상태·기간·총 연구비와 액션 버튼을 함께 표시한다.
+        액션 버튼을 탭 밖으로 뺐기 때문에 연구비 탭에서도 상태 변경·수정·삭제가 가능하다.
+        각 버튼의 노출 여부는 권한으로 분기한다 — JSP의 <c:if> 역할
+      */}
+      <ProjectSummaryHeader
+        project={project}
+        onBack={() => navigate('/projects')}
+        actions={
+          <>
+            {hasRole(userRole, 'MANAGER') && nextStatuses.length > 0 && (
+              <Button type="primary" onClick={() => setStatusModal(true)}>상태 변경</Button>
+            )}
+            {hasRole(userRole, 'RESEARCHER') && (
+              <Button icon={<EditOutlined />} onClick={() => navigate(`/projects/${id}/edit`)}>
+                수정
+              </Button>
+            )}
+            {hasRole(userRole, 'ADMIN') && (
+              <Popconfirm
+                title="과제를 삭제하시겠습니까?"
+                description="삭제된 과제는 복구할 수 없습니다."
+                onConfirm={handleDelete}
+                okText="삭제"
+                cancelText="취소"
+                okButtonProps={{ danger: true }}
+              >
+                <Button danger icon={<DeleteOutlined />}>삭제</Button>
+              </Popconfirm>
+            )}
+          </>
+        }
+      />
 
       {/* 탭 — JSP의 jQuery UI Tabs 역할 */}
       <Tabs
