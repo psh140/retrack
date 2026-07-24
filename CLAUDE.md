@@ -144,6 +144,14 @@ Password: retrack1234
 
 ---
 
+## 배포
+
+AWS EC2 배포까지 남은 작업 목록 → [`docs/배포-체크리스트.md`](docs/배포-체크리스트.md) 참고
+
+**배포 전 반드시 처리할 것**: `docker-compose.yml`의 `POSTGRES_PASSWORD`·`DB_PASSWORD`·`JWT_SECRET`이 평문으로 커밋되어 있다. `.env`로 분리하고 JWT 서명키는 새 값으로 교체한다.
+
+---
+
 ## 협업 규칙
 
 ### 커밋 / 푸시
