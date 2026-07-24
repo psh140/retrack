@@ -6,42 +6,19 @@
  * - ADMIN: 전체 사용자 수 추가
  *
  * @since 2026-05-18
+ * @modified 2026-07-24 UI 일관성 1단계: 상태 레이블·색상·원화 포맷을 공통 상수로 이동
  */
 import { useEffect, useState } from 'react';
 import { Card, Typography, Tag, Spin, Empty, Grid } from 'antd';
 import { BellOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getDashboard } from '../api/index';
+import { STATUS_MAP, STATUS_VALUES } from '../constants/project';
+import { won } from '../utils/format';
+import { COLORS } from '../theme';
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;  // 화면 크기 감지 훅 (Java의 request.getHeader("User-Agent") 분기와 유사)
-
-// 상태 한글 레이블 매핑
-const STATUS_LABEL = {
-  DRAFT:       '작성중',
-  SUBMITTED:   '제출',
-  REVIEWING:   '검토중',
-  APPROVED:    '승인',
-  IN_PROGRESS: '진행중',
-  COMPLETED:   '완료',
-  REJECTED:    '반려',
-};
-
-// 상태별 색상 — retrack-design 토큰 기준
-const STATUS_COLOR = {
-  DRAFT:       { fg: 'rgba(0,0,0,0.88)', bg: '#fafafa',  border: '#d9d9d9' },
-  SUBMITTED:   { fg: '#0958d9',           bg: '#e6f4ff',  border: '#91caff' },
-  REVIEWING:   { fg: '#08979c',           bg: '#e6fffb',  border: '#87e8de' },
-  APPROVED:    { fg: '#389e0d',           bg: '#f6ffed',  border: '#b7eb8f' },
-  IN_PROGRESS: { fg: '#1d39c4',           bg: '#f0f5ff',  border: '#adc6ff' },
-  COMPLETED:   { fg: '#531dab',           bg: '#f9f0ff',  border: '#d3adf7' },
-  REJECTED:    { fg: '#cf1322',           bg: '#fff1f0',  border: '#ffa39e' },
-};
-
-const ALL_STATUSES = ['DRAFT', 'SUBMITTED', 'REVIEWING', 'APPROVED', 'IN_PROGRESS', 'COMPLETED', 'REJECTED'];
-
-/** 숫자를 한국 원화 형식으로 포맷 */
-const won = (n) => (n ?? 0).toLocaleString('ko-KR') + '원';
 
 function DashboardPage() {
   // useBreakpoint: 현재 뷰포트 크기를 객체로 반환
@@ -86,14 +63,14 @@ function DashboardPage() {
   const inProgress    = byStatus.IN_PROGRESS || 0;
   const pending       = (byStatus.SUBMITTED || 0) + (byStatus.REVIEWING || 0);
   const completed     = byStatus.COMPLETED || 0;
-  const maxCount      = Math.max(...ALL_STATUSES.map((s) => byStatus[s] || 0), 1);
+  const maxCount      = Math.max(...STATUS_VALUES.map((s) => byStatus[s] || 0), 1);
 
-  // 상단 통계 카드 4개 데이터
+  // 상단 통계 카드 4개 데이터 — 색상은 대응하는 과제 상태 색을 사용
   const statCards = [
-    { label: '전체 과제',  value: totalProjects, hint: '등록된 과제 수',        color: 'rgba(0,0,0,0.88)' },
-    { label: '진행 중',    value: inProgress,    hint: '활성 과제',             color: '#1677ff' },
-    { label: '검토 대기',  value: pending,       hint: 'SUBMITTED · REVIEWING', color: '#08979c' },
-    { label: '완료',       value: completed,     hint: '종료된 과제',           color: '#531dab' },
+    { label: '전체 과제',  value: totalProjects, hint: '등록된 과제 수',        color: COLORS.fg },
+    { label: '진행 중',    value: inProgress,    hint: '활성 과제',             color: COLORS.brand },
+    { label: '검토 대기',  value: pending,       hint: 'SUBMITTED · REVIEWING', color: STATUS_MAP.REVIEWING.fg },
+    { label: '완료',       value: completed,     hint: '종료된 과제',           color: STATUS_MAP.COMPLETED.fg },
   ];
 
   // 반응형 컬럼 — lg+: 4열, sm+/모바일: 2열
@@ -133,10 +110,10 @@ function DashboardPage() {
         {/* 상태별 과제 현황 바 차트 */}
         <Card title="상태별 과제 현황" size="small" style={{ borderRadius: 6 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {ALL_STATUSES.map((st) => {
+            {STATUS_VALUES.map((st) => {
               const count = byStatus[st] || 0;
               const pct   = (count / maxCount) * 100;
-              const col   = STATUS_COLOR[st];
+              const col   = STATUS_MAP[st];
               return (
                 <div key={st} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   {/* 상태 태그 */}
@@ -145,11 +122,11 @@ function DashboardPage() {
                       color: col.fg, background: col.bg, borderColor: col.border,
                       fontSize: 11, margin: 0, borderRadius: 2,
                     }}>
-                      {STATUS_LABEL[st]}
+                      {col.label}
                     </Tag>
                   </div>
                   {/* 바 */}
-                  <div style={{ flex: 1, height: 8, background: 'rgba(0,0,0,0.04)', borderRadius: 4, overflow: 'hidden' }}>
+                  <div style={{ flex: 1, height: 8, background: COLORS.fillTertiary, borderRadius: 4, overflow: 'hidden' }}>
                     <div style={{
                       width: `${pct}%`, height: '100%',
                       background: col.fg, borderRadius: 4,
@@ -177,7 +154,7 @@ function DashboardPage() {
               <div style={{
                 fontSize: isMobile ? 22 : 28,
                 fontWeight: 600,
-                color: '#1677ff',
+                color: COLORS.brand,
                 marginTop: 8,
                 fontVariantNumeric: 'tabular-nums',
               }}>

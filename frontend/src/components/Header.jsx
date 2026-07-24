@@ -5,24 +5,19 @@
  *
  * @since 2026-05-14
  * @modified 2026-05-18 로고 마크 추가, 사용자명 표시, 모바일 패딩 조정
+ * @modified 2026-07-24 UI 일관성 1단계: ROLE_COLOR를 constants/role로 이동, 색상 토큰 적용
  */
 import { Layout, Button, Space, Typography, Tag } from 'antd';
 import { MenuOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';  // 페이지 이동 함수 제공 (response.sendRedirect 역할)
 import useAuthStore from '../store/authStore';    // 전역 로그인 상태 (HttpSession 역할)
+import { ROLE_COLOR } from '../constants/role';
+import { COLORS, SPACING } from '../theme';
 
 // Ant Design Layout.Header를 AntHeader로 별칭 지정
 // (이 파일의 함수명 Header와 충돌 방지)
 const { Header: AntHeader } = Layout;
 const { Text } = Typography;
-
-// 역할별 태그 색상 매핑
-const ROLE_COLOR = {
-  ADMIN: 'red',
-  MANAGER: 'orange',
-  RESEARCHER: 'blue',
-  VIEWER: 'default',
-};
 
 /**
  * @param {function} onMenuClick - 햄버거 버튼 클릭 시 MainLayout의 setDrawerOpen(true) 호출
@@ -48,9 +43,9 @@ function Header({ onMenuClick, isMobile }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',  // 좌우 끝으로 배치
-        padding: isMobile ? '0 12px' : '0 24px',
-        background: '#fff',
-        borderBottom: '1px solid #f0f0f0',
+        padding: isMobile ? `0 ${SPACING.sm}px` : `0 ${SPACING.lg}px`,
+        background: COLORS.bgContainer,
+        borderBottom: `1px solid ${COLORS.borderSecondary}`,
         flexShrink: 0,
       }}
     >

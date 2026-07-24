@@ -6,30 +6,28 @@
  *
  * @since 2026-05-18
  * @modified 2026-05-19 수신자·과제 ID 직접 입력 → Select 드롭다운으로 개선
+ * @modified 2026-07-24 UI 일관성 1단계: 권한·포맷 상수를 공통 모듈로 이동
  */
 import { useEffect, useState, useCallback } from 'react';
 import { Table, Tag, Button, Typography, message, Modal, Form, Input, Select, Grid } from 'antd';
 import { BellOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom'; // response.sendRedirect() 역할
-import dayjs from 'dayjs';
 import { getNotifications, sendNotification, getUsers, getProjects } from '../api/index';
 import useAuthStore from '../store/authStore';   // session.getAttribute() 역할
+import { hasRole } from '../constants/role';
+import { formatDateTime } from '../utils/format';
+import { COLORS } from '../theme';
 
 const { Title } = Typography;
 const { TextArea } = Input;
 const { useBreakpoint } = Grid;
 
-// 알림 발송 상태 레이블 + 색상
+// 알림 발송 상태 레이블 + 색상 (알림 도메인 전용 — 과제 상태와 별개)
 const STATUS_MAP = {
-  PENDING: { label: '대기',   color: 'gold'    },
-  SENT:    { label: '발송완료', color: 'green'   },
-  FAILED:  { label: '실패',   color: 'red'     },
+  PENDING: { label: '대기',    color: 'gold'  },
+  SENT:    { label: '발송완료', color: 'green' },
+  FAILED:  { label: '실패',    color: 'red'   },
 };
-
-// 권한 계층
-const ROLE_ORDER = ['VIEWER', 'RESEARCHER', 'MANAGER', 'ADMIN'];
-const hasRole = (userRole, required) =>
-  ROLE_ORDER.indexOf(userRole) >= ROLE_ORDER.indexOf(required);
 
 function NotificationPage() {
   const screens    = useBreakpoint();            // 반응형 브레이크포인트 감지
@@ -116,7 +114,7 @@ function NotificationPage() {
       key: 'message',
       render: (v, record) =>
         record.projectId ? (
-          <span style={{ color: '#1677ff', cursor: 'pointer' }}>{v}</span>
+          <span style={{ color: COLORS.brand, cursor: 'pointer' }}>{v}</span>
         ) : v,
     },
     {
@@ -135,14 +133,14 @@ function NotificationPage() {
         dataIndex: 'createdAt',
         key: 'createdAt',
         width: 150,
-        render: (v) => v ? dayjs(v).format('YYYY-MM-DD HH:mm') : '-',
+        render: (v) => formatDateTime(v),
       },
       {
         title: '발송일시',
         dataIndex: 'sentAt',
         key: 'sentAt',
         width: 150,
-        render: (v) => v ? dayjs(v).format('YYYY-MM-DD HH:mm') : '-',
+        render: (v) => formatDateTime(v),
       },
     ] : []),
   ];

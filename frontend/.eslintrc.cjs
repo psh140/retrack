@@ -8,6 +8,13 @@ module.exports = {
     'plugin:react-hooks/recommended',
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
+  // vite.config.js는 Node 환경에서 실행되므로 process 등 Node 전역 허용
+  overrides: [
+    {
+      files: ['vite.config.js'],
+      env: { node: true },
+    },
+  ],
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
   settings: { react: { version: '18.3' } },
   plugins: ['react-refresh'],

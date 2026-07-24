@@ -6,6 +6,7 @@
  * - 월별 알림 발송 건수 (LineChart)
  *
  * @since 2026-05-19
+ * @modified 2026-07-24 UI 일관성 1단계: 상태·카테고리 레이블을 공통 상수로 통일 (초안→작성중, 출장비→여비)
  */
 import { useEffect, useState } from 'react';
 import { Card, Col, Row, Table, Progress, Space, Typography, Spin, message } from 'antd';
@@ -26,27 +27,11 @@ import {
   getBudgetBurnRate,
   getMonthlyNotificationStats,
 } from '../api/index';
+import { STATUS_LABELS, CATEGORY_LABELS, STATUS_MAP } from '../constants/project';
+import { won } from '../utils/format';
+import { COLORS } from '../theme';
 
 const { Title } = Typography;
-
-/** 과제 상태 한글 레이블 매핑 */
-const STATUS_LABEL = {
-  DRAFT: '초안',
-  SUBMITTED: '제출됨',
-  REVIEWING: '검토중',
-  APPROVED: '승인됨',
-  IN_PROGRESS: '진행중',
-  COMPLETED: '완료',
-  REJECTED: '반려',
-};
-
-/** 연구비 카테고리 한글 레이블 매핑 */
-const CATEGORY_LABEL = {
-  PERSONNEL: '인건비',
-  TRAVEL: '출장비',
-  RESEARCH_ACTIVITY: '연구활동비',
-  ETC: '기타',
-};
 
 function StatsPage() {
   // private List statusData = new ArrayList<>();  — 과제 상태별 차트 데이터
@@ -60,9 +45,9 @@ function StatsPage() {
   // private boolean loading = false;
   const [loading, setLoading] = useState(false);
 
+  // 마운트 시 1회 조회 — fetchAll은 아래에서 선언되지만 호출 시점에는 이미 정의되어 있다
   useEffect(() => {
     fetchAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /** 4개 통계 API 병렬 호출 */
@@ -80,7 +65,7 @@ function StatsPage() {
       const statusMap = statusRes.data.data || {};
       setStatusData(
         Object.entries(statusMap).map(([key, value]) => ({
-          name: STATUS_LABEL[key] || key,
+          name: STATUS_LABELS[key] || key,
           건수: value,
         }))
       );
@@ -92,7 +77,7 @@ function StatsPage() {
           // total 항목은 차트에서 제외
           .filter(([key]) => key !== 'total')
           .map(([key, value]) => ({
-            name: CATEGORY_LABEL[key] || key,
+            name: CATEGORY_LABELS[key] || key,
             금액: value,
           }))
       );
@@ -120,13 +105,15 @@ function StatsPage() {
       title: '총 예산',
       dataIndex: 'budgetTotal',
       key: 'budgetTotal',
-      render: (value) => `${(value || 0).toLocaleString()}원`,
+      align: 'right',
+      render: (value) => won(value),
     },
     {
       title: '집행액',
       dataIndex: 'budgetUsed',
       key: 'budgetUsed',
-      render: (value) => `${(value || 0).toLocaleString()}원`,
+      align: 'right',
+      render: (value) => won(value),
     },
     {
       title: '소진율',
@@ -177,7 +164,7 @@ function StatsPage() {
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                 <Tooltip formatter={(value) => [`${value}건`, '건수']} />
-                <Bar dataKey="건수" fill="#1677ff" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="건수" fill={COLORS.brand} radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </Card>
@@ -194,8 +181,8 @@ function StatsPage() {
                   tickFormatter={(v) => `${(v / 10000).toFixed(0)}만`}
                   tick={{ fontSize: 12 }}
                 />
-                <Tooltip formatter={(value) => [`${(value || 0).toLocaleString()}원`, '금액']} />
-                <Bar dataKey="금액" fill="#52c41a" radius={[3, 3, 0, 0]} />
+                <Tooltip formatter={(value) => [won(value), '금액']} />
+                <Bar dataKey="금액" fill={STATUS_MAP.APPROVED.fg} radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </Card>
@@ -226,7 +213,7 @@ function StatsPage() {
                 <Line
                   type="monotone"
                   dataKey="count"
-                  stroke="#722ed1"
+                  stroke={STATUS_MAP.COMPLETED.fg}
                   strokeWidth={2}
                   dot={{ r: 4 }}
                   activeDot={{ r: 6 }}

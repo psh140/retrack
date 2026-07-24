@@ -205,7 +205,7 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 > 사전 확인: main.jsx, App.jsx, MainLayout.jsx, pages/ 전체를 읽고 현재 스타일 패턴(색상·간격·카드 사용) 파악 후 착수.
 > 제약: 새 CSS 프레임워크(Tailwind 등) 추가 금지 — AntD ConfigProvider + 테마 토큰만 / 기능·API 로직 변경 금지 (UI만) / 모바일 전용 카드 패턴 제외 / LandingPage 구조 유지 / 각 단계 후 `npm run dev` 확인 가능 상태 유지 / 단계별 커밋.
 
-- [ ] **1단계 — 전역 테마 도입**: `src/theme.js` 생성 (primary=기존 색 기준 통일, borderRadius, 폰트 크기, 간격 단위), main.jsx에서 `ConfigProvider`로 App 감싸 theme 적용
+- [x] **1단계 — 전역 테마 도입** (2026-07-24, `feature/ui-consistency` 브랜치): `src/theme.js` 생성 (COLORS·SPACING·LAYOUT 상수 + AntD token/components), main.jsx를 `ConfigProvider`(theme + `ko_KR` 로케일, dayjs ko)로 감쌈. 함께 처리 — 화면마다 어긋나던 도메인 상수를 `src/constants/project.js`(상태·카테고리 레이블/색상, 전이 규칙)·`src/constants/role.js`(권한 계층·hasRole·ROLE_COLOR)·`src/utils/format.js`(won·formatDate·formatDateTime)로 단일화하고 7개 페이지에 적용
 - [ ] **2단계 — 레이아웃 컨테이너 규칙 통일**: MainLayout Content가 padding/background/minHeight/본문 최대폭 단일 관리, 페이지별(StatsPage·UserManagePage·ActivityLogPage 등) 자체 지정 padding/background/minHeight 전부 제거
 - [ ] **3단계 — 공통 컴포넌트 생성** (`src/components/common/`): PageHeader(제목+설명+우측 액션), FilterToolbar(검색/필터 래퍼), StatCard(숫자 카드), StatusTag(상태별 색상 매핑 단일화), EmptyState(데이터 없음)
 - [ ] **4단계 — 공통 컴포넌트 적용**: DashboardPage·ProjectListPage·NotificationPage·UserManagePage·ActivityLogPage·StatsPage에 적용, inline style → 공통 컴포넌트+테마 토큰 대체

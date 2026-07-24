@@ -7,6 +7,7 @@
  * - 페이지네이션
  *
  * @since 2026-05-19
+ * @modified 2026-07-24 UI 일관성 1단계: 권한 목록·일시 포맷을 공통 모듈로 이동
  */
 import { useEffect, useState, useCallback } from 'react';
 import {
@@ -24,19 +25,17 @@ import {
   Typography,
 } from 'antd';
 import { CheckCircleOutlined, DeleteOutlined } from '@ant-design/icons';
-import dayjs from 'dayjs';
 import {
   getUsers,
   updateUserRole,
   verifyUser,
   deleteUser,
 } from '../api/index';
+import { ROLE_OPTIONS } from '../constants/role';
+import { formatDateTime } from '../utils/format';
 
 const { Title } = Typography;
 const { Option } = Select;
-
-/** 역할 선택지 */
-const ROLE_OPTIONS = ['VIEWER', 'RESEARCHER', 'MANAGER', 'ADMIN'];
 
 function UserManagePage() {
   // private List<UserVO> users = new ArrayList<>();
@@ -193,7 +192,7 @@ function UserManagePage() {
       title: '가입일',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      render: (value) => dayjs(value).format('YYYY-MM-DD HH:mm'),
+      render: (value) => formatDateTime(value),
     },
     {
       title: '액션',

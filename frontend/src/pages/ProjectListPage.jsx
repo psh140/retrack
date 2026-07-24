@@ -5,38 +5,21 @@
  * - 행 클릭 시 /projects/:id 이동
  *
  * @since 2026-05-18
+ * @modified 2026-07-24 UI 일관성 1단계: 상태·권한·포맷 상수를 공통 모듈로 이동
  */
 import { useEffect, useState, useCallback } from 'react';
 import { Table, Input, Select, Button, Tag, Typography, message, Grid } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';  // response.sendRedirect() 역할
-import dayjs from 'dayjs';
 import { getProjects } from '../api/index';
 import useAuthStore from '../store/authStore';    // session.getAttribute() 역할
+import { PROJECT_STATUSES, STATUS_MAP } from '../constants/project';
+import { hasRole } from '../constants/role';
+import { won, formatDate } from '../utils/format';
+import { COLORS } from '../theme';
 
 const { Title } = Typography;
 const { useBreakpoint } = Grid;
-
-// 상태 한글 레이블 + AntD Tag 색상 (retrack-design 토큰 기준)
-const STATUS_OPTIONS = [
-  { value: 'DRAFT',       label: '작성중',  color: 'default'  },
-  { value: 'SUBMITTED',   label: '제출',    color: 'blue'     },
-  { value: 'REVIEWING',   label: '검토중',  color: 'cyan'     },
-  { value: 'APPROVED',    label: '승인',    color: 'green'    },
-  { value: 'IN_PROGRESS', label: '진행중',  color: 'geekblue' },
-  { value: 'COMPLETED',   label: '완료',    color: 'purple'   },
-  { value: 'REJECTED',    label: '반려',    color: 'red'      },
-];
-
-const STATUS_MAP = Object.fromEntries(STATUS_OPTIONS.map((s) => [s.value, s]));
-
-// 권한 계층 — RESEARCHER 이상 여부 확인
-const ROLE_ORDER = ['VIEWER', 'RESEARCHER', 'MANAGER', 'ADMIN'];
-const hasRole = (userRole, required) =>
-  ROLE_ORDER.indexOf(userRole) >= ROLE_ORDER.indexOf(required);
-
-// 원화 포맷
-const won = (n) => (n ?? 0).toLocaleString('ko-KR') + '원';
 
 function ProjectListPage() {
   const screens = useBreakpoint();
@@ -112,7 +95,7 @@ function ProjectListPage() {
       title: '과제명',
       dataIndex: 'title',
       key: 'title',
-      render: (v) => <span style={{ color: '#1677ff', cursor: 'pointer' }}>{v}</span>,
+      render: (v) => <span style={{ color: COLORS.brand, cursor: 'pointer' }}>{v}</span>,
     },
     {
       title: '상태',
@@ -130,14 +113,14 @@ function ProjectListPage() {
         dataIndex: 'startDate',
         key: 'startDate',
         width: 110,
-        render: (v) => v ? dayjs(v).format('YYYY-MM-DD') : '-',
+        render: (v) => formatDate(v),
       },
       {
         title: '종료일',
         dataIndex: 'endDate',
         key: 'endDate',
         width: 110,
-        render: (v) => v ? dayjs(v).format('YYYY-MM-DD') : '-',
+        render: (v) => formatDate(v),
       },
       {
         title: '예산',
@@ -152,7 +135,7 @@ function ProjectListPage() {
         dataIndex: 'createdAt',
         key: 'createdAt',
         width: 110,
-        render: (v) => v ? dayjs(v).format('YYYY-MM-DD') : '-',
+        render: (v) => formatDate(v),
       },
     ] : []),
   ];
@@ -206,7 +189,7 @@ function ProjectListPage() {
           allowClear
           onClear={() => handleStatusChange(undefined)}
           style={{ width: isMobile ? '100%' : 140 }}
-          options={STATUS_OPTIONS.map((s) => ({ value: s.value, label: s.label }))}
+          options={PROJECT_STATUSES.map((s) => ({ value: s.value, label: s.label }))}
         />
         {!isMobile && (
           <Button onClick={handleSearch}>검색</Button>

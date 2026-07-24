@@ -7,6 +7,7 @@
  *
  * @since 2026-05-19
  * @modified 2026-05-26 ACTION_COLOR 실제 DB action 값으로 수정, 액션 컬럼 width 조정
+ * @modified 2026-07-24 UI 일관성 1단계: 일시 포맷을 공통 유틸로 이동
  */
 import { useEffect, useState } from 'react';
 import {
@@ -23,6 +24,7 @@ import {
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getActivityLogs, getUserActivityLogs } from '../api/index';
+import { formatDateTime } from '../utils/format';
 
 const { Title } = Typography;
 
@@ -145,7 +147,7 @@ function ActivityLogPage() {
       // createdAt 내림차순 정렬 — 최신 순
       defaultSortOrder: 'descend',
       sorter: (a, b) => dayjs(a.createdAt).unix() - dayjs(b.createdAt).unix(),
-      render: (value) => dayjs(value).format('YYYY-MM-DD HH:mm'),
+      render: (value) => formatDateTime(value),
     },
   ];
 

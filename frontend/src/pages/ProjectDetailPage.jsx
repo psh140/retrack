@@ -4,6 +4,7 @@
  * - 연구비 탭: 카테고리별 집계 차트 + 연구비 집행 내역 테이블
  *
  * @since 2026-05-18
+ * @modified 2026-07-24 UI 일관성 1단계: 상태·카테고리·권한·포맷 상수를 공통 모듈로 이동
  */
 import { useEffect, useState, useCallback } from 'react';
 import {
@@ -25,56 +26,17 @@ import {
   getFiles, uploadFile, deleteFile,
 } from '../api/index';
 import useAuthStore from '../store/authStore'; // session.getAttribute() 역할
+import {
+  PROJECT_STATUSES, STATUS_MAP, VALID_TRANSITIONS,
+  CATEGORY_LABELS, CATEGORY_COLORS,
+} from '../constants/project';
+import { hasRole } from '../constants/role';
+import { won, formatDate, formatDateTime } from '../utils/format';
+import { COLORS } from '../theme';
 
 const { Title } = Typography;
 const { TextArea } = Input;
 const { useBreakpoint } = Grid;
-
-// 상태 레이블 + 색상
-const STATUS_OPTIONS = [
-  { value: 'DRAFT',       label: '작성중', color: 'default'  },
-  { value: 'SUBMITTED',   label: '제출',   color: 'blue'     },
-  { value: 'REVIEWING',   label: '검토중', color: 'cyan'     },
-  { value: 'APPROVED',    label: '승인',   color: 'green'    },
-  { value: 'IN_PROGRESS', label: '진행중', color: 'geekblue' },
-  { value: 'COMPLETED',   label: '완료',   color: 'purple'   },
-  { value: 'REJECTED',    label: '반려',   color: 'red'      },
-];
-const STATUS_MAP = Object.fromEntries(STATUS_OPTIONS.map((s) => [s.value, s]));
-
-// 백엔드 ProjectService.VALID_TRANSITIONS 와 동일
-const VALID_TRANSITIONS = {
-  DRAFT:       ['SUBMITTED'],
-  SUBMITTED:   ['REVIEWING'],
-  REVIEWING:   ['APPROVED', 'REJECTED'],
-  APPROVED:    ['IN_PROGRESS'],
-  IN_PROGRESS: ['COMPLETED'],
-  COMPLETED:   [],
-  REJECTED:    [],
-};
-
-// 권한 계층
-const ROLE_ORDER = ['VIEWER', 'RESEARCHER', 'MANAGER', 'ADMIN'];
-const hasRole = (userRole, required) =>
-  ROLE_ORDER.indexOf(userRole) >= ROLE_ORDER.indexOf(required);
-
-// 연구비 카테고리 — BudgetService.VALID_CATEGORIES 와 동일
-const CATEGORY_LABELS = {
-  PERSONNEL:        '인건비',
-  TRAVEL:           '여비',
-  RESEARCH_ACTIVITY:'연구활동비',
-  ETC:              '기타',
-};
-
-const CATEGORY_COLORS = {
-  PERSONNEL:         '#1677ff',
-  TRAVEL:            '#13c2c2',
-  RESEARCH_ACTIVITY: '#52c41a',
-  ETC:               '#faad14',
-};
-
-// 원화 포맷
-const won = (n) => (n ?? 0).toLocaleString('ko-KR') + '원';
 
 function ProjectDetailPage() {
   const { id } = useParams();                    // req.getParameter("id") 역할
@@ -299,7 +261,7 @@ function ProjectDetailPage() {
   const currentStatus = STATUS_MAP[project.status];
   // MANAGER 이상: 현재 상태 제외한 전체 상태 선택 가능 / 그 미만: 정해진 전이만 허용
   const nextStatuses = hasRole(userRole, 'MANAGER')
-    ? STATUS_OPTIONS.map((s) => s.value).filter((v) => v !== project.status)
+    ? PROJECT_STATUSES.map((s) => s.value).filter((v) => v !== project.status)
     : VALID_TRANSITIONS[project.status] || [];
 
   // recharts 차트 데이터
@@ -329,18 +291,10 @@ function ProjectDetailPage() {
               : <Tag>{project.status}</Tag>}
           </Descriptions.Item>
           <Descriptions.Item label="총 연구비">{won(project.budgetTotal)}</Descriptions.Item>
-          <Descriptions.Item label="시작일">
-            {project.startDate ? dayjs(project.startDate).format('YYYY-MM-DD') : '-'}
-          </Descriptions.Item>
-          <Descriptions.Item label="종료일">
-            {project.endDate ? dayjs(project.endDate).format('YYYY-MM-DD') : '-'}
-          </Descriptions.Item>
-          <Descriptions.Item label="등록일">
-            {project.createdAt ? dayjs(project.createdAt).format('YYYY-MM-DD') : '-'}
-          </Descriptions.Item>
-          <Descriptions.Item label="수정일">
-            {project.updatedAt ? dayjs(project.updatedAt).format('YYYY-MM-DD') : '-'}
-          </Descriptions.Item>
+          <Descriptions.Item label="시작일">{formatDate(project.startDate)}</Descriptions.Item>
+          <Descriptions.Item label="종료일">{formatDate(project.endDate)}</Descriptions.Item>
+          <Descriptions.Item label="등록일">{formatDate(project.createdAt)}</Descriptions.Item>
+          <Descriptions.Item label="수정일">{formatDate(project.updatedAt)}</Descriptions.Item>
         </Descriptions>
 
         {/* 액션 버튼 — JSP의 <c:if> 역할로 권한별 표시 */}
@@ -407,7 +361,7 @@ function ProjectDetailPage() {
               dataIndex: 'changedAt',
               key: 'changedAt',
               width: 150,
-              render: (v) => v ? dayjs(v).format('YYYY-MM-DD HH:mm') : '-',
+              render: (v) => formatDateTime(v),
             },
           ]}
         />
@@ -460,7 +414,7 @@ function ProjectDetailPage() {
               dataIndex: 'createdAt',
               key: 'createdAt',
               width: 110,
-              render: (v) => v ? dayjs(v).format('YYYY-MM-DD') : '-',
+              render: (v) => formatDate(v),
             },
             {
               title: '',
@@ -498,12 +452,12 @@ function ProjectDetailPage() {
               style={{
                 flex: '1 1 110px',
                 padding: '12px 16px',
-                border: '1px solid #f0f0f0',
+                border: `1px solid ${COLORS.borderSecondary}`,
                 borderRadius: 6,
                 background: '#fafafa',
               }}
             >
-              <div style={{ color: '#8c8c8c', fontSize: 12, marginBottom: 4 }}>{label}</div>
+              <div style={{ color: COLORS.fgTertiary, fontSize: 12, marginBottom: 4 }}>{label}</div>
               <div style={{ fontSize: 15, fontWeight: 600, color: CATEGORY_COLORS[key] }}>
                 {won(summary[key] || 0)}
               </div>
@@ -521,7 +475,7 @@ function ProjectDetailPage() {
             <Tooltip formatter={(v) => [won(v), '금액']} />
             <Bar dataKey="amount" radius={[3, 3, 0, 0]}>
               {chartData.map((entry) => (
-                <Cell key={entry.key} fill={CATEGORY_COLORS[entry.key] || '#1677ff'} />
+                <Cell key={entry.key} fill={CATEGORY_COLORS[entry.key] || COLORS.brand} />
               ))}
             </Bar>
           </BarChart>
@@ -575,7 +529,7 @@ function ProjectDetailPage() {
               dataIndex: 'usedAt',
               key: 'usedAt',
               width: 150,
-              render: (v) => v ? dayjs(v).format('YYYY-MM-DD HH:mm') : '-',
+              render: (v) => formatDateTime(v),
             },
             {
               title: '',
@@ -618,7 +572,7 @@ function ProjectDetailPage() {
         <Button
           type="text"
           onClick={() => navigate('/projects')}
-          style={{ padding: 0, height: 'auto', color: '#8c8c8c' }}
+          style={{ padding: 0, height: 'auto', color: COLORS.fgTertiary }}
         >
           ← 목록으로
         </Button>
