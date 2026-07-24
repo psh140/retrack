@@ -8,9 +8,10 @@
  * @since 2026-05-19
  * @modified 2026-07-24 UI 일관성 1단계: 상태·카테고리 레이블을 공통 상수로 통일 (초안→작성중, 출장비→여비)
  * @modified 2026-07-24 UI 일관성 2단계: 페이지 자체 padding/background/minHeight 제거 (MainLayout이 관리)
+ * @modified 2026-07-24 UI 일관성 4단계: PageHeader·PageLoading·EmptyState 적용, 차트 그리드 색상을 토큰으로 대체
  */
 import { useEffect, useState } from 'react';
-import { Card, Col, Row, Table, Progress, Space, Typography, Spin, message } from 'antd';
+import { Card, Col, Row, Table, Progress, Space, message } from 'antd';
 import {
   ResponsiveContainer,
   BarChart,
@@ -30,9 +31,8 @@ import {
 } from '../api/index';
 import { STATUS_LABELS, CATEGORY_LABELS, STATUS_MAP } from '../constants/project';
 import { won } from '../utils/format';
-import { COLORS, SPACING } from '../theme';
-
-const { Title } = Typography;
+import { COLORS } from '../theme';
+import { PageHeader, PageLoading, EmptyState } from '../components/common';
 
 function StatsPage() {
   // private List statusData = new ArrayList<>();  — 과제 상태별 차트 데이터
@@ -133,19 +133,13 @@ function StatsPage() {
   ];
 
   if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
-        <Spin size="large" />
-      </div>
-    );
+    return <PageLoading />;
   }
 
   // 바깥 여백·배경은 MainLayout의 Content가 관리하므로 여기서 지정하지 않는다
   return (
     <div>
-      <Title level={4} style={{ marginBottom: SPACING.md }}>
-        통계
-      </Title>
+      <PageHeader title="통계" />
 
       <Row gutter={[16, 16]}>
         {/* 과제 상태별 현황 — BarChart */}
@@ -153,7 +147,7 @@ function StatsPage() {
           <Card title="과제 상태별 현황">
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={statusData} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <CartesianGrid strokeDasharray="3 3" stroke={COLORS.borderSecondary} />
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                 <Tooltip formatter={(value) => [`${value}건`, '건수']} />
@@ -168,7 +162,7 @@ function StatsPage() {
           <Card title="연구비 카테고리별 합계">
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={categoryData} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <CartesianGrid strokeDasharray="3 3" stroke={COLORS.borderSecondary} />
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis
                   tickFormatter={(v) => `${(v / 10000).toFixed(0)}만`}
@@ -190,6 +184,7 @@ function StatsPage() {
               dataSource={burnrateData}
               pagination={false}
               size="small"
+              locale={{ emptyText: <EmptyState description="집행 중인 연구비가 없습니다." /> }}
             />
           </Card>
         </Col>
@@ -199,7 +194,7 @@ function StatsPage() {
           <Card title="월별 알림 발송 건수">
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={monthlyData} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <CartesianGrid strokeDasharray="3 3" stroke={COLORS.borderSecondary} />
                 <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                 <Tooltip formatter={(value) => [`${value}건`, '발송 건수']} />

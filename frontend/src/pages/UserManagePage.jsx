@@ -9,10 +9,10 @@
  * @since 2026-05-19
  * @modified 2026-07-24 UI 일관성 1단계: 권한 목록·일시 포맷을 공통 모듈로 이동
  * @modified 2026-07-24 UI 일관성 2단계: 페이지 자체 padding/background/minHeight 제거 (MainLayout이 관리)
+ * @modified 2026-07-24 UI 일관성 4단계: PageHeader·FilterToolbar·EmptyState 적용, 테이블 Card 래핑 제거
  */
 import { useEffect, useState, useCallback } from 'react';
 import {
-  Card,
   Table,
   Input,
   Select,
@@ -20,10 +20,7 @@ import {
   Tag,
   Popconfirm,
   Space,
-  Row,
-  Col,
   message,
-  Typography,
 } from 'antd';
 import { CheckCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import {
@@ -34,9 +31,8 @@ import {
 } from '../api/index';
 import { ROLE_OPTIONS } from '../constants/role';
 import { formatDateTime } from '../utils/format';
-import { SPACING } from '../theme';
+import { PageHeader, FilterToolbar, EmptyState } from '../components/common';
 
-const { Title } = Typography;
 const { Option } = Select;
 
 function UserManagePage() {
@@ -234,76 +230,69 @@ function UserManagePage() {
   // 바깥 여백·배경은 MainLayout의 Content가 관리하므로 여기서 지정하지 않는다
   return (
     <div>
-      <Title level={4} style={{ marginBottom: SPACING.md }}>
-        사용자 관리
-      </Title>
+      <PageHeader title="사용자 관리" />
 
-      {/* 검색 바 */}
-      <Card style={{ marginBottom: SPACING.md }}>
-        <Row gutter={[12, 12]} align="middle">
-          <Col flex="auto">
-            <Input.Search
-              placeholder="이름 또는 이메일 검색"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              onSearch={handleSearch}
-              allowClear
-            />
-          </Col>
-          <Col>
-            <Select
-              placeholder="권한 필터"
-              allowClear
-              style={{ width: 140 }}
-              value={roleFilter}
-              onChange={handleRoleFilterChange}
-            >
-              <Option value={undefined}>전체</Option>
-              {ROLE_OPTIONS.map((r) => (
-                <Option key={r} value={r}>
-                  {r}
-                </Option>
-              ))}
-            </Select>
-          </Col>
-          <Col>
-            <Select
-              placeholder="인증 여부"
-              allowClear
-              style={{ width: 120 }}
-              value={isVerifiedFilter}
-              onChange={handleVerifiedFilterChange}
-            >
-              <Option value={undefined}>전체</Option>
-              <Option value={true}>승인됨</Option>
-              <Option value={false}>미승인</Option>
-            </Select>
-          </Col>
-          <Col>
-            <Button type="primary" onClick={handleSearch}>
-              검색
-            </Button>
-          </Col>
-        </Row>
-      </Card>
-
-      {/* 사용자 테이블 */}
-      <Card>
-        <Table
-          rowKey="userId"
-          columns={columns}
-          dataSource={users}
-          loading={loading}
-          scroll={{ x: 900 }}
-          pagination={{
-            current: page,
-            pageSize: size,
-            total: totalCount,
-            showSizeChanger: false,
-            onChange: (newPage) => setPage(newPage),
-          }}
+      {/* 검색 바 — 배치·간격은 FilterToolbar가 관리 */}
+      <FilterToolbar
+        extra={
+          <Button type="primary" onClick={handleSearch}>
+            검색
+          </Button>
+        }
+      >
+        {/* flex:1 — 검색창이 남은 가로 공간을 차지 (기존 Col flex="auto" 역할) */}
+        <Input.Search
+          placeholder="이름 또는 이메일 검색"
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          onSearch={handleSearch}
+          allowClear
+          style={{ flex: 1, minWidth: 200 }}
         />
-      </Card>
+        <Select
+          placeholder="권한 필터"
+          allowClear
+          style={{ width: 140 }}
+          value={roleFilter}
+          onChange={handleRoleFilterChange}
+        >
+          <Option value={undefined}>전체</Option>
+          {ROLE_OPTIONS.map((r) => (
+            <Option key={r} value={r}>
+              {r}
+            </Option>
+          ))}
+        </Select>
+        <Select
+          placeholder="인증 여부"
+          allowClear
+          style={{ width: 120 }}
+          value={isVerifiedFilter}
+          onChange={handleVerifiedFilterChange}
+        >
+          <Option value={undefined}>전체</Option>
+          <Option value={true}>승인됨</Option>
+          <Option value={false}>미승인</Option>
+        </Select>
+      </FilterToolbar>
+
+      {/* 사용자 테이블 — 다른 목록 화면과 동일하게 Card로 감싸지 않는다 */}
+      <Table
+        rowKey="userId"
+        columns={columns}
+        dataSource={users}
+        loading={loading}
+        scroll={{ x: 900 }}
+        locale={{ emptyText: <EmptyState description="조회된 사용자가 없습니다." /> }}
+        pagination={{
+          current: page,
+          pageSize: size,
+          total: totalCount,
+          showSizeChanger: false,
+          showTotal: (t) => `총 ${t}건`,
+          onChange: (newPage) => setPage(newPage),
+        }}
+      />
     </div>
   );
 }

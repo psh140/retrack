@@ -9,29 +9,24 @@
  * @modified 2026-05-26 ACTION_COLOR 실제 DB action 값으로 수정, 액션 컬럼 width 조정
  * @modified 2026-07-24 UI 일관성 1단계: 일시 포맷을 공통 유틸로 이동
  * @modified 2026-07-24 UI 일관성 2단계: 페이지 자체 padding/background/minHeight 제거 (MainLayout이 관리)
+ * @modified 2026-07-24 UI 일관성 4단계: PageHeader·FilterToolbar·EmptyState 적용, 테이블 Card 래핑 제거
  */
 import { useEffect, useState } from 'react';
 import {
-  Card,
   Table,
   InputNumber,
   Button,
   Tag,
-  Row,
-  Col,
-  Typography,
   message,
 } from 'antd';
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getActivityLogs, getUserActivityLogs } from '../api/index';
 import { formatDateTime } from '../utils/format';
-import { SPACING } from '../theme';
-
-const { Title } = Typography;
+import { PageHeader, FilterToolbar, EmptyState } from '../components/common';
 
 /**
- * 액션 태그 색상 매핑
+ * 액션 태그 색상 매핑 (활동 로그 전용 — 과제 상태와 별개이므로 StatusTag를 쓰지 않는다)
  * action 값에 따라 Tag 색상을 구분하여 시각적 가독성 향상
  */
 const ACTION_COLOR = {
@@ -156,52 +151,45 @@ function ActivityLogPage() {
   // 바깥 여백·배경은 MainLayout의 Content가 관리하므로 여기서 지정하지 않는다
   return (
     <div>
-      <Title level={4} style={{ marginBottom: SPACING.md }}>
-        활동 로그
-      </Title>
+      <PageHeader title="활동 로그" />
 
-      {/* 사용자 ID 필터 */}
-      <Card style={{ marginBottom: SPACING.md }}>
-        <Row gutter={[12, 12]} align="middle">
-          <Col>
-            {/* InputNumber — private Long filterUserId 입력 폼 역할 */}
-            <InputNumber
-              placeholder="사용자 ID 입력"
-              value={filterUserId}
-              onChange={(value) => setFilterUserId(value)}
-              min={1}
-              style={{ width: 160 }}
-            />
-          </Col>
-          <Col>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={fetchUserLogs}
-            >
-              조회
-            </Button>
-          </Col>
-          <Col>
-            <Button icon={<ReloadOutlined />} onClick={handleReset}>
-              초기화
-            </Button>
-          </Col>
-        </Row>
-      </Card>
-
-      {/* 로그 테이블 */}
-      <Card>
-        <Table
-          rowKey="logId"
-          columns={columns}
-          dataSource={logs}
-          loading={loading}
-          pagination={{ pageSize: 20, showSizeChanger: false }}
-          size="small"
-          scroll={{ x: 1000 }}
+      {/* 사용자 ID 필터 — 배치·간격은 FilterToolbar가 관리 */}
+      <FilterToolbar>
+        {/* InputNumber — private Long filterUserId 입력 폼 역할 */}
+        <InputNumber
+          placeholder="사용자 ID 입력"
+          value={filterUserId}
+          onChange={(value) => setFilterUserId(value)}
+          min={1}
+          style={{ width: 160 }}
         />
-      </Card>
+        <Button
+          type="primary"
+          icon={<SearchOutlined />}
+          onClick={fetchUserLogs}
+        >
+          조회
+        </Button>
+        <Button icon={<ReloadOutlined />} onClick={handleReset}>
+          초기화
+        </Button>
+      </FilterToolbar>
+
+      {/* 로그 테이블 — 다른 목록 화면과 동일하게 Card로 감싸지 않는다 */}
+      <Table
+        rowKey="logId"
+        columns={columns}
+        dataSource={logs}
+        loading={loading}
+        pagination={{
+          pageSize: 20,
+          showSizeChanger: false,
+          showTotal: (t) => `총 ${t}건`,
+        }}
+        size="small"
+        scroll={{ x: 1000 }}
+        locale={{ emptyText: <EmptyState description="활동 로그가 없습니다." /> }}
+      />
     </div>
   );
 }

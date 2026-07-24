@@ -6,19 +6,20 @@
  *
  * @since 2026-05-18
  * @modified 2026-07-24 UI 일관성 1단계: 상태·권한·포맷 상수를 공통 모듈로 이동
+ * @modified 2026-07-24 UI 일관성 4단계: PageHeader·FilterToolbar·StatusTag·EmptyState 공통 컴포넌트 적용
  */
 import { useEffect, useState, useCallback } from 'react';
-import { Table, Input, Select, Button, Tag, Typography, message, Grid } from 'antd';
+import { Table, Input, Select, Button, message, Grid } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';  // response.sendRedirect() 역할
 import { getProjects } from '../api/index';
 import useAuthStore from '../store/authStore';    // session.getAttribute() 역할
-import { PROJECT_STATUSES, STATUS_MAP } from '../constants/project';
+import { PROJECT_STATUSES } from '../constants/project';
 import { hasRole } from '../constants/role';
 import { won, formatDate } from '../utils/format';
 import { COLORS } from '../theme';
+import { PageHeader, FilterToolbar, StatusTag, EmptyState } from '../components/common';
 
-const { Title } = Typography;
 const { useBreakpoint } = Grid;
 
 function ProjectListPage() {
@@ -102,10 +103,7 @@ function ProjectListPage() {
       dataIndex: 'status',
       key: 'status',
       width: 90,
-      render: (v) => {
-        const s = STATUS_MAP[v];
-        return s ? <Tag color={s.color}>{s.label}</Tag> : <Tag>{v}</Tag>;
-      },
+      render: (v) => <StatusTag status={v} />,
     },
     ...(!isMobile ? [
       {
@@ -142,36 +140,24 @@ function ProjectListPage() {
 
   return (
     <div>
-      {/* 페이지 헤더 */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 16,
-        flexWrap: 'wrap',
-        gap: 8,
-      }}>
-        <Title level={4} style={{ margin: 0 }}>과제 목록</Title>
+      {/* 페이지 헤더 — RESEARCHER 이상만 과제 등록 버튼 표시 (JSP의 <c:if> 역할) */}
+      <PageHeader
+        title="과제 목록"
+        extra={
+          hasRole(userRole, 'RESEARCHER') && (
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => navigate('/projects/new')}
+            >
+              과제 등록
+            </Button>
+          )
+        }
+      />
 
-        {/* RESEARCHER 이상만 과제 등록 버튼 표시 — JSP의 <c:if> 역할 */}
-        {hasRole(userRole, 'RESEARCHER') && (
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => navigate('/projects/new')}
-          >
-            과제 등록
-          </Button>
-        )}
-      </div>
-
-      {/* 검색 영역 */}
-      <div style={{
-        display: 'flex',
-        gap: 8,
-        marginBottom: 16,
-        flexWrap: 'wrap',
-      }}>
+      {/* 검색 영역 — 배치·간격은 FilterToolbar가 관리 */}
+      <FilterToolbar extra={!isMobile && <Button onClick={handleSearch}>검색</Button>}>
         <Input.Search
           placeholder="과제명 검색"
           value={keyword}
@@ -191,10 +177,7 @@ function ProjectListPage() {
           style={{ width: isMobile ? '100%' : 140 }}
           options={PROJECT_STATUSES.map((s) => ({ value: s.value, label: s.label }))}
         />
-        {!isMobile && (
-          <Button onClick={handleSearch}>검색</Button>
-        )}
-      </div>
+      </FilterToolbar>
 
       {/* 과제 목록 테이블 */}
       <Table
@@ -215,7 +198,7 @@ function ProjectListPage() {
           showTotal: (t) => `총 ${t}건`,
           showSizeChanger: false,
         }}
-        locale={{ emptyText: '등록된 과제가 없습니다.' }}
+        locale={{ emptyText: <EmptyState description="등록된 과제가 없습니다." /> }}
         scroll={isMobile ? { x: true } : undefined}
       />
     </div>

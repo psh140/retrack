@@ -7,15 +7,24 @@
  *
  * @since 2026-05-18
  * @modified 2026-07-24 UI 일관성 1단계: 상태 레이블·색상·원화 포맷을 공통 상수로 이동
+ * @modified 2026-07-24 UI 일관성 4단계: PageHeader·StatCard·StatusTag·EmptyState·PageLoading 적용,
+ *                                        인라인 style의 색상값을 theme 토큰으로 대체
  */
 import { useEffect, useState } from 'react';
-import { Card, Typography, Tag, Spin, Empty, Grid } from 'antd';
+import { Card, Typography, Grid } from 'antd';
 import { BellOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getDashboard } from '../api/index';
 import { STATUS_MAP, STATUS_VALUES } from '../constants/project';
 import { won } from '../utils/format';
-import { COLORS } from '../theme';
+import { COLORS, SPACING } from '../theme';
+import {
+  PageHeader,
+  StatCard,
+  StatusTag,
+  EmptyState,
+  PageLoading,
+} from '../components/common';
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;  // 화면 크기 감지 훅 (Java의 request.getHeader("User-Agent") 분기와 유사)
@@ -41,17 +50,13 @@ function DashboardPage() {
   }, []);
 
   if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
-        <Spin size="large" />
-      </div>
-    );
+    return <PageLoading />;
   }
 
   if (error || !data) {
     return (
-      <Card style={{ borderRadius: 6 }}>
-        <Empty description={error || '데이터가 없습니다.'} />
+      <Card>
+        <EmptyState description={error || '데이터가 없습니다.'} />
       </Card>
     );
   }
@@ -76,31 +81,16 @@ function DashboardPage() {
   // 반응형 컬럼 — lg+: 4열, sm+/모바일: 2열
   const statGridCols   = screens.lg ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)';
   const bottomGridCols = screens.lg ? '1fr 1fr' : '1fr';
-  const gap            = isMobile ? 12 : 16;
+  const gap            = isMobile ? SPACING.sm : SPACING.md;
 
   return (
     <div>
-      {/* 페이지 제목 */}
-      <div style={{ fontSize: isMobile ? 20 : 24, fontWeight: 600, marginBottom: isMobile ? 16 : 24, color: 'rgba(0,0,0,0.88)' }}>
-        대시보드
-      </div>
+      <PageHeader title="대시보드" />
 
       {/* 통계 카드 4개 */}
       <div style={{ display: 'grid', gridTemplateColumns: statGridCols, gap, marginBottom: gap }}>
         {statCards.map(({ label, value, hint, color }) => (
-          <Card key={label} size="small" style={{ borderRadius: 6 }}>
-            <div style={{ color: 'rgba(0,0,0,0.65)', fontSize: 14 }}>{label}</div>
-            <div style={{
-              fontSize: isMobile ? 24 : 30,
-              fontWeight: 600,
-              color,
-              marginTop: 8,
-              fontVariantNumeric: 'tabular-nums',
-            }}>
-              {value}
-            </div>
-            <div style={{ color: 'rgba(0,0,0,0.45)', fontSize: 12, marginTop: 4 }}>{hint}</div>
-          </Card>
+          <StatCard key={label} label={label} value={value} hint={hint} color={color} />
         ))}
       </div>
 
@@ -108,7 +98,7 @@ function DashboardPage() {
       <div style={{ display: 'grid', gridTemplateColumns: bottomGridCols, gap, marginBottom: gap }}>
 
         {/* 상태별 과제 현황 바 차트 */}
-        <Card title="상태별 과제 현황" size="small" style={{ borderRadius: 6 }}>
+        <Card title="상태별 과제 현황" size="small">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {STATUS_VALUES.map((st) => {
               const count = byStatus[st] || 0;
@@ -116,14 +106,9 @@ function DashboardPage() {
               const col   = STATUS_MAP[st];
               return (
                 <div key={st} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  {/* 상태 태그 */}
+                  {/* 상태 태그 — 여러 개가 세로로 늘어서므로 옅은 배경(soft) 사용 */}
                   <div style={{ width: 60, flexShrink: 0 }}>
-                    <Tag style={{
-                      color: col.fg, background: col.bg, borderColor: col.border,
-                      fontSize: 11, margin: 0, borderRadius: 2,
-                    }}>
-                      {col.label}
-                    </Tag>
+                    <StatusTag status={st} variant="soft" />
                   </div>
                   {/* 바 */}
                   <div style={{ flex: 1, height: 8, background: COLORS.fillTertiary, borderRadius: 4, overflow: 'hidden' }}>
@@ -134,7 +119,7 @@ function DashboardPage() {
                     }} />
                   </div>
                   {/* 건수 */}
-                  <div style={{ width: 30, textAlign: 'right', fontSize: 13, fontVariantNumeric: 'tabular-nums', color: 'rgba(0,0,0,0.88)' }}>
+                  <div style={{ width: 30, textAlign: 'right', fontSize: 13, fontVariantNumeric: 'tabular-nums', color: COLORS.fg }}>
                     {count}건
                   </div>
                 </div>
@@ -145,44 +130,25 @@ function DashboardPage() {
 
         {/* 우측: 연구비 합계 + ADMIN 사용자 수 */}
         <div style={{ display: 'flex', flexDirection: 'column', gap }}>
-          {/* 연구비 합계 — VIEWER는 totalBudget 없음 */}
+          {/* 연구비 합계 — VIEWER는 totalBudget 없음. 금액은 자릿수가 길어 valueSize="small" */}
           {data.totalBudget !== undefined && (
-            <Card size="small" style={{ borderRadius: 6 }}>
-              <div style={{ color: 'rgba(0,0,0,0.65)', fontSize: 14 }}>
-                {data.role === 'ADMIN' ? '전체 연구비 합계' : '담당 연구비 합계'}
-              </div>
-              <div style={{
-                fontSize: isMobile ? 22 : 28,
-                fontWeight: 600,
-                color: COLORS.brand,
-                marginTop: 8,
-                fontVariantNumeric: 'tabular-nums',
-              }}>
-                {won(data.totalBudget)}
-              </div>
-            </Card>
+            <StatCard
+              label={data.role === 'ADMIN' ? '전체 연구비 합계' : '담당 연구비 합계'}
+              value={won(data.totalBudget)}
+              color={COLORS.brand}
+              valueSize="small"
+            />
           )}
 
           {/* 전체 사용자 수 — ADMIN 전용 */}
           {data.totalUsers !== undefined && (
-            <Card size="small" style={{ borderRadius: 6 }}>
-              <div style={{ color: 'rgba(0,0,0,0.65)', fontSize: 14 }}>전체 사용자 수</div>
-              <div style={{
-                fontSize: isMobile ? 24 : 30,
-                fontWeight: 600,
-                color: 'rgba(0,0,0,0.88)',
-                marginTop: 8,
-                fontVariantNumeric: 'tabular-nums',
-              }}>
-                {data.totalUsers}명
-              </div>
-            </Card>
+            <StatCard label="전체 사용자 수" value={data.totalUsers} suffix="명" />
           )}
 
           {/* VIEWER: 우측 카드 없음 — 빈 영역 방지 */}
           {data.totalBudget === undefined && data.totalUsers === undefined && (
-            <Card size="small" style={{ borderRadius: 6, height: '100%' }}>
-              <Empty description="추가 집계 정보 없음" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            <Card size="small" style={{ height: '100%' }}>
+              <EmptyState description="추가 집계 정보가 없습니다." />
             </Card>
           )}
         </div>
@@ -192,28 +158,30 @@ function DashboardPage() {
       <Card
         title={<><BellOutlined style={{ marginRight: 6 }} />최근 알림</>}
         size="small"
-        style={{ borderRadius: 6 }}
       >
         {!data.recentNotifications?.length ? (
-          <Empty description="최근 알림이 없습니다." image={Empty.PRESENTED_IMAGE_SIMPLE} />
+          <EmptyState description="최근 알림이 없습니다." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {data.recentNotifications.map((n, i) => (
               <div
                 key={n.notificationId ?? i}
                 style={{
-                  padding: '12px 0',
-                  borderBottom: i < data.recentNotifications.length - 1 ? '1px solid #f0f0f0' : 'none',
+                  padding: `${SPACING.sm}px 0`,
+                  borderBottom:
+                    i < data.recentNotifications.length - 1
+                      ? `1px solid ${COLORS.borderSecondary}`
+                      : 'none',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'flex-start',
-                  gap: 12,
+                  gap: SPACING.sm,
                 }}
               >
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.88)', marginBottom: 2 }}>{n.title}</div>
+                  <div style={{ fontSize: 14, color: COLORS.fg, marginBottom: 2 }}>{n.title}</div>
                   {n.message && (
-                    <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{n.message}</div>
+                    <div style={{ fontSize: 12, color: COLORS.fgTertiary }}>{n.message}</div>
                   )}
                 </div>
                 <Text type="secondary" style={{ fontSize: 12, flexShrink: 0 }}>

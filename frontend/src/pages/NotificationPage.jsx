@@ -7,22 +7,23 @@
  * @since 2026-05-18
  * @modified 2026-05-19 수신자·과제 ID 직접 입력 → Select 드롭다운으로 개선
  * @modified 2026-07-24 UI 일관성 1단계: 권한·포맷 상수를 공통 모듈로 이동
+ * @modified 2026-07-24 UI 일관성 4단계: PageHeader·EmptyState 공통 컴포넌트 적용
  */
 import { useEffect, useState, useCallback } from 'react';
-import { Table, Tag, Button, Typography, message, Modal, Form, Input, Select, Grid } from 'antd';
+import { Table, Tag, Button, message, Modal, Form, Input, Select, Grid } from 'antd';
 import { BellOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom'; // response.sendRedirect() 역할
 import { getNotifications, sendNotification, getUsers, getProjects } from '../api/index';
 import useAuthStore from '../store/authStore';   // session.getAttribute() 역할
 import { hasRole } from '../constants/role';
 import { formatDateTime } from '../utils/format';
-import { COLORS } from '../theme';
+import { COLORS, SPACING } from '../theme';
+import { PageHeader, EmptyState } from '../components/common';
 
-const { Title } = Typography;
 const { TextArea } = Input;
 const { useBreakpoint } = Grid;
 
-// 알림 발송 상태 레이블 + 색상 (알림 도메인 전용 — 과제 상태와 별개)
+// 알림 발송 상태 레이블 + 색상 (알림 도메인 전용 — 과제 상태와 별개이므로 StatusTag를 쓰지 않는다)
 const STATUS_MAP = {
   PENDING: { label: '대기',    color: 'gold'  },
   SENT:    { label: '발송완료', color: 'green' },
@@ -147,28 +148,21 @@ function NotificationPage() {
 
   return (
     <div>
-      {/* 페이지 헤더 */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 16,
-        flexWrap: 'wrap',
-        gap: 8,
-      }}>
-        <Title level={4} style={{ margin: 0 }}>알림</Title>
-
-        {/* MANAGER 이상만 발송 버튼 표시 — JSP의 <c:if> 역할 */}
-        {hasRole(userRole, 'MANAGER') && (
-          <Button
-            type="primary"
-            icon={<BellOutlined />}
-            onClick={handleOpenSendModal}
-          >
-            알림 발송
-          </Button>
-        )}
-      </div>
+      {/* 페이지 헤더 — MANAGER 이상만 발송 버튼 표시 (JSP의 <c:if> 역할) */}
+      <PageHeader
+        title="알림"
+        extra={
+          hasRole(userRole, 'MANAGER') && (
+            <Button
+              type="primary"
+              icon={<BellOutlined />}
+              onClick={handleOpenSendModal}
+            >
+              알림 발송
+            </Button>
+          )
+        }
+      />
 
       {/* 알림 목록 테이블 */}
       <Table
@@ -187,7 +181,7 @@ function NotificationPage() {
           showSizeChanger: false,
           showTotal: (t) => `총 ${t}건`,
         }}
-        locale={{ emptyText: '알림이 없습니다.' }}
+        locale={{ emptyText: <EmptyState description="알림이 없습니다." /> }}
         scroll={isMobile ? { x: true } : undefined}
       />
 
@@ -253,7 +247,7 @@ function NotificationPage() {
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-            <Button onClick={() => { setSendModal(false); sendForm.resetFields(); }} style={{ marginRight: 8 }}>
+            <Button onClick={() => { setSendModal(false); sendForm.resetFields(); }} style={{ marginRight: SPACING.xs }}>
               취소
             </Button>
             <Button type="primary" htmlType="submit" loading={sendLoading}>
