@@ -7,6 +7,7 @@
  *
  * @since 2026-05-19
  * @modified 2026-07-24 UI 일관성 1단계: 상태·카테고리 레이블을 공통 상수로 통일 (초안→작성중, 출장비→여비)
+ * @modified 2026-07-24 UI 일관성 2단계: 페이지 자체 padding/background/minHeight 제거 (MainLayout이 관리)
  */
 import { useEffect, useState } from 'react';
 import { Card, Col, Row, Table, Progress, Space, Typography, Spin, message } from 'antd';
@@ -29,7 +30,7 @@ import {
 } from '../api/index';
 import { STATUS_LABELS, CATEGORY_LABELS, STATUS_MAP } from '../constants/project';
 import { won } from '../utils/format';
-import { COLORS } from '../theme';
+import { COLORS, SPACING } from '../theme';
 
 const { Title } = Typography;
 
@@ -133,31 +134,23 @@ function StatsPage() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          padding: 24,
-          background: '#f5f5f5',
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
+      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
         <Spin size="large" />
       </div>
     );
   }
 
+  // 바깥 여백·배경은 MainLayout의 Content가 관리하므로 여기서 지정하지 않는다
   return (
-    <div style={{ padding: 24, background: '#f5f5f5', minHeight: '100vh' }}>
-      <Title level={4} style={{ marginBottom: 16 }}>
+    <div>
+      <Title level={4} style={{ marginBottom: SPACING.md }}>
         통계
       </Title>
 
       <Row gutter={[16, 16]}>
         {/* 과제 상태별 현황 — BarChart */}
         <Col xs={24} lg={12}>
-          <Card title="과제 상태별 현황" style={{ background: '#fff' }}>
+          <Card title="과제 상태별 현황">
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={statusData} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -172,7 +165,7 @@ function StatsPage() {
 
         {/* 연구비 카테고리별 합계 — BarChart */}
         <Col xs={24} lg={12}>
-          <Card title="연구비 카테고리별 합계" style={{ background: '#fff' }}>
+          <Card title="연구비 카테고리별 합계">
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={categoryData} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -190,7 +183,7 @@ function StatsPage() {
 
         {/* 연구비 소진 현황 (번레이트) — Table */}
         <Col xs={24}>
-          <Card title="연구비 소진 현황 (번레이트)" style={{ background: '#fff' }}>
+          <Card title="연구비 소진 현황 (번레이트)">
             <Table
               rowKey="projectId"
               columns={burnrateColumns}
@@ -203,7 +196,7 @@ function StatsPage() {
 
         {/* 월별 알림 발송 건수 — LineChart */}
         <Col xs={24}>
-          <Card title="월별 알림 발송 건수" style={{ background: '#fff' }}>
+          <Card title="월별 알림 발송 건수">
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={monthlyData} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />

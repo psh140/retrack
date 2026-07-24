@@ -9,16 +9,16 @@
  * 매 페이지마다 넣는 대신, 한 번에 처리하는 공통 레이아웃 역할이다.
  *
  * @since 2026-05-14
+ * @modified 2026-07-24 UI 일관성 2단계: 본문 패딩·배경·최대폭을 이 컴포넌트에서 단일 관리
  */
 import { useState } from 'react';       // React 상태 관리 훅 (Java의 인스턴스 변수 역할)
 import { Layout, Drawer, Grid } from 'antd';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import { COLORS, LAYOUT } from '../theme';
 
 const { Sider, Content } = Layout;
 const { useBreakpoint } = Grid;        // 현재 화면 크기를 감지하는 Ant Design 훅
-
-const SIDER_WIDTH = 220;               // 사이드바 너비 (px)
 
 /**
  * @param {React.ReactNode} children - 이 레이아웃 안에 들어올 페이지 컴포넌트
@@ -44,8 +44,9 @@ function MainLayout({ children }) {
       {/* JSX에서 조건부 렌더링: {조건 && <컴포넌트/>} → 조건이 true일 때만 렌더링 */}
       {!isMobile && (
         <Sider
-          width={SIDER_WIDTH}
-          style={{ background: '#fff', borderRight: '1px solid #f0f0f0' }}
+          width={LAYOUT.siderWidth}
+          // 배경색은 theme.js의 Layout.siderBg가 처리 — 여기서는 구분선만 지정
+          style={{ borderRight: `1px solid ${COLORS.borderSecondary}` }}
         >
           <Sidebar />
         </Sider>
@@ -56,9 +57,21 @@ function MainLayout({ children }) {
         {/* onMenuClick: 햄버거 버튼 클릭 시 drawerOpen을 true로 변경 */}
         <Header onMenuClick={() => setDrawerOpen(true)} isMobile={isMobile} />
 
-        {/* 실제 페이지 컴포넌트가 여기에 삽입됨 */}
-        <Content style={{ padding: 24, background: '#f5f5f5', minHeight: 'calc(100vh - 64px)' }}>
-          {children}
+        {/*
+          모든 페이지의 바깥 여백·배경·최소 높이를 이 한 곳에서 관리한다.
+          페이지 컴포넌트는 자체적으로 padding/background/minHeight를 지정하지 않는다.
+          (JSP로 치면 공통 레이아웃의 <div class="container">를 매 페이지가 다시 선언하지 않는 것과 같다)
+        */}
+        <Content
+          style={{
+            padding: isMobile ? LAYOUT.contentPaddingMobile : LAYOUT.contentPadding,
+            minHeight: `calc(100vh - ${LAYOUT.headerHeight}px)`,
+          }}
+        >
+          {/* 본문 최대폭 제한 — 대형 모니터에서 표가 화면 끝까지 늘어나지 않도록 가운데 정렬 */}
+          <div style={{ maxWidth: LAYOUT.contentMaxWidth, margin: '0 auto' }}>
+            {children}
+          </div>
         </Content>
       </Layout>
 
@@ -69,7 +82,7 @@ function MainLayout({ children }) {
           placement="left"                          // 왼쪽에서 슬라이드
           open={drawerOpen}                         // drawerOpen 값에 따라 열고 닫힘
           onClose={() => setDrawerOpen(false)}      // 외부 클릭 시 닫기
-          width={SIDER_WIDTH}
+          width={LAYOUT.siderWidth}
           title="Retrack"
           styles={{ body: { padding: 0 } }}
         >

@@ -43,8 +43,9 @@ function Header({ onMenuClick, isMobile }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',  // 좌우 끝으로 배치
+        // 배경색·높이는 theme.js의 Layout.headerBg / headerHeight가 처리
+        // 패딩만 화면 크기에 따라 달라지므로 여기서 지정
         padding: isMobile ? `0 ${SPACING.sm}px` : `0 ${SPACING.lg}px`,
-        background: COLORS.bgContainer,
         borderBottom: `1px solid ${COLORS.borderSecondary}`,
         flexShrink: 0,
       }}

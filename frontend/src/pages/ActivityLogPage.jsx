@@ -8,6 +8,7 @@
  * @since 2026-05-19
  * @modified 2026-05-26 ACTION_COLOR 실제 DB action 값으로 수정, 액션 컬럼 width 조정
  * @modified 2026-07-24 UI 일관성 1단계: 일시 포맷을 공통 유틸로 이동
+ * @modified 2026-07-24 UI 일관성 2단계: 페이지 자체 padding/background/minHeight 제거 (MainLayout이 관리)
  */
 import { useEffect, useState } from 'react';
 import {
@@ -25,6 +26,7 @@ import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getActivityLogs, getUserActivityLogs } from '../api/index';
 import { formatDateTime } from '../utils/format';
+import { SPACING } from '../theme';
 
 const { Title } = Typography;
 
@@ -151,14 +153,15 @@ function ActivityLogPage() {
     },
   ];
 
+  // 바깥 여백·배경은 MainLayout의 Content가 관리하므로 여기서 지정하지 않는다
   return (
-    <div style={{ padding: 24, background: '#f5f5f5', minHeight: '100vh' }}>
-      <Title level={4} style={{ marginBottom: 16 }}>
+    <div>
+      <Title level={4} style={{ marginBottom: SPACING.md }}>
         활동 로그
       </Title>
 
       {/* 사용자 ID 필터 */}
-      <Card style={{ marginBottom: 16, background: '#fff' }}>
+      <Card style={{ marginBottom: SPACING.md }}>
         <Row gutter={[12, 12]} align="middle">
           <Col>
             {/* InputNumber — private Long filterUserId 입력 폼 역할 */}
@@ -188,7 +191,7 @@ function ActivityLogPage() {
       </Card>
 
       {/* 로그 테이블 */}
-      <Card style={{ background: '#fff' }}>
+      <Card>
         <Table
           rowKey="logId"
           columns={columns}

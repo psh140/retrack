@@ -46,6 +46,7 @@ export const LAYOUT = {
   siderWidth: 220, // 좌측 사이드바 너비
   contentPadding: 24, // 본문 영역 패딩 (데스크탑)
   contentPaddingMobile: 16, // 본문 영역 패딩 (모바일)
+  contentMaxWidth: 1440, // 본문 최대 너비 — 대형 모니터에서 표가 과도하게 늘어나는 것 방지
 };
 
 /** 폰트 스택 — 시스템 폰트 우선, 한글은 Apple SD Gothic Neo / 맑은 고딕 */
