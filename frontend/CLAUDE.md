@@ -207,7 +207,7 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 
 - [x] **1단계 — 전역 테마 도입** (2026-07-24, `feature/ui-consistency` 브랜치): `src/theme.js` 생성 (COLORS·SPACING·LAYOUT 상수 + AntD token/components), main.jsx를 `ConfigProvider`(theme + `ko_KR` 로케일, dayjs ko)로 감쌈. 함께 처리 — 화면마다 어긋나던 도메인 상수를 `src/constants/project.js`(상태·카테고리 레이블/색상, 전이 규칙)·`src/constants/role.js`(권한 계층·hasRole·ROLE_COLOR)·`src/utils/format.js`(won·formatDate·formatDateTime)로 단일화하고 7개 페이지에 적용
 - [x] **2단계 — 레이아웃 컨테이너 규칙 통일** (2026-07-24): MainLayout Content가 padding(데스크탑 24 / 모바일 16)·minHeight·본문 최대폭(1440px, 가운데 정렬)을 단일 관리. 배경색은 theme의 `Layout.bodyBg`/`siderBg`/`headerBg`에 위임. StatsPage·UserManagePage·ActivityLogPage의 `padding:24 / background / minHeight:100vh` 래퍼와 Card의 불필요한 `background:'#fff'` 제거, StatsPage 로딩 화면을 다른 페이지와 동일한 형태로 통일
-- [ ] **3단계 — 공통 컴포넌트 생성** (`src/components/common/`): PageHeader(제목+설명+우측 액션), FilterToolbar(검색/필터 래퍼), StatCard(숫자 카드), StatusTag(상태별 색상 매핑 단일화), EmptyState(데이터 없음)
+- [x] **3단계 — 공통 컴포넌트 생성** (2026-07-24, `src/components/common/`): PageHeader(제목+설명+우측 액션), FilterToolbar(Card 기반 검색/필터 래퍼), StatCard(숫자 카드, `valueSize` default/small), StatusTag(`STATUS_MAP` 조회 흡수, `variant` preset/soft), EmptyState(빈 상태), PageLoading(로딩 스피너 — 계획 외 추가, Dashboard·Stats 중복 해소), `index.js` 배럴. 생성만 하고 페이지 적용은 4단계
 - [ ] **4단계 — 공통 컴포넌트 적용**: DashboardPage·ProjectListPage·NotificationPage·UserManagePage·ActivityLogPage·StatsPage에 적용, inline style → 공통 컴포넌트+테마 토큰 대체
 - [ ] **5단계 — ProjectDetailPage 재구성**: 상단 요약 헤더(제목·StatusTag·기간·총예산·담당자) + 수정/삭제/상태변경을 우측 액션 그룹으로 정리, 본문을 개요/연구비/파일/이력 섹션으로 구조화(기존 탭 유지 가능)
 
