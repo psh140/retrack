@@ -81,6 +81,9 @@ retrack/
 
 ## 실행 방법
 
+새 기기(Mac 등)에서 처음 세팅한다면 → [`docs/개발환경-세팅.md`](docs/개발환경-세팅.md) 참고.
+`.env`는 git에 포함되지 않으므로 기기 간 복사하지 말고 각 환경에서 새로 생성한다.
+
 ### 개발 환경 시작
 
 ```bash
@@ -127,8 +130,11 @@ Host: localhost
 Port: 5432
 Database: retrack
 Username: retrack
-Password: retrack1234
+Password: .env의 DB_PASSWORD 참조
 ```
+
+비밀번호를 포함한 모든 자격증명은 `.env`에서만 관리한다.
+소스나 문서에 평문으로 다시 적지 않는다. 새 환경 구성 시 `.env.example`을 복사해 채운다.
 
 ---
 
@@ -148,7 +154,10 @@ Password: retrack1234
 
 AWS EC2 배포까지 남은 작업 목록 → [`docs/배포-체크리스트.md`](docs/배포-체크리스트.md) 참고
 
-**배포 전 반드시 처리할 것**: `docker-compose.yml`의 `POSTGRES_PASSWORD`·`DB_PASSWORD`·`JWT_SECRET`이 평문으로 커밋되어 있다. `.env`로 분리하고 JWT 서명키는 새 값으로 교체한다.
+**시크릿 분리 완료 (2026-07-27)**: `POSTGRES_PASSWORD`·`DB_PASSWORD`·`JWT_SECRET`을 `.env`로 분리하고
+노출된 기존 값은 폐기·재발급했다. `spring-db.xml`의 하드코딩된 DB 접속 정보도 환경변수 참조로 교체했다.
+
+EC2 배포 시에는 로컬 `.env` 값을 그대로 쓰지 말고 서버에서 새 값을 생성한다.
 
 ---
 

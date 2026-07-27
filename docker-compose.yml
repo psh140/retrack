@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: retrack       # 생성할 DB 이름
       POSTGRES_USER: retrack     # DB 접속 계정
-      POSTGRES_PASSWORD: retrack1234  # DB 접속 비밀번호
+      POSTGRES_PASSWORD: ${DB_PASSWORD}  # DB 접속 비밀번호 (.env에서 주입)
     ports:
       - "5432:5432"             # 호스트:컨테이너 포트 매핑
     volumes:
@@ -28,8 +28,8 @@ services:
       DB_PORT: 5432
       DB_NAME: retrack
       DB_USER: retrack
-      DB_PASSWORD: retrack1234
-      JWT_SECRET: retrack-secret-key-must-be-at-least-32-bytes!!
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
       MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
 

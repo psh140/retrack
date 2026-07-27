@@ -278,6 +278,19 @@ Spring AOP + 커스텀 어노테이션 방식. 각 Service는 @LogActivity만 �
 - [x] `ProjectServiceTest` — `changeStatus()` 시그니처 변경 반영 (userRole 파라미터 추가)
 - [x] `sql/seed.sql` — 연구비 카테고리 오류 수정 (`EQUIPMENT` → `RESEARCH_ACTIVITY`, `SUPPLIES` → `ETC`), 과제 상태 오류 수정 (`IN_REVIEW` → `REVIEWING`)
 
+#### 시크릿 분리 (2026-07-27)
+공개 저장소에 평문 커밋되어 있던 자격증명을 `.env`로 분리하고 값 자체를 재발급했다.
+
+- [x] `spring-db.xml` — 하드코딩된 jdbcUrl·username·password를 `#{systemEnvironment['...']}` 참조로 교체
+      (`spring-mvc.xml`의 기존 메일 계정 주입 패턴과 통일)
+- [x] `docker-compose.yml` — `POSTGRES_PASSWORD`·`DB_PASSWORD`·`JWT_SECRET`을 `${...}`로 치환
+- [x] `.env` / `.env.example` — `DB_PASSWORD`, `JWT_SECRET` 키 추가
+- [x] PostgreSQL 계정 비밀번호 `ALTER USER`로 변경, JWT 서명키 재발급
+- 검증: 로그인 200 + JWT 발급, 위조 토큰 401, Nginx 프록시 경유 대시보드 200
+
+> `docker-compose.yml`이 `DB_*` 환경변수를 넘기고 있었지만 백엔드는 이를 읽지 않고
+> `spring-db.xml`에 직접 적힌 값을 쓰고 있었다. compose만 고쳤다면 DB 접속이 실패했을 것이다.
+
 #### 버그 수정 및 스키마 개선 (2026-05-14)
 - [x] `ProjectService.getProjectList()` — `page < 1` 검증 추가 (0 이하 입력 시 음수 offset → PostgreSQL 오류 방지)
 - [x] `UserService.getUserList()` — 동일한 `page < 1` 검증 추가
