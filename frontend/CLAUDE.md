@@ -196,10 +196,11 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 - [ ] EC2 인스턴스 생성 (Ubuntu, t2.micro 또는 t2.small) + Elastic IP 발급
 - [ ] 보안 그룹 설정 — 인바운드 22(SSH), 80(HTTP), 443(HTTPS) 오픈
 - [ ] EC2 서버 세팅 — Docker, Docker Compose 설치
-- [ ] GitHub 코드 clone 및 `.env` 파일 작성 (MAIL_USERNAME, MAIL_PASSWORD)
+- [ ] GitHub 코드 clone 및 `.env` 파일 작성 (DB_PASSWORD, JWT_SECRET, MAIL_USERNAME, MAIL_PASSWORD — 로컬 값 재사용 금지, 서버에서 새로 생성)
 - [ ] 백엔드 WAR 빌드 (Maven package) 후 서버 업로드
 - [ ] Route 53 DNS A 레코드 → EC2 Elastic IP 연결
-- [ ] `docker-compose up -d` 실행 및 서비스 정상 동작 확인
+- [x] `docker-compose.prod.yml` 운영 오버라이드 작성 (2026-07-29) — seed.sql 마운트 제외, db·backend 호스트 포트 노출 제거, frontend `80:80`, `restart: unless-stopped`
+- [ ] `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d` 실행 및 서비스 정상 동작 확인
 - [ ] Let's Encrypt SSL 인증서 발급 (Certbot) + nginx HTTPS 설정
 - [ ] HTTP → HTTPS 리다이렉트 설정
 
