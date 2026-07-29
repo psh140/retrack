@@ -56,15 +56,30 @@ server {
         try_files $uri /index.html;
     }
 
+    # Docker 내장 DNS — backend 컨테이너 IP를 요청 시마다 재조회한다.
+    resolver 127.0.0.11 valid=10s ipv6=off;
+
     # /api 요청 → backend 컨테이너(8080) 리버스 프록시
     location /api {
-        proxy_pass http://backend:8080;
+        set $backend_host backend;
+        proxy_pass http://$backend_host:8080$request_uri;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
 }
 ```
+
+### 업스트림을 변수로 지정하는 이유
+
+`proxy_pass http://backend:8080;`처럼 호스트명을 상수로 쓰면 nginx가 **기동 시점에 한 번만**
+DNS를 조회하고 그 IP를 계속 재사용한다. backend 컨테이너를 재생성하면 IP가 바뀌므로
+프론트엔드가 옛 IP를 계속 바라보며 모든 `/api` 요청이 502로 실패한다.
+
+변수(`$backend_host`)를 쓰면 요청 시점에 다시 조회하므로 컨테이너 재생성에도 자동 복구된다.
+단, 변수를 쓰면 요청 URI가 자동 전달되지 않으므로 `$request_uri`를 반드시 붙여야 한다.
+
+→ 상세 내용: [`troubleshooting-nginx-업스트림-DNS캐싱.md`](troubleshooting-nginx-업스트림-DNS캐싱.md)
 
 ---
 

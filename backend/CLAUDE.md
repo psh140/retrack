@@ -313,3 +313,4 @@ Spring AOP + 커스텀 어노테이션 방식. 각 Service는 @LogActivity만 �
 | `docs/transaction-컨텍스트-분리-이슈.md` | 트랜잭션 매니저 서블릿 컨텍스트 분리 이슈 |
 | `docs/troubleshooting-7단계-파일관리API.md` | Maven 커맨드라인 빌드 시 Lombok 미처리, Maven Java 버전 충돌 |
 | `docs/troubleshooting-12단계-단위테스트.md` | JUnit 5 미실행 (surefire 3.x 필요), BCryptPasswordEncoder Mock 불가 |
+| `docs/troubleshooting-nginx-업스트림-DNS캐싱.md` | 배포된 WAR가 옛 빌드본이라 DB 인증 실패(`spring-db.xml` 하드코딩 잔존), 기존 볼륨에 `POSTGRES_PASSWORD` 미반영, `mvn clean` 직후 `docker restart` 실패 |

@@ -184,6 +184,10 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 #### 성능 개선 (2026-06-07)
 - [x] `App.jsx` — 모든 페이지 `lazy()` 전환 (code-splitting), `Suspense` 폴백 스피너 추가 (초기 번들 1,709KB → 공통 코어 589KB 분리)
 
+#### nginx 업스트림 DNS 재조회 (2026-07-29)
+- [x] `nginx.conf` — `resolver 127.0.0.11 valid=10s ipv6=off;` 추가, `proxy_pass`를 변수(`set $backend_host backend;`) + `$request_uri` 방식으로 교체. backend 컨테이너 재생성 시 IP가 바뀌어도 프론트엔드 재시작 없이 자동 복구 (기존에는 옛 IP를 계속 참조해 전체 API 502)
+- [x] `docs/troubleshooting-nginx-업스트림-DNS캐싱.md` 신규 작성, `docs/nginx-배포설정.md` 설정 예시 갱신
+
 ### 다음 작업
 
 #### 8단계 — AWS 배포
@@ -221,3 +225,4 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 | `docs/troubleshooting-프론트엔드-3단계-인증.md` | 로그인 403 (CORS), Vite proxy Origin 헤더 덮어쓰기로 해결 |
 | `docs/troubleshooting-5단계-과제관리-프론트엔드.md` | seed.sql IN_REVIEW vs 백엔드 REVIEWING 불일치 — DB 재시딩으로 해결 |
 | `docs/nginx-배포설정.md` | 배포 시 Nginx 리버스 프록시 설정 (CORS 우회, React Router 폴백) |
+| `docs/troubleshooting-nginx-업스트림-DNS캐싱.md` | backend 재생성 후 전체 API 502 — nginx 업스트림 DNS 고정 문제. WAR 재빌드 누락, 기존 DB 볼륨 비밀번호 미반영 이슈도 함께 정리 |
