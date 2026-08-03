@@ -26,10 +26,20 @@
     <!-- @Aspect 어노테이션 기반 AOP 프록시 활성화 (ActivityLogAspect 등) -->
     <aop:aspectj-autoproxy/>
 
-    <!-- CORS 설정 -->
+    <!--
+        CORS 설정
+
+        localhost:3000 — 로컬 개발(Docker) 환경
+        hughpark.com   — 운영 환경. Nginx가 백엔드로 HTTP로 프록시하므로 브라우저가 보낸
+                         https Origin과 scheme이 어긋나 cross-origin으로 판정된다.
+                         운영에서는 Nginx가 Origin 헤더를 제거해(nginx.prod.conf) CORS 검사
+                         자체를 우회하지만, Nginx를 거치지 않는 접근에 대비해 명시해 둔다.
+
+        @modified 2026-08-03 운영 도메인 추가 (HTTPS 전환 후 로그인 403 대응)
+    -->
     <mvc:cors>
         <mvc:mapping path="/api/**"
-                     allowed-origins="http://localhost:3000"
+                     allowed-origins="http://localhost:3000,https://hughpark.com,https://www.hughpark.com"
                      allowed-methods="GET,POST,PUT,PATCH,DELETE,OPTIONS"
                      allowed-headers="*"
                      allow-credentials="true"/>

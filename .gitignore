@@ -17,3 +17,15 @@ dist/
 
 # Claude Code (settings.local은 개인 설정이지만 하네스 포함을 위해 전체 추적)
 # .claude/
+
+# SSH 키 — 절대 커밋 금지 (공개 저장소이므로 올라가는 즉시 서버가 탈취된다)
+*.pem
+*.ppk
+*.key
+
+# 런타임 업로드 파일 (도커 볼륨 마운트 경로 — 디렉터리만 유지)
+uploads/*
+!uploads/.gitkeep
+
+# 작업용 임시 파일 (스크린샷 등)
+임시폴더/
