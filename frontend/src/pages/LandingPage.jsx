@@ -6,8 +6,10 @@
  *
  * @since 2026-05-18
  * @modified 2026-05-18 로그인 상태 감지 후 CTA 분기
+ * @modified 2026-08-03 데모 계정 원클릭 체험 버튼 추가
  */
-import { Button, Card, Grid } from 'antd';
+import { useState } from 'react';
+import { Button, Card, Grid, message } from 'antd';
 import {
   ProjectOutlined,
   DollarOutlined,
@@ -16,6 +18,8 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';  // response.sendRedirect() 역할
 import useAuthStore from '../store/authStore';    // session.getAttribute() 역할
+import { login } from '../api/index';             // POST /api/auth/login
+import { DEMO_ACCOUNT } from '../constants/demo'; // 공개용 데모 계정 (가입 없이 체험)
 
 const { useBreakpoint } = Grid;
 
@@ -47,8 +51,33 @@ function LandingPage() {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
   const navigate  = useNavigate();        // response.sendRedirect() 역할
-  const { token } = useAuthStore();       // 로그인 여부 판단 — session.getAttribute("token") 역할
+  const { token, setAuth } = useAuthStore(); // 로그인 여부 판단 — session.getAttribute("token") 역할
   const isLoggedIn = Boolean(token);
+
+  // 체험하기 버튼 로딩 상태 — API 호출 중 중복 클릭 방지
+  const [demoLoading, setDemoLoading] = useState(false);
+
+  /**
+   * 데모 계정으로 즉시 로그인한다.
+   * LoginPage.handleSubmit과 동일한 흐름이며, 응답 구조도 같다.
+   * 백엔드 응답: { success: true, data: { token, userId, username, role } }
+   */
+  const handleDemoLogin = async () => {
+    setDemoLoading(true);
+    try {
+      const res = await login(DEMO_ACCOUNT.email, DEMO_ACCOUNT.password);
+      const { token: demoToken, userId, username, role } = res.data.data;
+      setAuth(demoToken, userId, username, role);  // localStorage + 전역 스토어 저장
+      navigate('/dashboard');
+    } catch (err) {
+      // 데모 계정이 아직 DB에 없는 경우(초기화 전)에도 여기로 온다.
+      // 방문자가 막히지 않도록 로그인 페이지로 안내한다.
+      message.error(err.response?.data?.message || '체험 계정 로그인에 실패했습니다. 직접 로그인해 주세요.');
+      navigate('/login');
+    } finally {
+      setDemoLoading(false);
+    }
+  };
 
   // 반응형: lg+ 4열, md 2열, 모바일 1열
   const featureCols = screens.lg ? 'repeat(4, 1fr)'
@@ -125,8 +154,17 @@ function LandingPage() {
             </Button>
           ) : (
             <>
+              {/* 가입 절차 없이 바로 둘러볼 수 있도록 체험하기를 primary로 앞세운다 */}
               <Button
                 type="primary"
+                size="large"
+                loading={demoLoading}
+                style={{ minWidth: 120 }}
+                onClick={handleDemoLogin}
+              >
+                체험하기
+              </Button>
+              <Button
                 size="large"
                 style={{ minWidth: 120 }}
                 onClick={() => navigate('/login')}
@@ -143,6 +181,17 @@ function LandingPage() {
             </>
           )}
         </div>
+
+        {/* 체험 계정 안내 — 비로그인 상태에서만 노출 */}
+        {!isLoggedIn && (
+          <div style={{
+            marginTop: 16,
+            fontSize: 13,
+            color: 'rgba(0,0,0,0.45)',
+          }}>
+            체험 계정은 관리자 권한이며, 입력하신 데이터는 매일 초기화됩니다.
+          </div>
+        )}
       </div>
 
       {/* 기능 소개 카드 */}
