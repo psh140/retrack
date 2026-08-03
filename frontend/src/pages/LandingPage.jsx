@@ -7,6 +7,7 @@
  * @since 2026-05-18
  * @modified 2026-05-18 로그인 상태 감지 후 CTA 분기
  * @modified 2026-08-03 데모 계정 원클릭 체험 버튼 추가
+ * @modified 2026-08-03 푸터에 GitHub 저장소 링크·제작자 표기 추가
  */
 import { useState } from 'react';
 import { Button, Card, Grid, message } from 'antd';
@@ -15,6 +16,7 @@ import {
   DollarOutlined,
   BellOutlined,
   TeamOutlined,
+  GithubOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';  // response.sendRedirect() 역할
 import useAuthStore from '../store/authStore';    // session.getAttribute() 역할
@@ -233,7 +235,7 @@ function LandingPage() {
         </div>
       </div>
 
-      {/* 푸터 */}
+      {/* 푸터 — 소스 코드로 이동할 수 있도록 저장소 링크를 함께 둔다 */}
       <div style={{
         textAlign: 'center',
         padding: '24px 0',
@@ -241,7 +243,22 @@ function LandingPage() {
         fontSize: 13,
         color: 'rgba(0,0,0,0.45)',
       }}>
-        Retrack — 연구과제 관리 시스템
+        <div style={{ marginBottom: 8 }}>
+          Retrack — 연구과제 관리 시스템
+        </div>
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', alignItems: 'center' }}>
+          {/* rel="noopener noreferrer": 새 탭이 window.opener로 원본 페이지를 조작하지 못하게 한다 */}
+          <a
+            href="https://github.com/psh140/retrack"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'rgba(0,0,0,0.45)', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+          >
+            <GithubOutlined /> GitHub
+          </a>
+          <span style={{ color: '#f0f0f0' }}>|</span>
+          <span>박상혁</span>
+        </div>
       </div>
     </div>
   );
