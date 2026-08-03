@@ -16,11 +16,18 @@ services:
     # 5432를 외부에 열면 보안 그룹과 무관하게 공격면이 늘어난다.
     ports: !reset []
 
-    # 개발용 테스트 데이터(seed.sql) 마운트를 제외한다.
+    # 개발용 테스트 데이터(seed.sql) 마운트를 제외하고 운영용 demo.sql로 교체한다.
     # 리스트는 기본적으로 병합되므로 항목을 빼려면 !override로 전체를 교체해야 한다.
+    #
+    # 주의 — /docker-entrypoint-initdb.d/ 의 스크립트는 **데이터 볼륨이 비어 있을 때만**
+    #        실행된다. 이미 운영 중인 DB에는 자동 반영되지 않으므로, 기존 볼륨에 데모
+    #        데이터를 넣으려면 scripts/reset-demo.sh를 수동으로 한 번 실행해야 한다.
     volumes: !override
       - postgres-data:/var/lib/postgresql/data
       - ./sql/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      # 데모 데이터 — 초기 구동 시 자동 적재된다.
+      # 이후 초기화는 scripts/reset-demo.sh가 이 경로의 파일을 psql로 재실행한다.
+      - ./sql/demo.sql:/docker-entrypoint-initdb.d/02_demo.sql
 
     restart: unless-stopped
 
