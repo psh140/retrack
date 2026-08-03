@@ -152,7 +152,25 @@ Password: .env의 DB_PASSWORD 참조
 
 ## 배포
 
-AWS EC2 배포까지 남은 작업 목록 → [`docs/배포-체크리스트.md`](docs/배포-체크리스트.md) 참고
+**2026-08-03 운영 배포 완료 — https://hughpark.com**
+
+| 문서 | 용도 |
+|---|---|
+| [`docs/배포-작업기록.md`](docs/배포-작업기록.md) | 실제 수행한 절차·명령어·트러블슈팅 (재현용) |
+| [`docs/배포-체크리스트.md`](docs/배포-체크리스트.md) | 항목별 완료 상태와 선택 근거 |
+| [`docs/개발-진행현황.md`](docs/개발-진행현황.md) | 프로젝트 전체 개발 이력 타임라인 |
+
+운영 구성: EC2(Ubuntu 24.04, t3.small, Elastic IP `52.78.210.188`) + Docker Compose 3컨테이너
++ Nginx(80/443) + Let's Encrypt.
+
+```bash
+# 운영 서버에서의 기동 — 반드시 두 파일을 함께 지정한다
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+**운영 전용 설정 파일이 따로 있다.** `frontend/nginx.prod.conf`(443 블록 포함)를 `prod.yml`이
+볼륨으로 덮어쓴다. 로컬 개발은 기존 `nginx.conf`를 그대로 쓴다 — 인증서가 없는 환경에서
+443 블록이 있으면 nginx가 기동하지 않기 때문이다.
 
 **시크릿 분리 완료 (2026-07-27)**: `POSTGRES_PASSWORD`·`DB_PASSWORD`·`JWT_SECRET`을 `.env`로 분리하고
 노출된 기존 값은 폐기·재발급했다. `spring-db.xml`의 하드코딩된 DB 접속 정보도 환경변수 참조로 교체했다.

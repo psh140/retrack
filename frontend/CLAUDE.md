@@ -188,23 +188,35 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 - [x] `nginx.conf` — `resolver 127.0.0.11 valid=10s ipv6=off;` 추가, `proxy_pass`를 변수(`set $backend_host backend;`) + `$request_uri` 방식으로 교체. backend 컨테이너 재생성 시 IP가 바뀌어도 프론트엔드 재시작 없이 자동 복구 (기존에는 옛 IP를 계속 참조해 전체 API 502)
 - [x] `docs/troubleshooting-nginx-업스트림-DNS캐싱.md` 신규 작성, `docs/nginx-배포설정.md` 설정 예시 갱신
 
-### 다음 작업
+#### 8단계 — AWS 배포 (2026-08-03 완료)
 
-#### 8단계 — AWS 배포
+> **https://hughpark.com 운영 중.** 실제 수행 절차·명령어·트러블슈팅은 `docs/배포-작업기록.md`,
+> 전체 이력 조망은 `docs/개발-진행현황.md` 참고.
 
-- [ ] Route 53 도메인 구매 (도메인명 미정)
-- [ ] EC2 인스턴스 생성 (Ubuntu, t2.micro 또는 t2.small) + Elastic IP 발급
-- [ ] 보안 그룹 설정 — 인바운드 22(SSH), 80(HTTP), 443(HTTPS) 오픈
-- [ ] EC2 서버 세팅 — Docker, Docker Compose 설치
-- [ ] GitHub 코드 clone 및 `.env` 파일 작성 (DB_PASSWORD, JWT_SECRET, MAIL_USERNAME, MAIL_PASSWORD — 로컬 값 재사용 금지, 서버에서 새로 생성)
-- [ ] 백엔드 WAR 빌드 (Maven package) 후 서버 업로드
-- [ ] Route 53 DNS A 레코드 → EC2 Elastic IP 연결
+- [x] Route 53 도메인 구매 — `hughpark.com` (Route 53 구매라 네임서버 위임 불필요)
+- [x] EC2 인스턴스 생성 (Ubuntu 24.04 LTS, t3.small, 20GB gp3) + Elastic IP 발급
+      — t2.micro(1GB)는 EC2에서 Vite 빌드 시 메모리 부족으로 실패한다. 상세: `docs/배포-체크리스트.md`
+      — t3.small(2GB)도 부족해 **swap 2GB를 추가**해야 빌드가 통과한다
+- [x] 보안 그룹 설정 — 인바운드 22(SSH), 80(HTTP), 443(HTTPS) 오픈
+- [x] EC2 서버 세팅 — Docker, Docker Compose 설치 (Docker 공식 저장소 사용)
+- [x] GitHub 코드 clone 및 `.env` 파일 작성 (DB_PASSWORD, JWT_SECRET, MAIL_USERNAME, MAIL_PASSWORD — 로컬 값 재사용 금지, 서버에서 새로 생성)
+- [x] 백엔드 WAR 빌드 (Maven package) 후 서버 업로드
+- [x] Route 53 DNS A 레코드 → EC2 Elastic IP 연결 (루트 + www)
 - [x] `docker-compose.prod.yml` 운영 오버라이드 작성 (2026-07-29) — seed.sql 마운트 제외, db·backend 호스트 포트 노출 제거, frontend `80:80`, `restart: unless-stopped`
-- [ ] `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d` 실행 및 서비스 정상 동작 확인
-- [ ] Let's Encrypt SSL 인증서 발급 (Certbot) + nginx HTTPS 설정
-- [ ] HTTP → HTTPS 리다이렉트 설정
+- [x] `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d` 실행 및 서비스 정상 동작 확인
+- [x] Let's Encrypt SSL 인증서 발급 (Certbot standalone) + nginx HTTPS 설정
+      — **`nginx.prod.conf`를 신설**했다. 443 블록은 인증서가 있어야 nginx가 기동하므로
+      `nginx.conf`에 합치면 로컬 개발 환경에서 프론트엔드 컨테이너가 뜨지 않는다.
+      운영에서는 `prod.yml`이 이 파일을 볼륨으로 덮어쓴다
+- [x] HTTP → HTTPS 리다이렉트 설정
+- [x] 갱신 훅 설정 — 자동 갱신도 standalone이라 frontend가 80을 잡고 있으면 실패한다.
+      `/etc/letsencrypt/renewal-hooks/`에 컨테이너 stop/start 스크립트 배치
 
-#### UI 일관성 개선 — 디자인 시스템 통일 (미착수)
+**HTTPS 전환 후 로그인 403 문제** — 브라우저 `Origin`이 `https://`인데 Nginx가 백엔드로 HTTP로
+프록시해 Spring이 cross-origin으로 판정, `allowed-origins`(개발용 localhost뿐)에 걸려 차단됐다.
+`nginx.prod.conf`에 `proxy_set_header Origin "";`를 추가해 해결. 상세: `docs/배포-작업기록.md` 8-1
+
+#### UI 일관성 개선 — 디자인 시스템 통일 (2026-07-24 완료)
 
 > 목표: 새 기능 추가가 아니라 기존 화면들을 하나의 디자인 시스템으로 통일.
 > 사전 확인: main.jsx, App.jsx, MainLayout.jsx, pages/ 전체를 읽고 현재 스타일 패턴(색상·간격·카드 사용) 파악 후 착수.
@@ -227,3 +239,4 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 | `docs/troubleshooting-5단계-과제관리-프론트엔드.md` | seed.sql IN_REVIEW vs 백엔드 REVIEWING 불일치 — DB 재시딩으로 해결 |
 | `docs/nginx-배포설정.md` | 배포 시 Nginx 리버스 프록시 설정 (CORS 우회, React Router 폴백) |
 | `docs/troubleshooting-nginx-업스트림-DNS캐싱.md` | backend 재생성 후 전체 API 502 — nginx 업스트림 DNS 고정 문제. WAR 재빌드 누락, 기존 DB 볼륨 비밀번호 미반영 이슈도 함께 정리 |
+| `docs/배포-작업기록.md` | AWS EC2 배포 전 과정의 실제 수행 기록. HTTPS 전환 후 로그인 403(CORS), 설정 마운트 시 컨테이너 미재생성, PowerShell→SSH 따옴표 소실 등 트러블슈팅 포함 |

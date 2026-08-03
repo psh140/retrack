@@ -291,6 +291,22 @@ Spring AOP + 커스텀 어노테이션 방식. 각 Service는 @LogActivity만 �
 > `docker-compose.yml`이 `DB_*` 환경변수를 넘기고 있었지만 백엔드는 이를 읽지 않고
 > `spring-db.xml`에 직접 적힌 값을 쓰고 있었다. compose만 고쳤다면 DB 접속이 실패했을 것이다.
 
+#### 운영 도메인 CORS 허용 (2026-08-03)
+- [x] `spring-mvc.xml` — `allowed-origins`에 `https://hughpark.com`, `https://www.hughpark.com` 추가
+- [x] WAR 재빌드(테스트 11건 통과) 후 운영 서버 배포 완료
+
+> 배경: HTTPS 전환 직후 로그인·회원가입이 403으로 막혔다. Nginx가 백엔드로 HTTP로 프록시하므로
+> 브라우저가 보낸 `https://` Origin과 백엔드가 인식한 scheme이 어긋나 cross-origin으로 판정됐고,
+> 허용 목록에 개발용 `localhost:3000`뿐이라 차단됐다. HTTP로 서비스할 때는 양쪽이 http라
+> same-origin으로 판정되어 문제가 드러나지 않았다. 상세: `docs/배포-작업기록.md` 8-1
+>
+> 즉시 복구는 `nginx.prod.conf`의 `proxy_set_header Origin "";`로 했고, 이후 백엔드 설정도
+> 바로잡아 재배포했다. **양쪽 조치를 모두 유지한다** — Nginx 뒤는 항상 동일 출처라
+> Origin 제거가 정당하고, 백엔드 설정은 Nginx를 거치지 않는 접근에 대한 대비다.
+>
+> 빌드 환경 참고: 로컬에 JDK 11이 없어 JDK 21로 빌드했다. `pom.xml`의 `source/target 11`
+> 설정이 클래스 파일 버전을 55로 맞추므로 `tomcat:9-jdk11` 컨테이너에서 정상 동작한다.
+
 #### 버그 수정 및 스키마 개선 (2026-05-14)
 - [x] `ProjectService.getProjectList()` — `page < 1` 검증 추가 (0 이하 입력 시 음수 offset → PostgreSQL 오류 방지)
 - [x] `UserService.getUserList()` — 동일한 `page < 1` 검증 추가
