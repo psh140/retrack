@@ -5,12 +5,14 @@
  *
  * @since 2026-05-14
  * @modified 2026-05-18 로고 마크 추가, authStore에 userName 저장
+ * @modified 2026-08-03 데모 계정 안내 배너 추가 (랜딩을 건너뛰고 진입한 방문자용)
  */
 import { useState, useEffect } from 'react';
-import { Form, Input, Button, Card, Typography, message } from 'antd';
+import { Form, Input, Button, Card, Typography, message, Alert } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../api/index';          // POST /api/auth/login
 import useAuthStore from '../store/authStore'; // 전역 로그인 상태 (HttpSession 역할)
+import { DEMO_ACCOUNT } from '../constants/demo'; // 공개용 데모 계정
 
 const { Text } = Typography;
 
@@ -28,6 +30,15 @@ function LoginPage() {
   useEffect(() => {
     if (token) navigate('/dashboard', { replace: true });
   }, [token, navigate]);
+
+  /**
+   * 데모 계정 값을 폼에 채우고 즉시 제출한다.
+   * 방문자가 이메일·비밀번호를 직접 옮겨 적는 수고를 없애기 위한 것이다.
+   */
+  const handleDemoFill = () => {
+    form.setFieldsValue({ email: DEMO_ACCOUNT.email, password: DEMO_ACCOUNT.password });
+    form.submit();   // onFinish(handleSubmit) 호출 — 유효성 검사도 함께 수행된다
+  };
 
   /**
    * 폼 제출 핸들러
@@ -82,6 +93,25 @@ function LoginPage() {
           </div>
           <Text type="secondary" style={{ fontSize: 14 }}>연구과제 관리 시스템</Text>
         </div>
+
+        {/* 데모 계정 안내 — 랜딩을 건너뛰고 /login으로 바로 들어온 방문자를 위한 것 */}
+        <Alert
+          type="info"
+          showIcon
+          style={{ marginBottom: 20 }}
+          message="가입 없이 둘러보기"
+          description={
+            <div style={{ fontSize: 13 }}>
+              <div style={{ marginBottom: 8, lineHeight: 1.7 }}>
+                아이디 <Text code>{DEMO_ACCOUNT.email}</Text><br />
+                비밀번호 <Text code>{DEMO_ACCOUNT.password}</Text>
+              </div>
+              <Button size="small" onClick={handleDemoFill} loading={loading}>
+                바로 로그인
+              </Button>
+            </div>
+          }
+        />
 
         {/* layout="vertical": 라벨이 입력 필드 위에 표시 */}
         <Form form={form} onFinish={handleSubmit} layout="vertical">
