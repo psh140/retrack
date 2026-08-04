@@ -6,12 +6,15 @@
  *
  * @since 2026-05-14
  * @modified 2026-05-18 로고 마크 추가
+ * @modified 2026-08-04 메인(랜딩) 복귀 경로 추가 — 로고 블록 링크화 + 하단 「메인으로」 버튼
  */
 import { useState, useEffect } from 'react';
 import { Form, Input, Button, Card, Typography, message } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { register } from '../api/index';          // POST /api/auth/register
 import useAuthStore from '../store/authStore';    // session.getAttribute() 역할
+import { COLORS } from '../theme';                // 색상 토큰 — hex 직접 입력 금지
 
 const { Text } = Typography;
 
@@ -56,18 +59,20 @@ function RegisterPage() {
           borderRadius: 6,
         }}
       >
-        {/* 로고 + 앱명 */}
+        {/* 로고 + 앱명 — 클릭 시 메인(랜딩)으로 이동 (LoginPage와 동일 패턴) */}
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <img
-            src="/logo-mark.svg"
-            width={48}
-            height={48}
-            alt="Retrack"
-            style={{ display: 'block', margin: '0 auto 12px' }}
-          />
-          <div style={{ fontSize: 24, fontWeight: 600, color: 'rgba(0,0,0,0.88)', lineHeight: 1.33 }}>
-            Retrack
-          </div>
+          <Link to="/" style={{ display: 'block', color: 'inherit', textDecoration: 'none' }}>
+            <img
+              src="/logo-mark.svg"
+              width={48}
+              height={48}
+              alt="Retrack"
+              style={{ display: 'block', margin: '0 auto 12px' }}
+            />
+            <div style={{ fontSize: 24, fontWeight: 600, color: COLORS.fg, lineHeight: 1.33 }}>
+              Retrack
+            </div>
+          </Link>
           <Text type="secondary" style={{ fontSize: 14 }}>회원가입</Text>
         </div>
 
@@ -112,6 +117,19 @@ function RegisterPage() {
         <div style={{ textAlign: 'center', marginTop: 16, fontSize: 14 }}>
           <Text type="secondary">이미 계정이 있으신가요? </Text>
           <Link to="/login">로그인</Link>
+        </div>
+
+        {/* 메인(랜딩) 복귀 경로 — LoginPage와 동일하게 목적지 고정 이동 */}
+        <div style={{ textAlign: 'center', marginTop: 8 }}>
+          <Button
+            type="text"
+            size="small"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate('/')}
+            style={{ color: COLORS.fgTertiary }}
+          >
+            메인으로
+          </Button>
         </div>
       </Card>
     </div>

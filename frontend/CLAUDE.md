@@ -228,6 +228,11 @@ const [open, setOpen] = useState(false); // private boolean open = false; + sett
 - [x] **4단계 — 공통 컴포넌트 적용** (2026-07-24): DashboardPage·ProjectListPage·NotificationPage·UserManagePage·ActivityLogPage·StatsPage 6개 페이지에 3단계 컴포넌트 적용(-282/+199줄). 목록 테이블은 **Card로 감싸지 않는 방식으로 통일**(UserManagePage·ActivityLogPage의 Card 래핑 제거) — StatsPage 번레이트만 카드 제목이 정보 전달에 필요해 예외. 알림 상태(PENDING/SENT/FAILED)·활동 로그 액션 태그는 과제 상태와 별개 도메인이라 각 페이지 지역 상수 유지
 - [x] **5단계 — ProjectDetailPage 재구성** (2026-07-24): `components/project/ProjectSummaryHeader.jsx` 신설 — 목록으로·제목·StatusTag·우측 액션 그룹(상태변경/수정/삭제)·메타 행(기간·총 연구비·등록일). **액션 버튼을 기본정보 탭 안 카드에서 헤더로 이동**해 연구비 탭에서도 접근 가능하도록 수정(기존 버그성 제약 해소). 기본정보 Descriptions는 헤더와 중복되는 과제명·상태·총 연구비를 빼고 '과제 개요' 카드로 재편. StatusTag·EmptyState·PageLoading 적용, `#fafafa`를 `COLORS.bgLabel` 토큰으로 단일화(theme.js `Table.headerBg`도 동일 토큰 참조). 탭 2개 구조는 유지. **담당자는 표시하지 않음** — ProjectVO가 managerId(숫자)만 내려주고 이름 조인이 없어 백엔드 변경 없이는 불가(사용자 결정)
 
+#### 인증 페이지 이탈 경로 추가 (2026-08-04)
+- [x] `pages/LoginPage.jsx`·`pages/RegisterPage.jsx` — 메인(랜딩) 복귀 경로 2종 추가: 로고+앱명 블록을 `<Link to="/">`로 감싸고(`color:'inherit'`로 링크 파란색 상속 차단), 카드 하단에 「메인으로」 버튼(`Button type="text"` + `ArrowLeftOutlined` + `COLORS.fgTertiary` — `ProjectSummaryHeader`의 「목록으로」와 동일 패턴) 배치
+- **`navigate(-1)`이 아니라 `navigate('/')`인 이유**: `/login` 진입 경로가 ①랜딩 CTA ②URL 직접 입력 ③401 자동 로그아웃 리다이렉트(`api/index.js` 응답 인터셉터) 세 가지다. ③에서 뒤로 가면 보호 페이지 → 다시 401 → `/login` 순환에 갇히고, ②는 히스토리가 없어 동작하지 않는다. 목적지를 고정해야 어느 경로로 들어왔든 결과가 같다
+- 두 파일은 UI 일관성 4단계 당시 대상에서 빠져 hex가 하드코딩돼 있었다. 이번에 수정한 줄만 `theme.js`의 `COLORS` 토큰으로 교체했다 (나머지 하드코딩 값은 유지)
+
 ---
 
 ## 트러블슈팅
