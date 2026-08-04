@@ -109,10 +109,100 @@ frontend:
 Nginx 프록시 구조에서는 백엔드 CORS 설정이 불필요하지만,
 추후 모바일 앱 등 별도 클라이언트가 생기면 그때 다시 설정.
 
-**③ HTTPS 적용 시**
-AWS EC2 배포 시 Let's Encrypt 또는 ACM 인증서 적용 권장.
-HTTP → HTTPS 리다이렉트 설정 추가 필요.
+**③ HTTPS (적용 완료)**
+운영에는 Let's Encrypt 인증서를 적용했고 HTTP → HTTPS 리다이렉트도 설정되어 있음.
+구성은 아래 「운영 설정에서 판단한 것들」 참고.
 
 **④ .dockerignore**
 `frontend/.dockerignore`에 `node_modules/`, `dist/`, `.env`가 제외 설정되어 있음.
 빌드 컨텍스트가 불필요하게 커지는 것을 방지.
+
+---
+
+## 운영 설정에서 판단한 것들
+
+아래는 운영용 `frontend/nginx.prod.conf`에 적용된 내용이다.
+HTTPS 적용 이후의 구성이므로 위 `nginx.conf`(로컬용)와는 다르다.
+
+### 설정 파일을 둘로 나눈 이유
+
+443 서버 블록은 **인증서 파일이 실재해야 nginx가 기동한다.**
+한 파일에 80과 443을 함께 넣으면, 인증서가 없는 로컬 개발 환경에서
+프론트엔드 컨테이너가 기동 자체를 실패한다.
+
+| 환경 | 파일 | 적용 방식 |
+|---|---|---|
+| 로컬 개발 | `frontend/nginx.conf` (80만) | Dockerfile이 이미지에 COPY |
+| 운영(EC2) | `frontend/nginx.prod.conf` (80 리다이렉트 + 443) | `docker-compose.prod.yml`에서 볼륨 마운트로 덮어쓰기 |
+
+볼륨 마운트 방식이라 설정만 바꿀 때는 이미지 재빌드 없이 컨테이너 재생성으로 반영된다.
+
+### `add_header`는 상속되지 않는다
+
+nginx의 `add_header`에는 함정이 있다.
+**하위 블록에 `add_header`가 하나라도 있으면 상위 블록의 것을 전혀 상속하지 않는다.**
+일부만 덮어쓰는 것이 아니라 통째로 사라진다.
+
+정적 자산 location에 캐시 헤더 하나를 추가한 순간, 서버 블록에 선언해 둔
+보안 헤더 네 종이 그 경로에서만 빠지게 된다.
+
+```nginx
+location ~* \.(js|css|svg|woff2?|ico|png|jpg)$ {
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+
+    # 위에 add_header가 생겼으므로 server 블록의 헤더가 상속되지 않는다 — 다시 선언한다
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options SAMEORIGIN always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    add_header Strict-Transport-Security "max-age=31536000" always;
+}
+```
+
+응답 헤더를 눈으로 확인하지 않으면 알아채기 어려운 종류의 누락이다.
+
+### `client_max_body_size`는 백엔드와 맞춰야 한다
+
+nginx의 기본 요청 본문 상한은 **1MB**이고, 백엔드 `spring-mvc.xml`의
+`maxUploadSize`는 **10MB**다. nginx 쪽을 올려두지 않으면 두 값이 어긋난다.
+
+```nginx
+client_max_body_size 10m;
+```
+
+어긋났을 때의 증상이 특히 헷갈린다.
+1MB를 넘는 업로드는 **백엔드에 도달하기 전에 nginx가 끊는다.**
+그래서 `GlobalExceptionHandler`의 `MaxUploadSizeExceededException` 핸들러가 실행되지 않고,
+JSON 대신 nginx 기본 413 HTML 페이지가 그대로 사용자에게 노출된다.
+프론트엔드는 JSON을 기대하고 파싱하다 또 다른 오류를 낸다.
+
+백엔드 예외 핸들러가 동작하려면 요청이 백엔드까지 도달해야 한다.
+따라서 nginx 상한은 백엔드 상한보다 작으면 안 된다.
+
+### HTTPS 403 대응 — 두 겹으로 막아둔 이유
+
+HTTPS 전환 직후 로그인·회원가입이 403으로 막혔다.
+브라우저는 `Origin: https://hughpark.com`을 보내는데 nginx는 백엔드로 HTTP로 프록시하므로,
+백엔드가 인식하는 scheme은 `http`다. Spring은 둘을 cross-origin으로 판정했고
+`allowed-origins`에는 개발용 주소만 있어 차단됐다.
+
+조치는 두 가지이고, **둘 다 유지한다.**
+
+```nginx
+# nginx.prod.conf — Origin 헤더 제거
+proxy_set_header Origin "";
+```
+
+```xml
+<!-- spring-mvc.xml — 운영 도메인을 허용 목록에 추가 -->
+```
+
+Origin 제거만으로도 동작한다. nginx 뒤는 항상 동일 출처이므로 Origin을 전달할 이유가 없고,
+헤더가 비면 Spring이 CORS 검사를 건너뛴다.
+
+그럼에도 백엔드 설정을 함께 고친 것은 **nginx를 거치지 않는 접근 경로**에 대비한 것이다.
+지금은 모든 트래픽이 nginx를 지나지만, 그 전제가 깨지는 순간
+nginx 쪽 조치는 아무 역할도 하지 못한다.
+한쪽이 무력화돼도 다른 쪽이 남도록 두 곳에 모두 반영해 두었다.
+
+→ 발생 경위와 조치 과정: [`배포-작업기록.md`](배포-작업기록.md) 8-1
