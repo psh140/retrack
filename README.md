@@ -90,11 +90,19 @@ public interface FileStorageStrategy {
 `@TransactionalEventListener(AFTER_COMMIT)` + `@Async` 조합으로,
 DB 커밋이 끝난 뒤 별도 스레드에서 메일을 보내도록 분리했습니다.
 
+`EmailSender`를 별도 빈으로 뺀 것도 이 때문입니다. 두 어노테이션은 Spring 프록시를 거쳐야
+동작하므로, 같은 빈 안에서 직접 호출하면 프록시를 타지 않아 무시됩니다(self-invocation).
+
 ### AOP 기반 활동 로그
 
 각 서비스가 로그 삽입 코드를 직접 갖고 있으면 비즈니스 로직과 섞입니다.
 `@LogActivity` 어노테이션만 선언하면 `ActivityLogAspect`가 처리하도록 분리했고,
 로그 기록이 실패해도 본래 기능은 영향받지 않도록 어드바이스 내부에서 예외를 삼킵니다.
+
+어드바이스는 `@Order(1)`로 트랜잭션 프록시 **바깥**에 뒀습니다.
+실행 순서가 `ActivityLogAspect → @Transactional 프록시 → 실제 메서드`가 되어
+로그 INSERT는 핵심 트랜잭션이 커밋된 뒤 실행되고 같은 트랜잭션에 묶이지 않습니다.
+포인트컷도 전체 패키지가 아니라 `@annotation(logActivity)`로 좁혀 `@LogActivity`를 붙인 메서드만 잡습니다.
 
 ### 트랜잭션이 롤백하지 못하는 것
 
