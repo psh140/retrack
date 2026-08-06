@@ -159,6 +159,7 @@ Password: .env의 DB_PASSWORD 참조
 | [`docs/배포-작업기록.md`](docs/배포-작업기록.md) | 실제 수행한 절차·명령어·트러블슈팅 (재현용) |
 | [`docs/배포-체크리스트.md`](docs/배포-체크리스트.md) | 항목별 완료 상태와 선택 근거 |
 | [`docs/개발-진행현황.md`](docs/개발-진행현황.md) | 프로젝트 전체 개발 이력 타임라인 |
+| [`docs/aws-cost-protection.md`](docs/aws-cost-protection.md) | 비용 방어 설정 (CloudWatch 경보·자동 중지) 및 경보 발동 시 대응 절차 |
 
 운영 구성: EC2(Ubuntu 24.04, t3.small, Elastic IP `52.78.210.188`) + Docker Compose 3컨테이너
 + Nginx(80/443) + Let's Encrypt.
