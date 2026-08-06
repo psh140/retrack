@@ -15,6 +15,16 @@
 | 2026-05-10 | 프론트엔드 팀 추가 | frontend-leader, ui-builder, api-connector | 페이지 단위 React 구현 자동화 |
 | 2026-05-18 | 프론트엔드 QA 강화 | frontend-qa 추가, api-connector 반환 타입 검증 프로토콜, frontend/CLAUDE.md 업데이트 Phase 추가 | 백엔드보다 사용자 수동 검토 비중이 높아 자동화 필요 |
 
+> 위 이력의 `frontend-qa`는 **실제 파일이 존재하지 않는다.** 계획만 기록되고 만들어지지 않았거나
+> 이후 삭제된 것으로 보인다. 하네스 구성의 판단 근거와 그 외 노후화 항목은
+> [`docs/하네스-설계기록.md`](docs/하네스-설계기록.md)에 정리해 두었다.
+
+**다른 AI 도구로 작업할 때:**
+위 하네스는 Claude Code 전용이다. Codex 등 `AGENTS.md` 규약을 따르는 도구는 `CLAUDE.md`를
+자동으로 읽지 않으므로, 루트 [`AGENTS.md`](AGENTS.md)를 진입점으로 둔다.
+핵심 규칙은 그 파일 본문에 있고 상세는 이 문서를 읽도록 연결되어 있다
+(`backend/AGENTS.md`, `frontend/AGENTS.md`도 동일한 방식).
+
 ---
 
 ## 프로젝트 개요
@@ -160,6 +170,7 @@ Password: .env의 DB_PASSWORD 참조
 | [`docs/배포-체크리스트.md`](docs/배포-체크리스트.md) | 항목별 완료 상태와 선택 근거 |
 | [`docs/개발-진행현황.md`](docs/개발-진행현황.md) | 프로젝트 전체 개발 이력 타임라인 |
 | [`docs/aws-cost-protection.md`](docs/aws-cost-protection.md) | 비용 방어 설정 (CloudWatch 경보·자동 중지) 및 경보 발동 시 대응 절차 |
+| [`docs/운영DB-접속구성.md`](docs/운영DB-접속구성.md) | 운영 DB를 DBeaver로 조회하기 위한 SSH 터널 구성 — **미실행 계획** |
 
 운영 구성: EC2(Ubuntu 24.04, t3.small, Elastic IP `52.78.210.188`) + Docker Compose 3컨테이너
 + Nginx(80/443) + Let's Encrypt.
